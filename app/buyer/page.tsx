@@ -219,7 +219,7 @@ export default function BuyerPage() {
                 All Types of Property Surveys
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Whether you're buying a historic masseria, a modern apartment, or commercial property, 
+                Whether you&apos;re buying a historic masseria, a modern apartment, or commercial property, 
                 our network of surveyors covers all your needs across Puglia.
               </p>
               
