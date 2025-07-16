@@ -159,7 +159,7 @@ export default function HowItWorksPage() {
       answer: 'By creating competition through our bidding system, buyers typically save 20-30% compared to traditional surveyor fees. Plus, you avoid costly translation services and administrative headaches.'
     },
     {
-      question: 'What happens if I need documents I don\'t have?',
+      question: 'What happens if I need documents I don't have?',
       answer: 'Apulink can obtain official property documents on your behalf for a small fee. We have established relationships with local authorities and can quickly secure any required documentation.'
     },
     {
