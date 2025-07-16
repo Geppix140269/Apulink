@@ -1,10 +1,25 @@
 # PATH: netlify.toml
 [build]
   command = "npm run build"
-  publish = ""
+  # Set publish to .next explicitly for Next.js
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
   NEXT_PRIVATE_TARGET = "server"
+
+# Additional configuration to ensure proper Next.js handling
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    cache-control = '''
+    max-age=0,
+    no-cache,
+    no-store,
+    must-revalidate'''
