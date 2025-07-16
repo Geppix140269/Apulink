@@ -16,7 +16,7 @@ import {
   Lock,
   MessageSquare,
   FileCheck,
-  Handshake,
+  Users2,
   Gavel
 } from 'lucide-react'
 
@@ -124,7 +124,7 @@ export default function HowItWorksPage() {
         'Direct communication enabled',
         'Clear scope of work'
       ],
-      icon: Handshake
+      icon: Users2
     },
     {
       number: 5,
