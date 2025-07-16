@@ -42,6 +42,8 @@ Never:
 - Use apostrophes - use "do not" instead of "don't"`;
 
 export async function POST(request: Request) {
+  let language: string = 'en'; // Default language
+  
   try {
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key not configured');
@@ -54,7 +56,8 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { messages, language } = body
+    const { messages } = body
+    language = body.language || 'en'; // Extract language from body
 
     // Prepare messages for OpenAI
     const openAIMessages: ChatMessage[] = [
@@ -96,7 +99,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Chat API error:', error)
     
-    // Fallback response
+    // Fallback response - now language is accessible here
     const fallbackMessage = language === 'it' 
       ? 'Mi dispiace, sto avendo problemi tecnici. Per favore riprova o contattaci a info@apulink.com per assistenza immediata.'
       : 'I apologize, I am experiencing technical difficulties. Please try again or contact us at info@apulink.com for immediate assistance.'
