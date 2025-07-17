@@ -5,6 +5,7 @@ import { Playfair_Display, Open_Sans } from "next/font/google";
 import "./global.css";
 import { LanguageProvider } from './providers/language-provider';
 import { LanguageSelector } from './components/language-selector';
+import Image from 'next/image';
 
 const playfair = Playfair_Display({ 
   subsets: ["latin"],
@@ -53,16 +54,15 @@ export default function RootLayout({
                 <div className="flex justify-between items-center h-20">
                   <div className="flex items-center space-x-8">
                     {/* Apulink Logo */}
-                    <a href="/" className="flex items-center space-x-3">
-                      <div className="relative w-12 h-12">
-                        {/* Simplified logo representation - you'll want to add the actual SVG */}
-                        <div className="absolute inset-0 bg-terracotta rounded-full opacity-80"></div>
-                        <div className="absolute inset-2 bg-stone-400 rounded-full opacity-80"></div>
-                        <div className="absolute inset-4 bg-sea rounded-full opacity-80"></div>
-                      </div>
-                      <span className="font-playfair text-2xl text-terracotta font-bold">
-                        Apulink
-                      </span>
+                    <a href="/" className="flex items-center">
+                      <Image 
+                        src="/APULINK_LOGO-TRASPARENT.png" 
+                        alt="Apulink - Your Bridge to Puglia Property Investment" 
+                        width={150} 
+                        height={60}
+                        className="h-12 w-auto"
+                        priority
+                      />
                     </a>
                     
                     <Navigation />
@@ -91,7 +91,15 @@ export default function RootLayout({
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid md:grid-cols-4 gap-8">
                   <div>
-                    <h3 className="font-playfair text-2xl text-terracotta mb-4">Apulink</h3>
+                    <div className="mb-4">
+                      <Image 
+                        src="/APULINK_LOGO-TRASPARENT.png" 
+                        alt="Apulink" 
+                        width={120} 
+                        height={48}
+                        className="h-10 w-auto brightness-0 invert opacity-90"
+                      />
+                    </div>
                     <p className="text-sm">
                       Your trusted bridge to property investment in Puglia. Connecting worlds, building futures.
                     </p>
