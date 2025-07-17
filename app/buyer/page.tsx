@@ -78,8 +78,8 @@ export default function BuyerPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-stone-800 to-stone-900 text-white">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
+      <section className="relative overflow-hidden bg-gradient-to-br from-coral-500 to-coral-600 text-white">
+        <div className="absolute inset-0 bg-black opacity-10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
             <div>
@@ -100,14 +100,14 @@ export default function BuyerPage() {
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <Link
                   href="/buyer/inquiry"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-terracotta text-white rounded-lg hover:bg-terracotta-dark transition-colors font-semibold shadow-lg"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-coral-500 rounded-lg hover:bg-gray-100 transition-colors font-medium"
                 >
                   Start Survey Request
                   <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/how-it-works"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white hover:text-stone-800 transition-colors font-medium"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-coral-700 text-white rounded-lg hover:bg-coral-800 transition-colors font-medium"
                 >
                   How It Works
                 </Link>
@@ -128,20 +128,20 @@ export default function BuyerPage() {
 
             {/* Stats Card */}
             <div className="mt-12 lg:mt-0">
-              <div className="bg-white rounded-2xl p-8 shadow-xl">
-                <h3 className="text-2xl font-bold mb-6 text-stone-800">Why Choose Apulink?</h3>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+                <h3 className="text-2xl font-bold mb-6">Why Choose Apulink?</h3>
                 <div className="space-y-6">
                   <div>
-                    <div className="text-3xl font-bold text-terracotta">€350-500</div>
-                    <div className="text-stone-600">Average savings per survey</div>
+                    <div className="text-3xl font-bold">€350-500</div>
+                    <div className="text-white/80">Average savings per survey</div>
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-terracotta">24-48h</div>
-                    <div className="text-stone-600">To receive multiple quotes</div>
+                    <div className="text-3xl font-bold">24-48h</div>
+                    <div className="text-white/80">To receive multiple quotes</div>
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-terracotta">100%</div>
-                    <div className="text-stone-600">Secure & anonymous bidding</div>
+                    <div className="text-3xl font-bold">100%</div>
+                    <div className="text-white/80">Secure & anonymous bidding</div>
                   </div>
                 </div>
               </div>
@@ -165,7 +165,7 @@ export default function BuyerPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {processSteps.map((step) => (
               <div key={step.number} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-terracotta/20 text-terracotta rounded-full text-2xl font-bold mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-coral-100 text-coral-500 rounded-full text-2xl font-bold mb-4">
                   {step.number}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -195,7 +195,7 @@ export default function BuyerPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
               <div key={index} className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-terracotta/20 text-terracotta rounded-lg mb-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-coral-100 text-coral-500 rounded-lg mb-4">
                   <benefit.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -223,7 +223,7 @@ export default function BuyerPage() {
                 our network of surveyors covers all your needs across Puglia.
               </p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 {surveyTypes.map((type, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -231,11 +231,21 @@ export default function BuyerPage() {
                   </div>
                 ))}
               </div>
+
+              {/* View Sample Report Link */}
+              <Link
+                href="/survey-report-template"
+                className="inline-flex items-center gap-2 text-coral-500 font-medium hover:text-coral-600 transition-colors"
+              >
+                <FileText className="w-5 h-5" />
+                View Sample Survey Report
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
 
             <div className="mt-12 lg:mt-0">
-              <div className="bg-gradient-to-br from-terracotta/10 to-terracotta/20 rounded-2xl p-8">
-                <FileSearch className="w-16 h-16 text-terracotta mb-6" />
+              <div className="bg-gradient-to-br from-coral-50 to-coral-100 rounded-2xl p-8">
+                <FileSearch className="w-16 h-16 text-coral-500 mb-6" />
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Need Documents?
                 </h3>
@@ -246,7 +256,7 @@ export default function BuyerPage() {
                 </p>
                 <Link
                   href="/buyer/inquiry"
-                  className="inline-flex items-center gap-2 text-terracotta font-medium hover:text-terracotta-dark"
+                  className="inline-flex items-center gap-2 text-coral-500 font-medium hover:text-coral-600"
                 >
                   Learn more
                   <ArrowRight className="w-4 h-4" />
@@ -261,7 +271,7 @@ export default function BuyerPage() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="bg-white rounded-2xl shadow-lg p-8 lg:p-12">
-            <MessageSquare className="w-12 h-12 text-terracotta mx-auto mb-6" />
+            <MessageSquare className="w-12 h-12 text-coral-500 mx-auto mb-6" />
             <blockquote className="text-xl text-gray-700 italic mb-6">
               &ldquo;Apulink made our property survey in Ostuni so simple. We received 
               5 quotes within 2 days and saved over €400 compared to the first 
@@ -275,7 +285,7 @@ export default function BuyerPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-terracotta to-terracotta-dark text-white py-16">
+      <section className="bg-gradient-to-br from-coral-500 to-coral-600 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-6">
             Ready to Get Your Property Survey?
@@ -287,14 +297,14 @@ export default function BuyerPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/buyer/inquiry"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-terracotta-dark rounded-lg hover:bg-stone-100 transition-colors font-semibold shadow-lg"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-coral-500 rounded-lg hover:bg-gray-100 transition-colors font-medium"
             >
               Start Your Survey Request
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/how-it-works"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white hover:text-terracotta-dark transition-colors font-medium"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-coral-700 text-white rounded-lg hover:bg-coral-800 transition-colors font-medium"
             >
               See How It Works
             </Link>
