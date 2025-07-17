@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         break
       
       case 'admin_notification':
-        to = 'admin@apulink.com' // CHANGE THIS TO YOUR EMAIL
+        to = 'apulink@1402celsius.com' // CHANGE THIS TO YOUR EMAIL
         subject = `New Survey Request #${data.request_id}`
         emailHtml = getAdminNotificationEmail(data)
         break
