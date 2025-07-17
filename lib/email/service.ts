@@ -6,6 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Email template functions that return HTML strings
 function getBuyerConfirmationHTML(data: {
   buyer_name: string;
+  buyer_email: string;  // ADD THIS LINE
   request_id: string;
   property_address: string;
   property_type: string;
