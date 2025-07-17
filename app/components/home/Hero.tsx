@@ -16,7 +16,7 @@ const Hero = () => {
 
       <div className="container mx-auto px-6 py-32 relative z-10 text-center">
         <div className="inline-block bg-white/10 px-6 py-2 rounded-full text-sm font-semibold tracking-wide backdrop-blur-md glass mb-6">
-          Introducing SurvEYES™ by Apulink
+          Property Surveys by SurvEYES™
         </div>
 
         <h1 className="text-5xl md:text-6xl font-playfair font-light leading-tight text-balance">
@@ -24,7 +24,8 @@ const Hero = () => {
         </h1>
 
         <p className="mt-6 text-lg md:text-xl text-white/90 font-opensans max-w-2xl mx-auto">
-          Get expert surveys, legal reviews, and renovation estimates — without stepping on a plane.
+          Get professional property surveys, competitive quotes from verified surveyors, 
+          and save 20-30% — all without leaving home.
         </p>
 
         <div className="mt-10">
@@ -32,6 +33,8 @@ const Hero = () => {
             <span className="btn-premium ripple">Request a Survey</span>
           </Link>
         </div>
+
+        {/* Trust indicators - keeping minimal */}
       </div>
     </section>
   );
