@@ -61,13 +61,13 @@ export default function SurveyReportTemplatePage() {
           <ul className="list-disc ml-6">
             <li>Type of property / Tipologia immobile</li>
             <li>Year of construction (if known) / Anno di costruzione</li>
-            <li>Intended use / Destinazione d'uso</li>
+            <li>Intended use / Destinazione d&apos;uso</li>
             <li>General condition / Condizioni generali</li>
           </ul>
         </section>
         
         <section className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">2. Town Planning & Cadastral Compliance / Conformità Urbanistica e Catastale</h2>
+          <h2 className="text-xl font-semibold mb-2">2. Town Planning &amp; Cadastral Compliance / Conformità Urbanistica e Catastale</h2>
           <ul className="list-disc ml-6">
             <li>Cadastral status: compliant / not compliant</li>
             <li>Building permits, condoni, variations</li>
@@ -77,7 +77,7 @@ export default function SurveyReportTemplatePage() {
         </section>
         
         <section className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">3. Restrictions & Bindings / Vincoli e Limitazioni</h2>
+          <h2 className="text-xl font-semibold mb-2">3. Restrictions &amp; Bindings / Vincoli e Limitazioni</h2>
           <ul className="list-disc ml-6">
             <li>Environmental or landscape restrictions?</li>
             <li>Historical building constraints?</li>
@@ -97,7 +97,7 @@ export default function SurveyReportTemplatePage() {
         </section>
         
         <section className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">5. Renovation Potential & Cost Estimate / Lavori Edili e Costi Stimati</h2>
+          <h2 className="text-xl font-semibold mb-2">5. Renovation Potential &amp; Cost Estimate / Lavori Edili e Costi Stimati</h2>
           <ul className="list-disc ml-6">
             <li>Renovation required? Yes/No</li>
             <li>Estimated cost: € [ ] – € [ ]</li>
