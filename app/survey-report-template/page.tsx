@@ -86,7 +86,7 @@ export default function SurveyReportTemplatePage() {
         </section>
         
         <section className="mb-6">
-          <h2 class="text-xl font-semibold mb-2">4. Structure & Installations / Struttura e Impianti</h2>
+          <h2 className="text-xl font-semibold mb-2">4. Structure & Installations / Struttura e Impianti</h2>
           <ul className="list-disc ml-6">
             <li>Structural condition: cracks, subsidence, etc.</li>
             <li>Electrical system: compliant?</li>
@@ -117,7 +117,7 @@ export default function SurveyReportTemplatePage() {
         </section>
         
         <section className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">7. Surveyor's Summary / Conclusioni del Tecnico</h2>
+          <h2 className="text-xl font-semibold mb-2">7. Surveyor&apos;s Summary / Conclusioni del Tecnico</h2>
           <ul className="list-disc ml-6">
             <li>Suitability for purchase:
               <ul className="ml-4">
