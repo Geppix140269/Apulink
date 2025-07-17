@@ -357,7 +357,7 @@ export default function SurveyorRegisterPage() {
                     className="w-5 h-5 text-sea border-stone-300 rounded focus:ring-sea mt-0.5"
                   />
                   <span className="text-stone-700">
-                    I agree to Apulink's Terms of Service, Privacy Policy, and commission structure *
+                    I agree to Apulink&apos;s Terms of Service, Privacy Policy, and commission structure *
                   </span>
                 </label>
               </div>
