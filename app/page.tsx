@@ -1,18 +1,28 @@
 // PATH: app/page.tsx
 import HeroLeadMagnet from './components/home/HeroLeadMagnet'
-import UserTypeCards from './components/home/UserTypeCards'
-import HowItWorks from './components/home/HowItWorks'
-import SurveyPackages from './components/home/SurveyPackages'
-import WhyUseApulink from './components/home/WhyUseApulink'
+import TrustBar from './components/home/TrustBar'
+import ValueProposition from './components/home/ValueProposition'
+import LeadMagnetOffer from './components/home/LeadMagnetOffer'
+import SocialProof from './components/home/SocialProof'
+import ProfessionalShowcase from './components/home/ProfessionalShowcase'
+import ROICalculator from './components/home/ROICalculator'
+import UrgencyBanner from './components/home/UrgencyBanner'
+import FAQSection from './components/home/FAQSection'
+import FinalCTA from './components/home/FinalCTA'
 
 export default function HomePage() {
   return (
     <>
       <HeroLeadMagnet />
-      <UserTypeCards />
-      <HowItWorks />
-      <SurveyPackages />
-      <WhyUseApulink />
+      <TrustBar />
+      <ValueProposition />
+      <LeadMagnetOffer />
+      <ProfessionalShowcase />
+      <SocialProof />
+      <ROICalculator />
+      <UrgencyBanner />
+      <FAQSection />
+      <FinalCTA />
     </>
   )
 }
