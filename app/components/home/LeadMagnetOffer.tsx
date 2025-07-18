@@ -1,111 +1,166 @@
+// PATH: app/components/home/LeadMagnetOffer.tsx
+'use client'
+
+'use client'
+
 import React, { useState } from 'react'
 import { Download, CheckCircle, Book, FileText, Calculator, Users } from 'lucide-react'
 
 export default function LeadMagnetOffer() {
+  const [isOpen, setIsOpen] = useState(false)
   const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Lead magnet request:', email)
+    setIsSubmitting(true)
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsSubmitting(false)
+      setIsSuccess(true)
+      // In real implementation, trigger download here
+    }, 1000)
   }
 
-  const guideContents = [
-    "Complete checklist for buying property in Italy",
-    "How to verify professional credentials",
-    "Understanding Italian property law basics",
-    "Cost breakdown: All fees and taxes explained",
-    "Red flags to avoid when buying Italian property",
-    "Region-by-region market analysis"
+  const guides = [
+    {
+      icon: Book,
+      title: 'Complete Puglia Property Guide',
+      description: 'Everything you need to know about buying property in Puglia'
+    },
+    {
+      icon: FileText,
+      title: 'Legal Checklist',
+      description: 'Essential documents and legal requirements for foreign buyers'
+    },
+    {
+      icon: Calculator,
+      title: 'Cost Calculator',
+      description: 'Calculate all costs involved in your property purchase'
+    },
+    {
+      icon: Users,
+      title: 'Professional Directory',
+      description: 'Verified local professionals ready to help you'
+    }
   ]
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-terracotta/5 to-olive/5">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="inline-flex items-center gap-2 bg-terracotta/10 text-terracotta px-4 py-2 rounded-full text-sm font-semibold mb-6">
-              <Book className="w-4 h-4" />
-              Free Resource
-            </div>
-            
-            <h2 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-6">
-              The International Buyer&apos;s Guide to Italian Property
-            </h2>
-            
-            <p className="text-lg text-gray-600 mb-8">
-              Everything you need to know before buying property in Italy. Written by experts, 
-              trusted by 10,000+ international buyers.
-            </p>
+    <>
+      {/* Floating CTA Button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-8 left-8 z-40 flex items-center gap-2 bg-gradient-to-r from-terracotta to-terracotta-dark text-white px-6 py-3 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
+      >
+        <Download className="w-5 h-5" />
+        <span className="font-medium">Free Buyer's Guide</span>
+      </button>
 
-            <div className="space-y-3 mb-8">
-              {guideContents.map((item, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-olive mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-6 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                <span>47 pages</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Download className="w-4 h-4" />
-                <span>PDF format</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <span>10k+ downloads</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <h3 className="text-2xl font-playfair font-bold text-gray-900 mb-2">
-              Get Your Free Guide
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Plus exclusive access to our professional network
-            </p>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="guide-email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email address
-                </label>
-                <input
-                  type="email"
-                  id="guide-email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sea focus:border-transparent"
-                  required
-                />
-              </div>
-
+      {/* Modal Overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="relative bg-gradient-to-r from-terracotta to-terracotta-dark p-8 text-white rounded-t-2xl">
               <button
-                type="submit"
-                className="w-full bg-sea text-white font-bold py-4 px-6 rounded-lg hover:bg-sea/90 transition-all duration-200 transform hover:scale-[1.02]"
+                onClick={() => setIsOpen(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white"
               >
-                Send Me the Free Guide
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-
-              <p className="text-xs text-center text-gray-500">
-                We respect your privacy. Unsubscribe at any time.
+              
+              <h2 className="text-3xl font-playfair font-bold mb-4">
+                Get Your Free Puglia Property Buyer's Kit
+              </h2>
+              <p className="text-xl text-white/90">
+                Essential guides, checklists, and tools for international property buyers
               </p>
-            </form>
+            </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center">
-                <strong>Bonus:</strong> Get instant access to our directory of 500+ verified professionals
-              </p>
+            {/* Content */}
+            <div className="p-8">
+              {!isSuccess ? (
+                <>
+                  {/* What's Included */}
+                  <div className="mb-8">
+                    <h3 className="text-xl font-semibold text-stone-800 mb-4">What's Included:</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {guides.map((guide, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="bg-terracotta/10 p-2 rounded-lg">
+                            <guide.icon className="w-5 h-5 text-terracotta" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-stone-800">{guide.title}</h4>
+                            <p className="text-sm text-stone-600">{guide.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Form */}
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-2">
+                        Enter your email to get instant access:
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        placeholder="your@email.com"
+                        className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-terracotta"
+                      />
+                    </div>
+                    
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`w-full py-3 rounded-lg font-medium transition-all ${
+                        isSubmitting
+                          ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                          : 'bg-terracotta text-white hover:bg-terracotta-dark'
+                      }`}
+                    >
+                      {isSubmitting ? 'Processing...' : 'Get My Free Guide'}
+                    </button>
+                    
+                    <p className="text-xs text-stone-500 text-center">
+                      We respect your privacy. Unsubscribe at any time.
+                    </p>
+                  </form>
+                </>
+              ) : (
+                /* Success State */
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <h3 className="text-2xl font-semibold text-stone-800 mb-2">
+                    Success! Check Your Email
+                  </h3>
+                  <p className="text-stone-600 mb-6">
+                    We've sent your Puglia Property Buyer's Kit to {email}
+                  </p>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="bg-terracotta text-white px-6 py-2 rounded-lg hover:bg-terracotta-dark transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      )}
+    </>
   )
 }
