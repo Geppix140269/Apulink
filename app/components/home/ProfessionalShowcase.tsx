@@ -1,121 +1,109 @@
-import React from 'react'
-import { Star, MapPin, Clock, CheckCircle, MessageSquare } from 'lucide-react'
+import React, { useState } from 'react'
+import { Download, CheckCircle, Book, FileText, Calculator, Users } from 'lucide-react'
 
-export default function ProfessionalShowcase() {
-  const professionals = [
-    {
-      name: "Marco Rossi",
-      title: "RICS Chartered Surveyor",
-      location: "Bari, Puglia",
-      rating: 4.9,
-      reviews: 127,
-      responseTime: "2 hours",
-      expertise: ["Structural Surveys", "Pre-Purchase Inspections", "Defect Analysis"],
-      languages: ["English", "Italian", "German"],
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marco"
-    },
-    {
-      name: "Elena Bianchi",
-      title: "Licensed Architect",
-      location: "Lecce, Puglia",
-      rating: 5.0,
-      reviews: 89,
-      responseTime: "4 hours",
-      expertise: ["Renovation Projects", "Historic Properties", "Planning Permissions"],
-      languages: ["English", "Italian", "French"],
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena"
-    },
-    {
-      name: "Giuseppe Conti",
-      title: "Property Lawyer",
-      location: "Brindisi, Puglia",
-      rating: 4.8,
-      reviews: 156,
-      responseTime: "Same day",
-      expertise: ["Property Contracts", "Due Diligence", "Tax Advisory"],
-      languages: ["English", "Italian", "Spanish"],
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Giuseppe"
-    }
+export default function LeadMagnetOffer() {
+  const [email, setEmail] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Lead magnet request:', email)
+  }
+
+  const guideContents = [
+    "Complete checklist for buying property in Italy",
+    "How to verify professional credentials",
+    "Understanding Italian property law basics",
+    "Cost breakdown: All fees and taxes explained",
+    "Red flags to avoid when buying Italian property",
+    "Region-by-region market analysis"
   ]
 
   return (
-    <section className="py-20 px-4 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-4">
-            Meet Our Top-Rated Professionals
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Every professional on Apulink is verified, licensed, and rated by real clients. 
-            Here are some of our highest-rated experts ready to help with your property needs.
-          </p>
-        </div>
+    <section className="py-20 px-4 bg-gradient-to-br from-terracotta/5 to-olive/5">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-terracotta/10 text-terracotta px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <Book className="w-4 h-4" />
+              Free Resource
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-6">
+              The International Buyer&apos;s Guide to Italian Property
+            </h2>
+            
+            <p className="text-lg text-gray-600 mb-8">
+              Everything you need to know before buying property in Italy. Written by experts, 
+              trusted by 10,000+ international buyers.
+            </p>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {professionals.map((pro, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <img 
-                      src={pro.image} 
-                      alt={pro.name}
-                      className="w-16 h-16 rounded-full bg-gray-200"
-                    />
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{pro.name}</h3>
-                      <p className="text-sea font-medium">{pro.title}</p>
-                    </div>
-                  </div>
+            <div className="space-y-3 mb-8">
+              {guideContents.map((item, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-olive mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700">{item}</span>
                 </div>
+              ))}
+            </div>
 
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 text-terracotta" />
-                    <span>{pro.location}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <span className="font-semibold text-gray-900">{pro.rating}</span>
-                    </div>
-                    <span className="text-sm text-gray-600">({pro.reviews} reviews)</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Clock className="w-4 h-4 text-olive" />
-                    <span>Responds in {pro.responseTime}</span>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Expertise:</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {pro.expertise.map((skill, i) => (
-                      <span key={i} className="text-xs bg-sea/10 text-sea px-2 py-1 rounded-full">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                  <p className="text-sm font-medium text-gray-700 mb-2">Languages:</p>
-                  <p className="text-sm text-gray-600">{pro.languages.join(", ")}</p>
-                </div>
-
-                <button className="w-full mt-4 bg-terracotta text-white font-semibold py-3 px-4 rounded-lg hover:bg-terracotta/90 transition-colors duration-200">
-                  Request Quote
-                </button>
+            <div className="flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                <span>47 pages</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                <span>PDF format</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span>10k+ downloads</span>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div className="text-center mt-12">
-          <button className="inline-flex items-center gap-2 bg-white border-2 border-sea text-sea font-semibold py-3 px-6 rounded-lg hover:bg-sea hover:text-white transition-all duration-200">
-            Browse All Professionals
-            <CheckCircle className="w-5 h-5" />
-          </button>
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h3 className="text-2xl font-playfair font-bold text-gray-900 mb-2">
+              Get Your Free Guide
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Plus exclusive access to our professional network
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="guide-email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email address
+                </label>
+                <input
+                  type="email"
+                  id="guide-email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sea focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-sea text-white font-bold py-4 px-6 rounded-lg hover:bg-sea/90 transition-all duration-200 transform hover:scale-[1.02]"
+              >
+                Send Me the Free Guide
+              </button>
+
+              <p className="text-xs text-center text-gray-500">
+                We respect your privacy. Unsubscribe at any time.
+              </p>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-600 text-center">
+                <strong>Bonus:</strong> Get instant access to our directory of 500+ verified professionals
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
