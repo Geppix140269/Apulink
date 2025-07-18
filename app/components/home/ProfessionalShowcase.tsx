@@ -1,134 +1,123 @@
-// PATH: app/components/home/ProfessionalShowcase.tsx
-import React from 'react';
-import { Star, Award, Clock, MessageCircle, ArrowRight } from 'lucide-react';
+import React from 'react'
+import { Star, MapPin, Clock, CheckCircle, MessageSquare } from 'lucide-react'
 
-const ProfessionalShowcase = () => {
+export default function ProfessionalShowcase() {
   const professionals = [
     {
-      name: 'Marco Benedetti',
-      title: 'Chartered Surveyor',
-      location: 'Bari',
+      name: "Marco Rossi",
+      title: "RICS Chartered Surveyor",
+      location: "Bari, Puglia",
       rating: 4.9,
-      reviews: 47,
-      responseTime: '2 hours',
-      expertise: ['Trulli Specialist', 'English Speaking'],
-      recentWork: 'Just helped Emma from London save €8,000 on renovation quotes',
-      image: 'https://i.pravatar.cc/150?img=11'
+      reviews: 127,
+      responseTime: "2 hours",
+      expertise: ["Structural Surveys", "Pre-Purchase Inspections", "Defect Analysis"],
+      languages: ["English", "Italian", "German"],
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marco"
     },
     {
-      name: 'Dr. Giulia Romano',
-      title: 'Property Lawyer',
-      location: 'Lecce',
+      name: "Elena Bianchi",
+      title: "Licensed Architect",
+      location: "Lecce, Puglia",
       rating: 5.0,
-      reviews: 62,
-      responseTime: '1 hour',
-      expertise: ['International Buyers', 'Tax Expert'],
-      recentWork: 'Resolved complex inheritance issue for US client in 3 weeks',
-      image: 'https://i.pravatar.cc/150?img=32'
+      reviews: 89,
+      responseTime: "4 hours",
+      expertise: ["Renovation Projects", "Historic Properties", "Planning Permissions"],
+      languages: ["English", "Italian", "French"],
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena"
     },
     {
-      name: 'Alessandro Greco',
-      title: 'Architect',
-      location: 'Ostuni',
+      name: "Giuseppe Conti",
+      title: "Property Lawyer",
+      location: "Brindisi, Puglia",
       rating: 4.8,
-      reviews: 38,
-      responseTime: '4 hours',
-      expertise: ['Historic Restoration', 'Masseria Expert'],
-      recentWork: 'Completed stunning trullo renovation under budget',
-      image: 'https://i.pravatar.cc/150?img=33'
+      reviews: 156,
+      responseTime: "Same day",
+      expertise: ["Property Contracts", "Due Diligence", "Tax Advisory"],
+      languages: ["English", "Italian", "Spanish"],
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Giuseppe"
     }
-  ];
+  ]
 
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Award className="w-4 h-4" />
-              <span>All Professionals Verified & Insured</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-playfair font-bold text-stone-800 mb-4">
-              Meet Your Future Property Team
-            </h2>
-            <p className="text-xl text-stone-600">
-              50+ vetted professionals ready to help. Average response time: 3 hours.
-            </p>
-          </div>
+    <section className="py-20 px-4 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-4">
+            Meet Our Top-Rated Professionals
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Every professional on Apulink is verified, licensed, and rated by real clients. 
+            Here are some of our highest-rated experts ready to help with your property needs.
+          </p>
+        </div>
 
-          {/* Professional Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {professionals.map((pro, index) => (
-              <div key={index} className="bg-white border border-stone-200 rounded-xl p-6 hover:shadow-xl transition-all duration-300">
-                {/* Header */}
-                <div className="flex items-start gap-4 mb-4">
-                  <img 
-                    src={pro.image} 
-                    alt={pro.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-stone-800">{pro.name}</h3>
-                    <p className="text-sm text-stone-600">{pro.title} • {pro.location}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium">{pro.rating}</span>
-                      </div>
-                      <span className="text-sm text-stone-500">({pro.reviews} reviews)</span>
+        <div className="grid md:grid-cols-3 gap-8">
+          {professionals.map((pro, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={pro.image} 
+                      alt={pro.name}
+                      className="w-16 h-16 rounded-full bg-gray-200"
+                    />
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">{pro.name}</h3>
+                      <p className="text-sea font-medium">{pro.title}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Expertise Tags */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {pro.expertise.map((tag, idx) => (
-                    <span key={idx} className="bg-stone-100 text-stone-700 px-2 py-1 rounded text-xs">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="w-4 h-4 text-terracotta" />
+                    <span>{pro.location}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                      <span className="font-semibold text-gray-900">{pro.rating}</span>
+                    </div>
+                    <span className="text-sm text-gray-600">({pro.reviews} reviews)</span>
+                  </div>
 
-                {/* Recent Work */}
-                <div className="bg-green-50 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-green-800 italic">"{pro.recentWork}"</p>
-                </div>
-
-                {/* Response Time */}
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 text-stone-600">
-                    <Clock className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock className="w-4 h-4 text-olive" />
                     <span>Responds in {pro.responseTime}</span>
                   </div>
-                  <button className="text-terracotta hover:text-terracotta-dark font-medium">
-                    View Profile →
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
 
-          {/* CTA */}
-          <div className="text-center bg-stone-50 rounded-xl p-8">
-            <h3 className="text-2xl font-semibold text-stone-800 mb-4">
-              Ready to Connect with Trusted Professionals?
-            </h3>
-            <p className="text-stone-600 mb-6">
-              Get your free guide first, then use your €100 credit to start getting quotes
-            </p>
-            <a 
-              href="#get-guide" 
-              className="inline-flex items-center gap-2 bg-terracotta text-white px-8 py-4 rounded-lg font-semibold hover:bg-terracotta-dark transition-all duration-200"
-            >
-              Get Guide + Browse All Professionals
-              <ArrowRight className="w-5 h-5" />
-            </a>
-          </div>
+                <div className="border-t pt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Expertise:</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {pro.expertise.map((skill, i) => (
+                      <span key={i} className="text-xs bg-sea/10 text-sea px-2 py-1 rounded-full">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-sm font-medium text-gray-700 mb-2">Languages:</p>
+                  <p className="text-sm text-gray-600">{pro.languages.join(", ")}</p>
+                </div>
+
+                <button className="w-full mt-4 bg-terracotta text-white font-semibold py-3 px-4 rounded-lg hover:bg-terracotta/90 transition-colors duration-200">
+                  Request Quote
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <button className="inline-flex items-center gap-2 bg-white border-2 border-sea text-sea font-semibold py-3 px-6 rounded-lg hover:bg-sea hover:text-white transition-all duration-200">
+            Browse All Professionals
+            <CheckCircle className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </section>
-  );
-};
-
-export default ProfessionalShowcase;
+  )
+}
