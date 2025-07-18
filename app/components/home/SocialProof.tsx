@@ -1,119 +1,111 @@
-// PATH: app/components/home/SocialProof.tsx
-import React from 'react';
-import { Quote, Star } from 'lucide-react';
+import React from 'react'
+import { Star, Quote, MapPin } from 'lucide-react'
 
-const SocialProof = () => {
+export default function SocialProof() {
   const testimonials = [
     {
-      name: 'Emma Thompson',
-      location: 'London, UK',
-      property: 'Trullo in Alberobello',
-      saved: '€12,000',
-      image: 'https://i.pravatar.cc/150?img=49',
-      quote: 'The guide revealed issues with the property cadastral registration that would have cost me thousands. My surveyor (found through Apulink) caught it immediately.',
-      rating: 5
+      name: "Sarah Thompson",
+      location: "London, UK",
+      property: "Trullo in Ostuni, Puglia",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+      rating: 5,
+      text: "Apulink made buying our dream home in Puglia so simple. Our surveyor found issues we would have missed, saving us €30,000 in repairs. The architect they connected us with handled all the renovation permits perfectly.",
+      professionals: ["Surveyor", "Architect", "Lawyer"]
     },
     {
-      name: 'Michael & Susan Davis',
-      location: 'California, USA',
-      property: 'Masseria near Ostuni',
-      saved: '€23,000',
-      image: 'https://i.pravatar.cc/150?img=54',
-      quote: 'We were about to pay tourist prices until we read the negotiation chapter. The scripts worked perfectly - the seller dropped the price by 22%!',
-      rating: 5
+      name: "Michael Chen",
+      location: "San Francisco, USA",
+      property: "Villa in Polignano a Mare",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael",
+      rating: 5,
+      text: "As an overseas buyer, having English-speaking professionals was crucial. The lawyer Apulink recommended walked us through every step of the purchase. Response times were incredible - usually within hours!",
+      professionals: ["Lawyer", "Notary", "Surveyor"]
     },
     {
-      name: 'Klaus Mueller',
-      location: 'Munich, Germany',
-      property: 'Apartment in Lecce',
-      saved: '€8,500',
-      image: 'https://i.pravatar.cc/150?img=52',
-      quote: 'The tax optimization section alone saved me €3,500/year. Plus, the recommended accountant speaks perfect German!',
-      rating: 5
+      name: "Klaus & Anna Weber",
+      location: "Munich, Germany",
+      property: "Masseria near Lecce",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Klaus",
+      rating: 5,
+      text: "We compared 5 different surveyors through Apulink and saved 40% compared to the first quote we got elsewhere. The platform made it easy to see credentials, reviews, and pricing all in one place.",
+      professionals: ["Surveyor", "Engineer", "Architect"]
     }
-  ];
+  ]
+
+  const stats = [
+    { number: "€15M+", label: "Property value protected" },
+    { number: "92%", label: "Issues found before purchase" },
+    { number: "€350", label: "Average savings per survey" },
+    { number: "4.9/5", label: "Average customer rating" }
+  ]
 
   return (
-    <section className="py-20 bg-gradient-to-br from-stone-50 to-white">
-      <div className="container mx-auto px-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-playfair font-bold text-stone-800 mb-4">
-              2,847 Buyers Saved €8M+ Using Our Guide
-            </h2>
-            <p className="text-xl text-stone-600">
-              Real stories from buyers who avoided costly mistakes
-            </p>
-          </div>
+    <section className="py-20 px-4 bg-white">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-4">
+            Join Thousands of Happy Property Buyers
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Real stories from international buyers who found their dream Italian property with Apulink&apos;s professional network
+          </p>
+        </div>
 
-          {/* Testimonials */}
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-6 relative">
-                <Quote className="absolute top-4 right-4 w-8 h-8 text-stone-200" />
-                
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-stone-800">{testimonial.name}</h4>
-                    <p className="text-sm text-stone-600">{testimonial.location}</p>
-                  </div>
-                </div>
+        {/* Stats bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center p-6 bg-gradient-to-br from-sea/5 to-olive/5 rounded-xl">
+              <p className="text-3xl font-bold text-terracotta">{stat.number}</p>
+              <p className="text-sm text-gray-600 mt-1">{stat.label}</p>
+            </div>
+          ))}
+        </div>
 
-                {/* Rating */}
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                  ))}
-                </div>
-
-                {/* Quote */}
-                <p className="text-stone-700 mb-4 italic">"{testimonial.quote}"</p>
-
-                {/* Results */}
-                <div className="border-t pt-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-stone-600">Property:</span>
-                    <span className="font-medium text-stone-800">{testimonial.property}</span>
-                  </div>
-                  <div className="flex justify-between text-sm mt-1">
-                    <span className="text-stone-600">Saved:</span>
-                    <span className="font-bold text-green-600">{testimonial.saved}</span>
-                  </div>
+        {/* Testimonials */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
+            <div key={index} className="bg-gray-50 rounded-xl p-6 relative">
+              <Quote className="absolute top-4 right-4 w-8 h-8 text-terracotta/20" />
+              
+              <div className="flex items-center gap-4 mb-4">
+                <img 
+                  src={testimonial.image} 
+                  alt={testimonial.name}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div>
+                  <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
+                  <p className="text-sm text-gray-600">{testimonial.location}</p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Trust Badges */}
-          <div className="flex flex-wrap justify-center items-center gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-stone-800">€8,500</div>
-              <div className="text-sm text-stone-600">Average Savings</div>
+              <div className="flex items-center gap-1 mb-3">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                ))}
+              </div>
+
+              <p className="text-gray-700 mb-4">&ldquo;{testimonial.text}&rdquo;</p>
+
+              <div className="pt-4 border-t border-gray-200">
+                <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  Property: {testimonial.property}
+                </p>
+                <p className="text-xs text-gray-600">
+                  Used: {testimonial.professionals.join(", ")}
+                </p>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-stone-800">4.9/5</div>
-              <div className="text-sm text-stone-600">Guide Rating</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-stone-800">92%</div>
-              <div className="text-sm text-stone-600">Would Recommend</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-stone-800">24hrs</div>
-              <div className="text-sm text-stone-600">To First Quote</div>
-            </div>
-          </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <p className="text-lg text-gray-600">
+            Ready to join them? Start your Italian property journey today.
+          </p>
         </div>
       </div>
     </section>
-  );
-};
-
-export default SocialProof;
+  )
+}
