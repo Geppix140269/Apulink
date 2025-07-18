@@ -101,13 +101,14 @@ export default function RootLayout({
                 <div className="grid md:grid-cols-4 gap-8">
                   <div>
                     <div className="mb-4">
-                      <Image 
-                        src="/APULINK_LOGO-TRASPARENT.png" 
-                        alt="Apulink" 
-                        width={180} 
-                        height={72}
-                        className="h-16 w-auto brightness-0 invert opacity-90"
-                      />
+                    <Image 
+  src="/APULINK_LOGO-TRASPARENT.png" 
+  alt="Apulink - Your Bridge to Puglia Property Investment" 
+  width={200} 
+  height={80}
+  className="h-14 md:h-16 lg:h-20 w-auto"
+  priority
+/>
                     </div>
                     <p className="text-sm">
                       Your trusted bridge to property investment in Puglia. Connecting worlds, building futures.
