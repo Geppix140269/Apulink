@@ -6,8 +6,8 @@ import LeadMagnetOffer from './components/home/LeadMagnetOffer'
 import SocialProof from './components/home/SocialProof'
 import ProfessionalShowcase from './components/home/ProfessionalShowcase'
 import ROICalculator from './components/home/ROICalculator'
-import UrgencyBanner from './components/home/UrgencyBanner'
-import FAQSection from './components/home/FAQSection'
+// Removed: import UrgencyBanner from './components/home/UrgencyBanner'
+// Removed: import FAQSection from './components/home/FAQSection'
 import FinalCTA from './components/home/FinalCTA'
 
 export default function HomePage() {
@@ -20,8 +20,8 @@ export default function HomePage() {
       <ProfessionalShowcase />
       <SocialProof />
       <ROICalculator />
-      <UrgencyBanner />
-      <FAQSection />
+      {/* Removed: <UrgencyBanner /> */}
+      {/* Removed: <FAQSection /> */}
       <FinalCTA />
     </>
   )
