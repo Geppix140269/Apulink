@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react'
 import { Calculator, TrendingUp, Euro, Shield } from 'lucide-react'
 
@@ -62,7 +64,7 @@ export default function ROICalculator() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Survey Type Required
+                  Type of Survey Needed
                 </label>
                 <select
                   value={surveyType}
@@ -70,80 +72,83 @@ export default function ROICalculator() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sea focus:border-transparent"
                 >
                   <option value="basic">Basic Survey (€{surveyFees.basic.toFixed(0)})</option>
-                  <option value="full">Full Structural Survey (€{surveyFees.full.toFixed(0)})</option>
-                  <option value="building">Building Survey + Tests (€{surveyFees.building.toFixed(0)})</option>
+                  <option value="full">Full Building Survey (€{surveyFees.full.toFixed(0)})</option>
+                  <option value="building">Structural Survey (€{surveyFees.building.toFixed(0)})</option>
                 </select>
               </div>
             </div>
-
-            <div className="mt-8 p-6 bg-gradient-to-br from-terracotta/10 to-olive/10 rounded-xl">
-              <h4 className="font-semibold text-gray-900 mb-4">Your Potential Savings:</h4>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Issues typically found:</span>
-                  <span className="font-semibold">€{potentialIssues.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Negotiation leverage:</span>
-                  <span className="font-semibold">€{negotiationSavings.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Survey investment:</span>
-                  <span className="font-semibold">-€{surveyFees[surveyType as keyof typeof surveyFees].toFixed(0)}</span>
-                </div>
-                <div className="pt-3 border-t border-gray-300">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-gray-900">Total Protection Value:</span>
-                    <span className="text-2xl font-bold text-olive">€{totalSavings.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-start gap-4">
-                <Shield className="w-8 h-8 text-terracotta flex-shrink-0" />
+          <div className="bg-gradient-to-br from-sea to-olive text-white rounded-2xl p-8">
+            <h3 className="text-xl font-semibold mb-6">
+              Your Potential Protection
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm">Hidden Issues Avoided</span>
+                  <span className="font-bold">€{potentialIssues.toFixed(0)}</span>
+                </div>
+                <p className="text-xs text-white/70">
+                  Average repair costs discovered through surveys
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm">Negotiation Leverage</span>
+                  <span className="font-bold">€{negotiationSavings.toFixed(0)}</span>
+                </div>
+                <p className="text-xs text-white/70">
+                  Average price reduction from survey findings
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm">Survey Investment</span>
+                  <span className="font-bold">-€{surveyFees[surveyType as keyof typeof surveyFees].toFixed(0)}</span>
+                </div>
+                <p className="text-xs text-white/70">
+                  Professional survey fee
+                </p>
+              </div>
+
+              <div className="border-t border-white/20 pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold">Total Potential Savings</span>
+                  <span className="text-2xl font-bold">€{totalSavings.toFixed(0)}</span>
+                </div>
+                <p className="text-sm text-white/70 mt-2">
+                  {(totalSavings / propertyValue * 100).toFixed(1)}% of property value protected
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-white/20 backdrop-blur-sm rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Protect Your Investment</h4>
-                  <p className="text-gray-600">
-                    92% of property surveys reveal issues that affect value. Professional surveys 
-                    give you negotiating power and prevent costly surprises after purchase.
+                  <p className="text-sm font-semibold mb-1">Peace of Mind Included</p>
+                  <p className="text-xs text-white/80">
+                    Beyond financial savings, a professional survey provides invaluable peace 
+                    of mind and protects your investment from costly surprises.
                   </p>
                 </div>
               </div>
             </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-md">
-              <div className="flex items-start gap-4">
-                <TrendingUp className="w-8 h-8 text-sea flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">ROI on Professional Services</h4>
-                  <p className="text-gray-600">
-                    Average return on survey investment: <strong>1,200%</strong>. Most buyers save 
-                    10-15x their survey cost through issue discovery and negotiation.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-sea to-olive text-white rounded-xl p-6">
-              <h4 className="font-semibold mb-3">What&apos;s Typically Found:</h4>
-              <ul className="space-y-2 text-sm">
-                <li>• Structural defects (€10k-50k repairs)</li>
-                <li>• Roof issues (€5k-20k repairs)</li>
-                <li>• Damp problems (€3k-15k treatment)</li>
-                <li>• Illegal modifications (€5k-30k to regularize)</li>
-                <li>• Boundary disputes (€2k-10k legal costs)</li>
-              </ul>
-            </div>
-
-            <button className="w-full bg-terracotta text-white font-bold py-4 px-6 rounded-lg hover:bg-terracotta/90 transition-all duration-200 transform hover:scale-[1.02]">
-              Get Quotes from Verified Surveyors
-            </button>
           </div>
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 mb-6">
+            Ready to protect your investment? Get quotes from verified professionals.
+          </p>
+          <button className="bg-terracotta text-white font-bold py-4 px-8 rounded-lg hover:bg-terracotta/90 transition-all duration-200 transform hover:scale-[1.02] inline-flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Find Your Professional
+          </button>
         </div>
       </div>
     </section>
