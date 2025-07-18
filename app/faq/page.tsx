@@ -28,12 +28,12 @@ export default function FAQPage() {
     // Buying Property
     {
       question: "Can foreigners buy property in Italy?",
-      answer: "Yes! Italy welcomes foreign property buyers. EU citizens have the same rights as Italian citizens. Non-EU citizens can also buy property, though some countries have reciprocity agreements that make the process easier. You'll need a codice fiscale (tax code) and a bank account. Apulink helps guide you through the entire process.",
+      answer: "Yes! Italy welcomes foreign property buyers. EU citizens have the same rights as Italian citizens. Non-EU citizens can also buy property, though some countries have reciprocity agreements that make the process easier. You&apos;ll need a codice fiscale (tax code) and a bank account. Apulink helps guide you through the entire process.",
       category: "buying"
     },
     {
       question: "What is a geometra and why do I need one?",
-      answer: "A geometra is a licensed professional in Italy who handles property surveys, building permits, cadastral matters, and construction supervision. They're essential for property transactions because they verify legal compliance, check for building violations, handle bureaucracy, and ensure all documents are in order. Think of them as a combination of surveyor, building inspector, and technical consultant.",
+      answer: "A geometra is a licensed professional in Italy who handles property surveys, building permits, cadastral matters, and construction supervision. They&apos;re essential for property transactions because they verify legal compliance, check for building violations, handle bureaucracy, and ensure all documents are in order. Think of them as a combination of surveyor, building inspector, and technical consultant.",
       category: "buying"
     },
     {
@@ -42,14 +42,14 @@ export default function FAQPage() {
       category: "buying"
     },
     {
-      question: "What's the difference between a trullo and a masseria?",
+      question: "What&apos;s the difference between a trullo and a masseria?",
       answer: "A trullo is a traditional Apulian stone dwelling with a conical roof, typically small and charming, originally used for storage or temporary shelter. A masseria is a fortified farmhouse, usually much larger, that was the center of agricultural estates. Trulli are perfect for couples or small families, while masserie offer more space and often include land. Both require specialized restoration expertise.",
       category: "buying"
     },
     
     // Using Apulink
     {
-      question: "How does Apulink's anonymous bidding system work?",
+      question: "How does Apulink&apos;s anonymous bidding system work?",
       answer: "When you post a survey request, verified professionals in your area receive a notification. They can view your property documents and requirements, then submit competitive bids. All communication remains anonymous through our platform until you select a winner. This ensures fair pricing and prevents professionals from circumventing the system. Once you choose a professional, we facilitate the introduction.",
       category: "platform"
     },
@@ -59,8 +59,8 @@ export default function FAQPage() {
       category: "platform"
     },
     {
-      question: "What if I don't have all the required documents?",
-      answer: "No problem! Apulink offers a document procurement service. We can obtain official documents from Italian authorities on your behalf, including cadastral records, building permits, and property deeds. This service costs €50-150 per document depending on complexity. It's especially helpful for international buyers who can't easily visit Italian offices.",
+      question: "What if I don&apos;t have all the required documents?",
+      answer: "No problem! Apulink offers a document procurement service. We can obtain official documents from Italian authorities on your behalf, including cadastral records, building permits, and property deeds. This service costs €50-150 per document depending on complexity. It&apos;s especially helpful for international buyers who can&apos;t easily visit Italian offices.",
       category: "platform"
     },
     {
@@ -81,7 +81,7 @@ export default function FAQPage() {
       category: "professionals"
     },
     {
-      question: "What if I'm not satisfied with the professional's work?",
+      question: "What if I&apos;m not satisfied with the professional&apos;s work?",
       answer: "Apulink provides several protections: we hold the 10% deposit until you confirm the professional has been selected, we mediate any disputes that arise, all professionals must maintain insurance, and you can leave reviews to help future users. If serious issues occur, we can help you find a replacement professional.",
       category: "professionals"
     },
@@ -94,7 +94,7 @@ export default function FAQPage() {
     },
     {
       question: "What is a compromesso?",
-      answer: "The compromesso (preliminary contract) is a binding agreement between buyer and seller that outlines all terms of the sale. It includes: purchase price, payment schedule, completion date, any conditions, and penalties for breach. Usually, you pay 10-30% deposit at this stage. It's legally binding, so having a professional review it is crucial.",
+      answer: "The compromesso (preliminary contract) is a binding agreement between buyer and seller that outlines all terms of the sale. It includes: purchase price, payment schedule, completion date, any conditions, and penalties for breach. Usually, you pay 10-30% deposit at this stage. It&apos;s legally binding, so having a professional review it is crucial.",
       category: "documents"
     },
     {
@@ -116,24 +116,24 @@ export default function FAQPage() {
     },
     {
       question: "Are there tax benefits for renovating property in Italy?",
-      answer: "Yes! Italy offers generous tax incentives for renovations: general renovations can receive up to 50% tax credits, energy efficiency improvements up to 65%, and seismic upgrades up to 85%. The famous 'Superbonus' has offered even higher percentages. These incentives make renovating older properties very attractive. Your geometra can help you navigate available benefits.",
+      answer: "Yes! Italy offers generous tax incentives for renovations: general renovations can receive up to 50% tax credits, energy efficiency improvements up to 65%, and seismic upgrades up to 85%. The famous &apos;Superbonus&apos; has offered even higher percentages. These incentives make renovating older properties very attractive. Your geometra can help you navigate available benefits.",
       category: "costs"
     },
     
     // Living in Puglia
     {
       question: "What are the best areas in Puglia for foreign buyers?",
-      answer: "Popular areas include: Ostuni (the 'White City') for its charm and international community, Alberobello for its unique trulli, Polignano a Mare for coastal beauty, Lecce for baroque architecture and city life, Locorotondo and Cisternino for authentic hill town living, and the Salento peninsula for beaches. Each area offers different lifestyles and price points.",
+      answer: "Popular areas include: Ostuni (the &apos;White City&apos;) for its charm and international community, Alberobello for its unique trulli, Polignano a Mare for coastal beauty, Lecce for baroque architecture and city life, Locorotondo and Cisternino for authentic hill town living, and the Salento peninsula for beaches. Each area offers different lifestyles and price points.",
       category: "living"
     },
     {
-      question: "What's the cost of living in Puglia?",
+      question: "What&apos;s the cost of living in Puglia?",
       answer: "Puglia offers excellent value compared to northern Italy or other European destinations. Monthly costs for a couple might include: groceries (€300-500), utilities (€100-200), dining out (€200-400), and transportation (€100-200). Property taxes and maintenance are generally reasonable. Many expats find they can live comfortably on €1,500-2,500 per month.",
       category: "living"
     },
     {
       question: "Do I need residency to buy property in Italy?",
-      answer: "No, you don't need residency to buy property. However, residency affects your tax status. Residents (spending 183+ days per year in Italy) pay 2% registration tax on primary homes vs. 9% for non-residents. Residency also provides access to the Italian healthcare system and other benefits. EU citizens can obtain residency easily; non-EU citizens need to meet specific requirements.",
+      answer: "No, you don&apos;t need residency to buy property. However, residency affects your tax status. Residents (spending 183+ days per year in Italy) pay 2% registration tax on primary homes vs. 9% for non-residents. Residency also provides access to the Italian healthcare system and other benefits. EU citizens can obtain residency easily; non-EU citizens need to meet specific requirements.",
       category: "living"
     }
   ]
