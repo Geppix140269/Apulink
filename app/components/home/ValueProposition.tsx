@@ -1,113 +1,127 @@
-// PATH: app/components/home/ValueProposition.tsx
-import React from 'react';
-import { AlertTriangle, CheckCircle, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react'
+import { MapPin, Users, Shield, Clock } from 'lucide-react'
 
-const ValueProposition = () => {
-  const problems = [
-    {
-      title: 'Overcharged by 30-50%',
-      description: 'Foreign buyers pay "tourist prices" without knowing local rates'
-    },
-    {
-      title: '€5,000+ in Hidden Fees',
-      description: 'Unexpected taxes, permits, and bureaucratic costs add up fast'
-    },
-    {
-      title: 'Language & Legal Barriers',
-      description: 'Complex Italian property law + language gaps = expensive mistakes'
-    },
-    {
-      title: 'Finding Trustworthy Pros',
-      description: 'No way to verify if that "recommended" lawyer is actually good'
-    }
-  ];
+export default function HeroLeadMagnet() {
+  const [email, setEmail] = useState('')
+  const [propertyLocation, setPropertyLocation] = useState('')
 
-  const solutions = [
-    {
-      title: 'Transparent, Competitive Pricing',
-      description: 'Multiple quotes from vetted professionals - save 20-30%'
-    },
-    {
-      title: 'All Costs Upfront',
-      description: 'No surprises - know every fee before you commit'
-    },
-    {
-      title: 'English-Speaking Experts',
-      description: 'All professionals verified for international client experience'
-    },
-    {
-      title: 'Reviews You Can Trust',
-      description: 'Real reviews from verified international buyers like you'
-    }
-  ];
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Handle form submission
+    console.log('Form submitted:', { email, propertyLocation })
+  }
 
   return (
-    <section className="py-20 bg-stone-50">
-      <div className="container mx-auto px-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-playfair font-bold text-stone-800 mb-4">
-              Why 73% of Foreign Buyers 
-              <span className="text-terracotta"> Overpay</span> in Italy
-            </h2>
-            <p className="text-xl text-stone-600">
-              ...and how Apulink members save an average of €8,500 per property
-            </p>
-          </div>
+    <section className="relative bg-gradient-to-br from-terracotta via-sea to-olive animate-gradient-shift text-white overflow-hidden">
+      {/* Shimmer effect */}
+      <div
+        className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at 20% 20%, white, transparent 60%)',
+          animation: 'shimmer 20s linear infinite',
+        }}
+      />
 
-          {/* Problem/Solution Grid */}
-          <div className="grid md:grid-cols-2 gap-12 mb-16">
-            {/* Problems Column */}
+      <div className="container mx-auto px-6 py-24 relative z-10">
+        {/* Platform badge */}
+        <div className="text-center mb-8">
+          <div className="inline-block bg-white/10 px-6 py-2 rounded-full text-sm font-semibold tracking-wide backdrop-blur-md glass mb-6">
+            <MapPin className="inline w-4 h-4 mr-2" />
+            Italy&apos;s Trusted Property Professional Marketplace
+          </div>
+        </div>
+
+        {/* Clear headline */}
+        <h1 className="text-4xl md:text-6xl font-playfair font-light leading-tight text-center text-balance max-w-4xl mx-auto">
+          Find <strong className="font-bold">Verified Professionals</strong> for Your <strong className="font-bold">Italian Property</strong>
+        </h1>
+
+        <p className="mt-6 text-lg md:text-xl text-white/90 font-opensans max-w-3xl mx-auto text-center">
+          Connect with RICS-certified surveyors, registered architects, structural engineers, 
+          property lawyers, and notaries. Get competitive quotes and expert guidance for your property investment in Italy.
+        </p>
+
+        {/* Trust indicators */}
+        <div className="flex flex-wrap justify-center gap-6 mt-8 mb-12">
+          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
+            <Users className="w-5 h-5" />
+            <span className="font-semibold">500+ Verified Professionals</span>
+          </div>
+          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
+            <Shield className="w-5 h-5" />
+            <span className="font-semibold">100% Licensed & Insured</span>
+          </div>
+          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
+            <Clock className="w-5 h-5" />
+            <span className="font-semibold">Quotes in 24 Hours</span>
+          </div>
+        </div>
+
+        {/* Lead capture form */}
+        <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-md rounded-2xl p-8 glass">
+          <h2 className="text-2xl font-playfair font-bold text-center mb-2">
+            Get Your Free Property Professional Guide
+          </h2>
+          <p className="text-center text-white/80 mb-6">
+            Essential checklist for buying property in Italy + exclusive access to our professional network
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <AlertTriangle className="w-8 h-8 text-red-500" />
-                <h3 className="text-2xl font-semibold text-stone-800">Without Apulink</h3>
-              </div>
-              <div className="space-y-6">
-                {problems.map((problem, index) => (
-                  <div key={index} className="bg-red-50 rounded-lg p-6 border border-red-100">
-                    <h4 className="font-semibold text-stone-800 mb-2">{problem.title}</h4>
-                    <p className="text-stone-600">{problem.description}</p>
-                  </div>
-                ))}
-              </div>
+              <label htmlFor="location" className="block text-sm font-medium mb-2">
+                Where in Italy are you looking to buy?
+              </label>
+              <input
+                type="text"
+                id="location"
+                value={propertyLocation}
+                onChange={(e) => setPropertyLocation(e.target.value)}
+                placeholder="e.g., Puglia, Tuscany, Lake Como..."
+                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-md"
+                required
+              />
             </div>
 
-            {/* Solutions Column */}
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <CheckCircle className="w-8 h-8 text-green-500" />
-                <h3 className="text-2xl font-semibold text-stone-800">With Apulink</h3>
-              </div>
-              <div className="space-y-6">
-                {solutions.map((solution, index) => (
-                  <div key={index} className="bg-green-50 rounded-lg p-6 border border-green-100">
-                    <h4 className="font-semibold text-stone-800 mb-2">{solution.title}</h4>
-                    <p className="text-stone-600">{solution.description}</p>
-                  </div>
-                ))}
-              </div>
+              <label htmlFor="email" className="block text-sm font-medium mb-2">
+                Your email address
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-md"
+                required
+              />
             </div>
-          </div>
 
-          {/* CTA */}
-          <div className="text-center">
-            <p className="text-lg text-stone-700 mb-6">
-              Don't leave €8,500 on the table. Get your free guide and €100 credit now.
-            </p>
-            <a 
-              href="#get-guide" 
-              className="inline-flex items-center gap-2 bg-terracotta text-white px-8 py-4 rounded-lg font-semibold hover:bg-terracotta-dark transition-all duration-200"
+            <button
+              type="submit"
+              className="w-full bg-white text-terracotta font-bold py-4 px-6 rounded-lg hover:bg-white/90 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
             >
-              Claim Your Free Guide
-              <ArrowRight className="w-5 h-5" />
-            </a>
+              Get Free Guide + Professional Access
+            </button>
+
+            <p className="text-xs text-center text-white/70 mt-4">
+              Join 10,000+ international property buyers. Unsubscribe anytime.
+            </p>
+          </form>
+        </div>
+
+        {/* Professional categories showcase */}
+        <div className="mt-16 text-center">
+          <p className="text-sm text-white/80 mb-4">Trusted by property buyers from:</p>
+          <div className="flex flex-wrap justify-center gap-4 text-white/60">
+            <span>🇬🇧 United Kingdom</span>
+            <span>🇺🇸 United States</span>
+            <span>🇩🇪 Germany</span>
+            <span>🇫🇷 France</span>
+            <span>🇨🇦 Canada</span>
           </div>
         </div>
       </div>
     </section>
-  );
-};
-
-export default ValueProposition;
+  )
+}
