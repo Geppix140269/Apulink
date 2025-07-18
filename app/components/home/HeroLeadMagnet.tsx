@@ -48,58 +48,6 @@ export default function HeroLeadMagnet() {
         <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-green-100 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-float" style={{ animationDelay: '4s' }} />
       </div>
 
-      {/* Navigation Header */}
-      <nav className="relative z-30 px-4 sm:px-6 lg:px-8 py-6 animate-slide-down">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <Link href="/" className="flex items-center">
-              <Image 
-                src="/APULINK_LOGO-TRASPARENT.png" 
-                alt="Apulink - Your Bridge to Puglia Property Investment" 
-                width={180} 
-                height={72}
-                className="h-14 md:h-16 lg:h-20 w-auto"
-                priority
-              />
-            </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/how-it-works" className="nav-link text-gray-700 hover:text-gray-900 font-medium transition-colors relative">
-                How it Works
-              </Link>
-              <Link href="/about" className="nav-link text-gray-700 hover:text-gray-900 font-medium transition-colors relative">
-                About
-              </Link>
-              <Link href="/contact" className="nav-link text-gray-700 hover:text-gray-900 font-medium transition-colors relative">
-                Contact
-              </Link>
-              
-              {/* Language Selector */}
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-all cursor-pointer shadow-sm hover:shadow-md">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
-                <span className="text-sm font-medium flex items-center gap-1">
-                  <span className="w-4 h-3 flex rounded-sm overflow-hidden shadow-sm">
-                    <span className="flex-1 bg-green-600"></span>
-                    <span className="flex-1 bg-white"></span>
-                    <span className="flex-1 bg-red-600"></span>
-                  </span>
-                  IT
-                </span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-
-              {/* Login Button */}
-              <Link href="/login" className="btn-hero-primary px-6 py-3">
-                Login
-              </Link>
-            </div>
-
             {/* Mobile Menu Button */}
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
