@@ -248,7 +248,7 @@ export default function HelpCentrePage() {
               </div>
               <h3 className="font-semibold text-stone-800 mb-2">Contact Support</h3>
               <p className="text-stone-600 mb-4">
-                Can't find what you need? Our team is here to help
+                                  Can&apos;t find what you need? Our team is here to help
               </p>
               <a href="/contact" className="text-terracotta hover:text-terracotta-dark font-medium">
                 Contact Us →
