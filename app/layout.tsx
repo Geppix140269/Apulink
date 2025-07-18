@@ -33,14 +33,14 @@ export const metadata: Metadata = {
 
 function Navigation() {
   return (
-    <nav className="hidden md:flex space-x-6">
-      <a href="/how-it-works" className="text-stone-600 hover:text-terracotta transition-colors font-medium">
+    <nav className="hidden md:flex items-center space-x-8">
+      <a href="/how-it-works" className="nav-link text-gray-700 hover:text-gray-900 font-medium transition-colors relative">
         How it Works
       </a>
-      <a href="/about" className="text-stone-600 hover:text-terracotta transition-colors font-medium">
+      <a href="/about" className="nav-link text-gray-700 hover:text-gray-900 font-medium transition-colors relative">
         About
       </a>
-      <a href="/contact" className="text-stone-600 hover:text-terracotta transition-colors font-medium">
+      <a href="/contact" className="nav-link text-gray-700 hover:text-gray-900 font-medium transition-colors relative">
         Contact
       </a>
     </nav>
@@ -57,19 +57,19 @@ export default function RootLayout({
       <body className={`${openSans.className} antialiased`}>
         <LanguageProvider>
           <div className="min-h-screen bg-stone-50">
-            {/* Professional header with Apulink branding */}
-            <header className="bg-white shadow-sm border-b border-stone-200">
+            {/* Modern header with enhanced styling */}
+            <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100 fixed w-full top-0 z-50">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-20">
                   <div className="flex items-center space-x-8">
-                    {/* Apulink Logo */}
-                    <a href="/" className="flex items-center">
+                    {/* Enhanced Apulink Logo */}
+                    <a href="/" className="flex items-center group">
                       <Image 
                         src="/APULINK_LOGO-TRASPARENT.png" 
                         alt="Apulink - Your Bridge to Puglia Property Investment" 
-                        width={150} 
-                        height={60}
-                        className="h-12 w-auto"
+                        width={180} 
+                        height={72}
+                        className="h-14 md:h-16 lg:h-20 w-auto transition-transform duration-200 group-hover:scale-105"
                         priority
                       />
                     </a>
@@ -77,12 +77,18 @@ export default function RootLayout({
                     <Navigation />
                   </div>
                   
-                  {/* Right side - Language selector & Login */}
+                  {/* Right side - Enhanced Language selector & Login */}
                   <div className="flex items-center space-x-4">
-                    <LanguageSelector />
+                    {/* Enhanced Language Selector */}
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all cursor-pointer shadow-sm hover:shadow-md border border-gray-100">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                      </svg>
+                      <LanguageSelector />
+                    </div>
                     
-                    {/* Login Button */}
-                    <button className="bg-terracotta text-white px-6 py-2 rounded-lg font-medium hover:bg-terracotta-dark transition-all duration-200">
+                    {/* Modern Login Button */}
+                    <button className="btn-hero-primary">
                       Login
                     </button>
                   </div>
@@ -90,8 +96,8 @@ export default function RootLayout({
               </div>
             </header>
             
-            {/* Main content */}
-            <main>
+            {/* Main content with padding for fixed header */}
+            <main className="pt-20">
               {children}
             </main>
             
@@ -101,14 +107,13 @@ export default function RootLayout({
                 <div className="grid md:grid-cols-4 gap-8">
                   <div>
                     <div className="mb-4">
-                    <Image 
-  src="/APULINK_LOGO-TRASPARENT.png" 
-  alt="Apulink - Your Bridge to Puglia Property Investment" 
-  width={200} 
-  height={80}
-  className="h-14 md:h-16 lg:h-20 w-auto"
-  priority
-/>
+                      <Image 
+                        src="/APULINK_LOGO-TRASPARENT.png" 
+                        alt="Apulink" 
+                        width={120} 
+                        height={48}
+                        className="h-10 w-auto brightness-0 invert opacity-90"
+                      />
                     </div>
                     <p className="text-sm">
                       Your trusted bridge to property investment in Puglia. Connecting worlds, building futures.
