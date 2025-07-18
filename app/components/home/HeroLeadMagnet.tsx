@@ -1,5 +1,4 @@
-// PATH: app/components/home/HeroLeadMagnet.tsx
-'use client'
+'use client';
 import React, { useState } from 'react';
 import { ArrowRight, Download, Shield, Clock, TrendingUp } from 'lucide-react';
 
@@ -11,12 +10,11 @@ const HeroLeadMagnet = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
       setShowSuccess(true);
-      // Trigger download or redirect to gated content
     }, 1000);
   };
 
@@ -33,7 +31,6 @@ const HeroLeadMagnet = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left side - Value Proposition */}
             <div>
-              {/* Trust Badge */}
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                 <Shield className="w-4 h-4 text-green-400" />
                 <span className="text-sm">Trusted by 500+ International Property Investors</span>
@@ -48,32 +45,30 @@ const HeroLeadMagnet = () => {
 
               <p className="text-xl text-stone-200 mb-8">
                 Get instant access to our exclusive guide revealing the 7 costly mistakes 
-                foreign buyers make in Italy - and how to avoid them.
+                foreign buyers make in Italy – and how to avoid them.
               </p>
 
-              {/* Value Points */}
               <div className="space-y-3 mb-8">
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
                     <span className="text-xs">✓</span>
                   </div>
-                  <span className="text-stone-200">Legal pitfalls that cost buyers €5,000-15,000</span>
+                  <span className="text-stone-200">Legal pitfalls that cost buyers €5,000–15,000</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
                     <span className="text-xs">✓</span>
                   </div>
-                  <span className="text-stone-200">How to negotiate 20-30% below asking price</span>
+                  <span className="text-stone-200">How to negotiate 20–30% below asking price</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
                     <span className="text-xs">✓</span>
                   </div>
-                  <span className="text-stone-200">Trusted professionals that won't overcharge foreigners</span>
+                  <span className="text-stone-200">Trusted professionals that won’t overcharge foreigners</span>
                 </div>
               </div>
 
-              {/* Trust Indicators */}
               <div className="flex items-center gap-6 text-sm text-stone-300">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -140,7 +135,7 @@ const HeroLeadMagnet = () => {
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Check Your Email!</h3>
                   <p className="text-stone-300 mb-4">
-                    We've sent your guide and €100 credit code to {email}
+                    We’ve sent your guide and €100 credit code to {email}
                   </p>
                   <button className="text-terracotta hover:text-terracotta-light transition-colors">
                     Browse Professionals While You Wait →
@@ -148,7 +143,6 @@ const HeroLeadMagnet = () => {
                 </div>
               )}
 
-              {/* Social Proof */}
               <div className="mt-6 pt-6 border-t border-white/20">
                 <div className="flex items-center justify-center gap-4">
                   <div className="flex -space-x-2">
@@ -158,7 +152,7 @@ const HeroLeadMagnet = () => {
                         className="w-8 h-8 bg-stone-600 rounded-full border-2 border-white/20"
                         style={{
                           backgroundImage: `url(https://i.pravatar.cc/32?img=${i})`,
-                          backgroundSize: 'cover'
+                          backgroundSize: 'cover',
                         }}
                       />
                     ))}
@@ -175,7 +169,9 @@ const HeroLeadMagnet = () => {
           <div className="mt-12 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-lg font-semibold">🎯 Limited Time: First 100 buyers get exclusive access to our network of pre-vetted professionals</p>
+                <p className="text-lg font-semibold">
+                  🎯 Limited Time: First 100 buyers get exclusive access to our network of pre-vetted professionals
+                </p>
                 <p className="text-stone-300">67 spots remaining • Offer ends in 48 hours</p>
               </div>
               <div className="flex items-center gap-4">
