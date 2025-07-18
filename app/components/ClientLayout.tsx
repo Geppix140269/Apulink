@@ -87,8 +87,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Modern header with scroll effect */}
+    <>
+      {/* Modern header with scroll effect - THIS IS THE ONLY HEADER */}
       <header className={`fixed w-full top-0 z-50 transition-all duration-300 ${
         isScrolled 
           ? 'bg-white/95 backdrop-blur-md shadow-lg' 
@@ -127,9 +127,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               </div>
               
               {/* Modern Login Button - Desktop */}
-              <button className="btn-hero-primary hidden md:inline-flex">
+              <a href="/login" className="btn-hero-primary hidden md:inline-flex">
                 Login
-              </button>
+              </a>
 
               {/* Mobile Menu Button */}
               <button
@@ -201,7 +201,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* Spacer for fixed header */}
       <div className="h-20"></div>
       
-      {/* Main content */}
+      {/* Main content - NO WRAPPER DIV */}
       <main>
         {children}
       </main>
@@ -256,6 +256,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           </div>
         </div>
       </footer>
-    </div>
+    </>
   );
 }
