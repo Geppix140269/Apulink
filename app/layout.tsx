@@ -104,9 +104,9 @@ export default function RootLayout({
                       <Image 
                         src="/APULINK_LOGO-TRASPARENT.png" 
                         alt="Apulink" 
-                        width={120} 
-                        height={48}
-                        className="h-10 w-auto brightness-0 invert opacity-90"
+                        width={180} 
+                        height={72}
+                        className="h-16 w-auto brightness-0 invert opacity-90"
                       />
                     </div>
                     <p className="text-sm">
