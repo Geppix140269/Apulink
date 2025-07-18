@@ -1,28 +1,26 @@
-// PATH: app/components/home/TrustBar.tsx
-import React from 'react';
+import React from 'react'
 
-const TrustBar = () => {
-  const stats = [
-    { value: '€12M+', label: 'Property Value Reviewed' },
-    { value: '2,847', label: 'Active Members' },
-    { value: '4.9/5', label: 'Average Rating' },
-    { value: '24hrs', label: 'Avg. Response Time' }
-  ];
+export default function TrustBar() {
+  const trustItems = [
+    { value: '10,000+', label: 'Property Buyers Served' },
+    { value: '500+', label: 'Verified Professionals' },
+    { value: '€50M+', label: 'Property Value Surveyed' },
+    { value: '4.8/5', label: 'Average Rating' },
+    { value: '24hr', label: 'Average Response Time' }
+  ]
 
   return (
-    <section className="bg-white py-8 border-b border-stone-200">
-      <div className="container mx-auto px-6">
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-stone-800">{stat.value}</div>
-              <div className="text-sm text-stone-600">{stat.label}</div>
+    <section className="bg-gray-900 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
+          {trustItems.map((item, index) => (
+            <div key={index} className="text-white">
+              <p className="text-2xl md:text-3xl font-bold text-olive">{item.value}</p>
+              <p className="text-sm text-gray-400 mt-1">{item.label}</p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  );
-};
-
-export default TrustBar;
+  )
+}
