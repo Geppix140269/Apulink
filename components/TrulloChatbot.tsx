@@ -153,9 +153,14 @@ export default function TrulloChatbot({ language = 'en' }: TrulloChatbotProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
+          <div className="relative">
+            <img 
+              src="/trullo-mascot.png" 
+              alt="Chat with Trullo"
+              className="w-8 h-8 object-contain"
+            />
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          </div>
         )}
       </button>
 
@@ -165,8 +170,12 @@ export default function TrulloChatbot({ language = 'en' }: TrulloChatbotProps) {
           {/* Header */}
           <div className="bg-gradient-to-r from-terracotta to-terracotta-dark p-6 text-white">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-2xl">🏠</span>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-1 shadow-md">
+                <img 
+                  src="/trullo-mascot.png" 
+                  alt="Trullo"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <h3 className="font-bold text-lg">Trullo</h3>
