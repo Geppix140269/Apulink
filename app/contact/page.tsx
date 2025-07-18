@@ -41,7 +41,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-xl text-terracotta-light max-w-2xl mx-auto">
-            Have questions about buying property in Puglia? Need help with our platform? We're here to help!
+            Have questions about buying property in Puglia? Need help with our platform? We&apos;re here to help!
           </p>
         </div>
       </section>
