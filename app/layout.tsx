@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Playfair_Display, Open_Sans } from "next/font/google";
 import "./global.css";
 import { LanguageProvider } from './providers/language-provider';
-import ClientLayout from './components/ClientLayout';
 
 const playfair = Playfair_Display({ 
   subsets: ["latin"],
@@ -29,6 +28,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Import the ClientLayout component
+import ClientLayout from './components/ClientLayout';
+
 export default function RootLayout({
   children,
 }: {
@@ -41,8 +43,8 @@ export default function RootLayout({
           <ClientLayout>
             {children}
           </ClientLayout>
+          <TrulloChatbot />
         </LanguageProvider>
-        <TrulloChatbot />
       </body>
     </html>
   );
