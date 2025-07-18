@@ -1,8 +1,6 @@
 // PATH: app/components/home/LeadMagnetOffer.tsx
 'use client'
 
-'use client'
-
 import React, { useState } from 'react'
 import { Download, CheckCircle, Book, FileText, Calculator, Users } from 'lucide-react'
 
