@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { LanguageSelector } from '../components/language-selector';
+import { LanguageSelector } from './language-selector';
 
 function Navigation({ mobile = false, closeMobileMenu }: { mobile?: boolean; closeMobileMenu?: () => void }) {
   const navLinks = [
