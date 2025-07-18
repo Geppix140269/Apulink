@@ -5,6 +5,7 @@
 
 @layer base {
   :root {
+    /* Keep existing colors */
     --color-terracotta: #E2725B;
     --color-terracotta-dark: #C85A42;
     --color-stone: #B2B2B2;
@@ -12,6 +13,12 @@
     --color-sea: #6495ED;
     --color-sea-dark: #4A7FDB;
     --color-olive: #808000;
+
+    /* Add new modern colors for hero */
+    --color-primary: #EF4444;
+    --color-primary-dark: #DC2626;
+    --color-accent: #8B5CF6;
+    --color-accent-light: #A78BFA;
 
     --font-playfair: 'Playfair Display', serif;
     --font-opensans: 'Open Sans', sans-serif;
@@ -44,6 +51,7 @@
 }
 
 @layer components {
+  /* Existing animations - Updated for hero */
   .animate-gradient-shift {
     animation: gradientShift 20s ease infinite;
   }
@@ -53,21 +61,93 @@
     50% { background-position: 100% 50%; }
   }
 
+  /* Updated float animation for hero */
   .animate-float {
-    animation: float 6s ease-in-out infinite;
+    animation: float 8s ease-in-out infinite;
   }
 
   .animate-float-delayed {
-    animation: float 8s ease-in-out infinite;
+    animation: float 10s ease-in-out infinite;
     animation-delay: 2s;
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
     33% { transform: translateY(-20px) rotate(2deg); }
-    66% { transform: translateY(20px) rotate(-2deg); }
+    66% { transform: translateY(10px) rotate(-1deg); }
   }
 
+  /* New hero-specific animations */
+  @keyframes slide-down {
+    from { 
+      opacity: 0; 
+      transform: translateY(-30px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  @keyframes slide-up {
+    from { 
+      opacity: 0; 
+      transform: translateY(30px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.8s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.8s ease-out forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Hero gradient text - Enhanced version */
+  .gradient-text-hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-primary) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 4s ease infinite;
+    font-weight: 800;
+  }
+
+  /* Hero headline styles */
+  .hero-headline {
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    line-height: 1.1;
+  }
+
+  /* Enhanced glass effect for hero */
+  .glass-hero {
+    @apply backdrop-blur-md bg-white/90 border border-white/50 shadow-xl;
+  }
+
+  /* Trust indicator cards */
+  .trust-indicator {
+    @apply bg-white/80 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-md transition-all duration-200;
+  }
+
+  .trust-indicator:hover {
+    @apply shadow-lg -translate-y-1;
+  }
+
+  /* Keep all existing styles below... */
   @keyframes shimmer {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -110,6 +190,15 @@
 
   .btn-premium:hover::before {
     @apply scale-x-100;
+  }
+
+  /* New hero button style */
+  .btn-hero-primary {
+    @apply relative overflow-hidden bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-full font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-200;
+  }
+
+  .btn-hero-secondary {
+    @apply bg-white/85 backdrop-blur-sm text-gray-700 px-8 py-4 rounded-full font-semibold shadow-lg hover:shadow-xl hover:bg-white/95 transform hover:-translate-y-0.5 transition-all duration-200 border border-white/90;
   }
 
   .card-hover {
@@ -233,6 +322,7 @@
   }
 }
 
+/* Hero-specific responsive styles */
 @media (max-width: 768px) {
   .text-responsive {
     @apply text-sm;
@@ -240,6 +330,18 @@
 
   .padding-responsive {
     @apply px-4 py-3;
+  }
+
+  .hero-headline {
+    @apply text-4xl;
+    line-height: 1.2;
+  }
+
+  /* Disable video on small mobile to save bandwidth */
+  @media (max-width: 640px) {
+    video.hero-video {
+      display: none;
+    }
   }
 }
 
@@ -255,4 +357,13 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Video background specific styles */
+.video-overlay {
+  background: linear-gradient(to bottom, 
+    rgba(255,255,255,0.94) 0%, 
+    rgba(255,255,255,0.88) 40%,
+    rgba(255,255,255,0.88) 60%, 
+    rgba(255,255,255,0.94) 100%);
 }
