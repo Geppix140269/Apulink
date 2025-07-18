@@ -87,7 +87,6 @@ export default function HeroLeadMagnet() {
             </div>
           )}
         </div>
-      </nav>
 
       {/* Hero Content */}
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
