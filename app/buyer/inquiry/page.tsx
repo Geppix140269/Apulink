@@ -1,8 +1,9 @@
-// PATH: app/buyer/inquiry/page.tsx
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { submitBuyerInquiry } from '@/lib/supabase/client'
+import { getServiceCategories, getServiceHierarchy, getServiceBundles } from '@/lib/supabase/professional-services'
+import type { ServiceCategory, ServiceHierarchy, ServiceBundleView } from '@/lib/types/professional-services'
 
 interface FormData {
   // Contact Information
@@ -20,6 +21,10 @@ interface FormData {
   timeline: string
   purpose: string
   
+  // Services Required
+  selectedServices: string[]
+  selectedBundle: string
+  
   // Additional Information
   hasVisitedPuglia: boolean
   needsFinancing: boolean
@@ -31,6 +36,9 @@ export default function BuyerInquiryPage() {
   const [language, setLanguage] = useState<'en' | 'it'>('en')
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [categories, setCategories] = useState<ServiceCategory[]>([])
+  const [services, setServices] = useState<ServiceHierarchy[]>([])
+  const [bundles, setBundles] = useState<ServiceBundleView[]>([])
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -43,12 +51,38 @@ export default function BuyerInquiryPage() {
     locations: [],
     timeline: '',
     purpose: 'residence',
+    selectedServices: [],
+    selectedBundle: '',
     hasVisitedPuglia: false,
     needsFinancing: false,
     additionalNotes: ''
   })
 
-  const totalSteps = 3
+  const totalSteps = 4
+
+  useEffect(() => {
+    loadServiceData()
+  }, [])
+
+  const loadServiceData = async () => {
+    try {
+      // Only load if we have the functions available
+      if (typeof getServiceCategories === 'function') {
+        const [categoriesRes, servicesRes, bundlesRes] = await Promise.all([
+          getServiceCategories(),
+          getServiceHierarchy(),
+          getServiceBundles()
+        ])
+
+        if (categoriesRes?.data) setCategories(categoriesRes.data)
+        if (servicesRes?.data) setServices(servicesRes.data)
+        if (bundlesRes?.data) setBundles(bundlesRes.data)
+      }
+    } catch (error) {
+      console.error('Error loading service data:', error)
+      // Continue without services - form still works
+    }
+  }
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
@@ -57,7 +91,7 @@ export default function BuyerInquiryPage() {
     }))
   }
 
-  const handleArrayToggle = (field: 'propertyType' | 'locations', value: string) => {
+  const handleArrayToggle = (field: 'propertyType' | 'locations' | 'selectedServices', value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: prev[field].includes(value) 
@@ -68,6 +102,7 @@ export default function BuyerInquiryPage() {
 
   const canProceedStep1 = formData.firstName && formData.lastName && formData.email && formData.phone
   const canProceedStep2 = formData.propertyType.length > 0 && formData.budget && formData.locations.length > 0
+  const canProceedStep3 = formData.selectedServices.length > 0 || formData.selectedBundle || services.length === 0
   
   const handleSubmit = async () => {
     setIsSubmitting(true)
@@ -88,7 +123,9 @@ export default function BuyerInquiryPage() {
         purchase_purpose: formData.purpose,
         has_visited_puglia: formData.hasVisitedPuglia,
         needs_financing: formData.needsFinancing,
-        additional_notes: formData.additionalNotes
+        additional_notes: formData.additionalNotes,
+        service_ids: formData.selectedServices,
+        bundle_id: formData.selectedBundle || null
       }
 
       // Submit to Supabase
@@ -104,13 +141,11 @@ export default function BuyerInquiryPage() {
           })
         } catch (emailError) {
           console.error('Email notification failed:', emailError)
-          // Don't block the user if email fails
         }
         
         // Redirect to success page
         router.push('/buyer/inquiry/success')
       } else {
-        // Show error message
         alert(language === 'en' 
           ? 'There was an error submitting your inquiry. Please try again.' 
           : 'Si è verificato un errore. Riprova.'
@@ -395,8 +430,106 @@ export default function BuyerInquiryPage() {
               </div>
             )}
 
-            {/* Step 3: Additional Information */}
+            {/* Step 3: Service Selection */}
             {currentStep === 3 && (
+              <div className="space-y-6">
+                <h2 className="font-playfair text-2xl font-semibold text-stone-800 mb-6">
+                  {language === 'en' ? 'Services You Need' : 'Servizi di cui Hai Bisogno'}
+                </h2>
+
+                {services.length > 0 ? (
+                  <>
+                    {/* Service Bundles */}
+                    <div>
+                      <label className="block text-sm font-medium text-stone-700 mb-3">
+                        {language === 'en' ? 'Service Packages (Optional)' : 'Pacchetti di Servizi (Opzionale)'}
+                      </label>
+                      <div className="space-y-3">
+                        {bundles.filter(b => b.is_featured).map(bundle => (
+                          <label key={bundle.id} className="flex items-start space-x-3 cursor-pointer p-4 border rounded-lg hover:bg-stone-50">
+                            <input
+                              type="radio"
+                              name="bundle"
+                              value={bundle.id}
+                              checked={formData.selectedBundle === bundle.id}
+                              onChange={(e) => handleInputChange('selectedBundle', e.target.value)}
+                              className="mt-1"
+                            />
+                            <div className="flex-1">
+                              <p className="font-semibold text-stone-800">
+                                {language === 'en' ? bundle.name_en : bundle.name_it}
+                              </p>
+                              <p className="text-sm text-stone-600 mt-1">
+                                {language === 'en' ? bundle.description_en : bundle.description_it}
+                              </p>
+                              {bundle.typical_price_min && (
+                                <p className="text-sm text-terracotta mt-2">
+                                  €{bundle.typical_price_min.toLocaleString()} - €{bundle.typical_price_max?.toLocaleString()}
+                                  {bundle.discount_percentage > 0 && (
+                                    <span className="ml-2 text-green-600">
+                                      ({bundle.discount_percentage}% {language === 'en' ? 'discount' : 'sconto'})
+                                    </span>
+                                  )}
+                                </p>
+                              )}
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Individual Services */}
+                    <div>
+                      <label className="block text-sm font-medium text-stone-700 mb-3">
+                        {language === 'en' ? 'Or Select Individual Services' : 'O Seleziona Servizi Individuali'}
+                      </label>
+                      
+                      {categories.map(category => {
+                        const categoryServices = services.filter(s => s.category_code === category.code)
+                        if (categoryServices.length === 0) return null
+                        
+                        return (
+                          <div key={category.code} className="mb-6">
+                            <h4 className="font-semibold text-stone-700 mb-3">
+                              {language === 'en' ? category.name_en : category.name_it}
+                            </h4>
+                            <div className="grid md:grid-cols-2 gap-3">
+                              {categoryServices.slice(0, 8).map(service => (
+                                <label key={service.service_id} className="flex items-center space-x-3 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={formData.selectedServices.includes(service.service_id)}
+                                    onChange={() => handleArrayToggle('selectedServices', service.service_id)}
+                                    className="w-5 h-5 text-terracotta border-stone-300 rounded focus:ring-terracotta"
+                                  />
+                                  <span className="text-stone-700 text-sm">
+                                    {language === 'en' ? service.service_name_en : service.service_name_it}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-8 text-stone-600">
+                    <p>{language === 'en' 
+                      ? 'Service selection will be available after database setup.' 
+                      : 'La selezione dei servizi sarà disponibile dopo la configurazione del database.'
+                    }</p>
+                    <p className="text-sm mt-2">{language === 'en' 
+                      ? 'You can continue with the form.' 
+                      : 'Puoi continuare con il modulo.'
+                    }</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 4: Additional Information */}
+            {currentStep === 4 && (
               <div className="space-y-6">
                 <h2 className="font-playfair text-2xl font-semibold text-stone-800 mb-6">
                   {language === 'en' ? 'Additional Information' : 'Informazioni Aggiuntive'}
@@ -494,10 +627,13 @@ export default function BuyerInquiryPage() {
                   onClick={() => setCurrentStep(currentStep + 1)}
                   disabled={
                     (currentStep === 1 && !canProceedStep1) ||
-                    (currentStep === 2 && !canProceedStep2)
+                    (currentStep === 2 && !canProceedStep2) ||
+                    (currentStep === 3 && !canProceedStep3)
                   }
                   className={`ml-auto px-8 py-3 rounded-lg font-semibold transition-all ${
-                    (currentStep === 1 && !canProceedStep1) || (currentStep === 2 && !canProceedStep2)
+                    ((currentStep === 1 && !canProceedStep1) || 
+                     (currentStep === 2 && !canProceedStep2) ||
+                     (currentStep === 3 && !canProceedStep3))
                       ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
                       : 'bg-terracotta text-white hover:bg-terracotta-dark'
                   }`}
