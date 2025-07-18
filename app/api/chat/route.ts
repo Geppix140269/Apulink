@@ -44,12 +44,21 @@ Never:
 export async function POST(request: Request) {
   let language: string = 'en'; // Default language
   
+  // Debug logging
+  console.log('Chat API called');
+  console.log('API Key exists:', !!OPENAI_API_KEY);
+  console.log('API Key starts with:', OPENAI_API_KEY?.substring(0, 7));
+  
   try {
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key not configured');
       return NextResponse.json(
         { 
-          message: 'I apologize, but I am temporarily unable to connect. Please email info@apulink.com for assistance.' 
+          message: 'I apologize, but I am temporarily unable to connect. Please email info@apulink.com for assistance.',
+          debug: {
+            error: 'API key not found',
+            hasApiKey: false
+          }
         },
         { status: 500 }
       )
@@ -88,7 +97,17 @@ export async function POST(request: Request) {
     if (!openAIResponse.ok) {
       const error = await openAIResponse.text()
       console.error('OpenAI API error:', error)
-      throw new Error('OpenAI API request failed')
+      console.error('Response status:', openAIResponse.status)
+      
+      return NextResponse.json({
+        message: 'I apologize, I am experiencing technical difficulties. Please try again or contact us at info@apulink.com for immediate assistance.',
+        debug: {
+          error: `OpenAI API error: ${openAIResponse.status}`,
+          details: error,
+          hasApiKey: true,
+          apiKeyPrefix: OPENAI_API_KEY.substring(0, 10) + '...'
+        }
+      })
     }
 
     const data = await openAIResponse.json()
@@ -99,11 +118,18 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Chat API error:', error)
     
-    // Fallback response - now language is accessible here
-    const fallbackMessage = language === 'it' 
-      ? 'Mi dispiace, sto avendo problemi tecnici. Per favore riprova o contattaci a info@apulink.com per assistenza immediata.'
-      : 'I apologize, I am experiencing technical difficulties. Please try again or contact us at info@apulink.com for immediate assistance.'
+    // More detailed error response for debugging
+    const errorDetails = {
+      message: language === 'it' 
+        ? 'Mi dispiace, sto avendo problemi tecnici. Per favore riprova o contattaci a info@apulink.com per assistenza immediata.'
+        : 'I apologize, I am experiencing technical difficulties. Please try again or contact us at info@apulink.com for immediate assistance.',
+      debug: {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        hasApiKey: !!OPENAI_API_KEY,
+        apiKeyPrefix: OPENAI_API_KEY ? OPENAI_API_KEY.substring(0, 10) + '...' : 'not set'
+      }
+    }
     
-    return NextResponse.json({ message: fallbackMessage })
+    return NextResponse.json(errorDetails)
   }
 }
