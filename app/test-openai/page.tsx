@@ -98,7 +98,7 @@ export default function TestOpenAI() {
             </li>
             <li className="flex items-start">
               <span className="text-blue-600 mr-2">3.</span>
-              <span>Does the API key start with "sk-proj-"?</span>
+              <span>Does the API key start with &quot;sk-proj-&quot;?</span>
             </li>
             <li className="flex items-start">
               <span className="text-blue-600 mr-2">4.</span>
