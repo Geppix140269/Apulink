@@ -96,8 +96,8 @@ export default function RootLayout({
               </div>
             </header>
             
-            {/* Main content with padding for fixed header */}
-            <main className="pt-20">
+            {/* Main content without padding since hero handles its own spacing */}
+            <main>
               {children}
             </main>
             
