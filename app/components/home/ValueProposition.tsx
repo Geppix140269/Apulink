@@ -1,126 +1,85 @@
-'use client'
+// PATH: app/components/home/ValueProposition.tsx
+import React from 'react'
+import { Shield, Clock, PiggyBank, Globe, CheckCircle, Users } from 'lucide-react'
 
-import React, { useState } from 'react'
-import { MapPin, Users, Shield, Clock } from 'lucide-react'
-
-export default function HeroLeadMagnet() {
-  const [email, setEmail] = useState('')
-  const [propertyLocation, setPropertyLocation] = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log('Form submitted:', { email, propertyLocation })
-  }
+export default function ValueProposition() {
+  const benefits = [
+    {
+      icon: Shield,
+      title: "100% Verified Professionals",
+      description: "Every professional is licensed, insured, and background-checked before joining our platform",
+      color: "text-terracotta"
+    },
+    {
+      icon: Clock,
+      title: "24-Hour Response Time",
+      description: "Get multiple competitive quotes within 24 hours of posting your request",
+      color: "text-sea"
+    },
+    {
+      icon: PiggyBank,
+      title: "Save 20-30% on Average",
+      description: "Competition drives better prices. Our buyers save thousands compared to direct quotes",
+      color: "text-olive"
+    },
+    {
+      icon: Globe,
+      title: "Multi-Language Support",
+      description: "We handle all communication in English, Italian, German, and French",
+      color: "text-terracotta"
+    },
+    {
+      icon: CheckCircle,
+      title: "Quality Guaranteed",
+      description: "All work comes with professional guarantees and insurance coverage",
+      color: "text-sea"
+    },
+    {
+      icon: Users,
+      title: "Complete Professional Network",
+      description: "From surveyors to lawyers, find every professional you need in one place",
+      color: "text-olive"
+    }
+  ]
 
   return (
-    <section className="relative bg-gradient-to-br from-terracotta via-sea to-olive animate-gradient-shift text-white overflow-hidden">
-      {/* Shimmer effect */}
-      <div
-        className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at 20% 20%, white, transparent 60%)',
-          animation: 'shimmer 20s linear infinite',
-        }}
-      />
-
-      <div className="container mx-auto px-6 py-24 relative z-10">
-        {/* Platform badge */}
-        <div className="text-center mb-8">
-          <div className="inline-block bg-white/10 px-6 py-2 rounded-full text-sm font-semibold tracking-wide backdrop-blur-md glass mb-6">
-            <MapPin className="inline w-4 h-4 mr-2" />
-            Italy&apos;s Trusted Property Professional Marketplace
-          </div>
-        </div>
-
-        {/* Clear headline */}
-        <h1 className="text-4xl md:text-6xl font-playfair font-light leading-tight text-center text-balance max-w-4xl mx-auto">
-          Find <strong className="font-bold">Verified Professionals</strong> for Your <strong className="font-bold">Italian Property</strong>
-        </h1>
-
-        <p className="mt-6 text-lg md:text-xl text-white/90 font-opensans max-w-3xl mx-auto text-center">
-          Connect with RICS-certified surveyors, registered architects, structural engineers, 
-          property lawyers, and notaries. Get competitive quotes and expert guidance for your property investment in Italy.
-        </p>
-
-        {/* Trust indicators */}
-        <div className="flex flex-wrap justify-center gap-6 mt-8 mb-12">
-          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
-            <Users className="w-5 h-5" />
-            <span className="font-semibold">500+ Verified Professionals</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
-            <Shield className="w-5 h-5" />
-            <span className="font-semibold">100% Licensed & Insured</span>
-          </div>
-          <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
-            <Clock className="w-5 h-5" />
-            <span className="font-semibold">Quotes in 24 Hours</span>
-          </div>
-        </div>
-
-        {/* Lead capture form */}
-        <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-md rounded-2xl p-8 glass">
-          <h2 className="text-2xl font-playfair font-bold text-center mb-2">
-            Get Your Free Property Professional Guide
+    <section className="py-20 px-4 bg-white">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-4">
+            Why International Buyers Choose Apulink
           </h2>
-          <p className="text-center text-white/80 mb-6">
-            Essential checklist for buying property in Italy + exclusive access to our professional network
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            We've built the only platform designed specifically for international property buyers in Italy. 
+            Here's what makes us different.
           </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium mb-2">
-                Where in Italy are you looking to buy?
-              </label>
-              <input
-                type="text"
-                id="location"
-                value={propertyLocation}
-                onChange={(e) => setPropertyLocation(e.target.value)}
-                placeholder="e.g., Puglia, Tuscany, Lake Como..."
-                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-md"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Your email address
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-md"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-white text-terracotta font-bold py-4 px-6 rounded-lg hover:bg-white/90 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
-            >
-              Get Free Guide + Professional Access
-            </button>
-
-            <p className="text-xs text-center text-white/70 mt-4">
-              Join 10,000+ international property buyers. Unsubscribe anytime.
-            </p>
-          </form>
         </div>
 
-        {/* Professional categories showcase */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {benefits.map((benefit, index) => (
+            <div 
+              key={index} 
+              className="group hover:shadow-lg transition-all duration-300 p-6 rounded-xl bg-gray-50 hover:bg-white"
+            >
+              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-white shadow-md mb-4 group-hover:scale-110 transition-transform ${benefit.color}`}>
+                <benefit.icon className="w-6 h-6" />
+              </div>
+              
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {benefit.title}
+              </h3>
+              
+              <p className="text-gray-600">
+                {benefit.description}
+              </p>
+            </div>
+          ))}
+        </div>
+
         <div className="mt-16 text-center">
-          <p className="text-sm text-white/80 mb-4">Trusted by property buyers from:</p>
-          <div className="flex flex-wrap justify-center gap-4 text-white/60">
-            <span>🇬🇧 United Kingdom</span>
-            <span>🇺🇸 United States</span>
-            <span>🇩🇪 Germany</span>
-            <span>🇫🇷 France</span>
-            <span>🇨🇦 Canada</span>
+          <div className="inline-flex items-center gap-2 bg-terracotta/10 text-terracotta px-6 py-3 rounded-full text-sm font-semibold">
+            <Shield className="w-4 h-4" />
+            All professionals carry €1M+ professional indemnity insurance
           </div>
         </div>
       </div>
