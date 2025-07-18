@@ -56,7 +56,7 @@ export default function HeroLeadMagnet() {
           {/* Main Headline */}
           <h1 className="font-playfair text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 animate-slide-down hero-headline">
             Find Verified Professionals<br />
-            for Your <span className="gradient-text">Italian Property</span>
+            for Your <span className="gradient-text-hero">Italian Property</span>
           </h1>
 
           {/* Subheadline */}
@@ -68,7 +68,7 @@ export default function HeroLeadMagnet() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20 animate-slide-up">
-            <button className="group relative px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 hover:scale-[1.02] transition-all duration-200 overflow-hidden">
+            <button className="btn-hero-primary group relative overflow-hidden">
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
               <span className="relative flex items-center justify-center gap-2">
                 Find Professionals
@@ -77,7 +77,7 @@ export default function HeroLeadMagnet() {
                 </svg>
               </span>
             </button>
-            <button className="px-8 py-4 bg-white/85 backdrop-blur-sm text-gray-700 font-semibold rounded-full shadow-lg hover:shadow-xl hover:bg-white/95 transform hover:-translate-y-0.5 transition-all duration-200 border border-white/90">
+            <button className="btn-hero-secondary">
               Join as Professional
             </button>
           </div>
