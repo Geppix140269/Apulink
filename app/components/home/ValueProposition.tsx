@@ -1,85 +1,124 @@
-// PATH: app/components/home/ValueProposition.tsx
 import React from 'react'
-import { Shield, Clock, PiggyBank, Globe, CheckCircle, Users } from 'lucide-react'
+import { Shield, Clock, Euro, Users, CheckCircle, Globe } from 'lucide-react'
 
 export default function ValueProposition() {
   const benefits = [
     {
       icon: Shield,
-      title: "100% Verified Professionals",
-      description: "Every professional is licensed, insured, and background-checked before joining our platform",
-      color: "text-terracotta"
+      title: "Verified Professionals Only",
+      description: "Every professional is screened, certified, and insured. No cowboys, no surprises."
     },
     {
       icon: Clock,
-      title: "24-Hour Response Time",
-      description: "Get multiple competitive quotes within 24 hours of posting your request",
-      color: "text-sea"
+      title: "Get Quotes in 24 Hours",
+      description: "Submit once, receive multiple competitive quotes. Save weeks of searching and calling."
     },
     {
-      icon: PiggyBank,
-      title: "Save 20-30% on Average",
-      description: "Competition drives better prices. Our buyers save thousands compared to direct quotes",
-      color: "text-olive"
-    },
-    {
-      icon: Globe,
-      title: "Multi-Language Support",
-      description: "We handle all communication in English, Italian, German, and French",
-      color: "text-terracotta"
-    },
-    {
-      icon: CheckCircle,
-      title: "Quality Guaranteed",
-      description: "All work comes with professional guarantees and insurance coverage",
-      color: "text-sea"
+      icon: Euro,
+      title: "Save 20-30% on Services",
+      description: "Competition drives better pricing. Compare quotes side-by-side and choose the best value."
     },
     {
       icon: Users,
-      title: "Complete Professional Network",
-      description: "From surveyors to lawyers, find every professional you need in one place",
-      color: "text-olive"
+      title: "All Professions in One Place",
+      description: "Surveyors, architects, lawyers, notaries - everyone you need for your property journey."
+    }
+  ]
+
+  const processSteps = [
+    {
+      number: "1",
+      title: "Tell us what you need",
+      description: "Quick form about your property and required services"
+    },
+    {
+      number: "2",
+      title: "Get matched instantly",
+      description: "Our AI finds the best professionals for your specific needs"
+    },
+    {
+      number: "3",
+      title: "Receive competitive quotes",
+      description: "Compare prices, reviews, and credentials"
+    },
+    {
+      number: "4",
+      title: "Choose with confidence",
+      description: "Hire directly through the platform with payment protection"
     }
   ]
 
   return (
     <section className="py-20 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
+        {/* Benefits Grid */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-playfair font-bold text-gray-900 mb-4">
-            Why International Buyers Choose Apulink
+            Why 10,000+ International Buyers Choose APULINK
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We've built the only platform designed specifically for international property buyers in Italy. 
-            Here's what makes us different.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            The smart way to find and hire Italian property professionals - without the language barriers, 
+            hidden fees, or endless searching.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
           {benefits.map((benefit, index) => (
-            <div 
-              key={index} 
-              className="group hover:shadow-lg transition-all duration-300 p-6 rounded-xl bg-gray-50 hover:bg-white"
-            >
-              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-white shadow-md mb-4 group-hover:scale-110 transition-transform ${benefit.color}`}>
-                <benefit.icon className="w-6 h-6" />
+            <div key={index} className="text-center group">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-sea/10 text-sea rounded-full mb-4 group-hover:bg-sea group-hover:text-white transition-all duration-300">
+                <benefit.icon className="w-8 h-8" />
               </div>
-              
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {benefit.title}
-              </h3>
-              
-              <p className="text-gray-600">
-                {benefit.description}
-              </p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{benefit.title}</h3>
+              <p className="text-gray-600">{benefit.description}</p>
             </div>
           ))}
         </div>
 
+        {/* How it Works */}
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl p-12">
+          <h3 className="text-2xl md:text-3xl font-playfair font-bold text-center text-gray-900 mb-12">
+            How APULINK Works
+          </h3>
+          
+          <div className="grid md:grid-cols-4 gap-8">
+            {processSteps.map((step, index) => (
+              <div key={index} className="relative">
+                {/* Connection line */}
+                {index < processSteps.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-full w-full h-0.5 bg-gray-300" />
+                )}
+                
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-terracotta text-white rounded-full font-bold text-xl mb-4">
+                    {step.number}
+                  </div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h4>
+                  <p className="text-gray-600 text-sm">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Trust Section */}
         <div className="mt-16 text-center">
-          <div className="inline-flex items-center gap-2 bg-terracotta/10 text-terracotta px-6 py-3 rounded-full text-sm font-semibold">
-            <Shield className="w-4 h-4" />
-            All professionals carry €1M+ professional indemnity insurance
+          <div className="inline-flex items-center gap-8 flex-wrap justify-center">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-gray-700">GDPR Compliant</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-gray-700">Secure Payments</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <span className="text-gray-700">Dispute Resolution</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-green-600" />
+              <span className="text-gray-700">Available in 5 Languages</span>
+            </div>
           </div>
         </div>
       </div>
