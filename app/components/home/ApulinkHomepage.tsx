@@ -58,12 +58,18 @@ export default function ApulinkHomepage() {
   }
 
   const handleArrayInput = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field as keyof typeof formData].includes(value)
-        ? (prev[field as keyof typeof formData] as string[]).filter(item => item !== value)
-        : [...(prev[field as keyof typeof formData] as string[]), value]
-    }))
+    setFormData(prev => {
+      const currentValue = prev[field as keyof typeof formData]
+      if (Array.isArray(currentValue)) {
+        return {
+          ...prev,
+          [field]: currentValue.includes(value)
+            ? currentValue.filter(item => item !== value)
+            : [...currentValue, value]
+        }
+      }
+      return prev
+    })
   }
 
   const nextStep = () => {
