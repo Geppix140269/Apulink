@@ -1,13 +1,7 @@
-'use client'
-
 import { useState, useEffect } from 'react'
-
-import Image from 'next/image'
-import Link from 'next/link'
 
 export default function HeroLeadMagnet() {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     // Add entrance animations
@@ -15,7 +9,7 @@ export default function HeroLeadMagnet() {
   }, [])
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gray-50">
+    <section className="relative min-h-screen overflow-hidden">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <video
@@ -48,48 +42,8 @@ export default function HeroLeadMagnet() {
         <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-green-100 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-float" style={{ animationDelay: '4s' }} />
       </div>
 
-            {/* Mobile Menu Button */}
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-white/80 transition-colors backdrop-blur-sm"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-              </svg>
-            </button>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="md:hidden mt-4 py-4 bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl animate-slide-down">
-              <div className="flex flex-col space-y-4 px-6">
-                <Link href="/how-it-works" className="text-gray-700 hover:text-gray-900 font-medium py-2">
-                  How it Works
-                </Link>
-                <Link href="/about" className="text-gray-700 hover:text-gray-900 font-medium py-2">
-                  About
-                </Link>
-                <Link href="/contact" className="text-gray-700 hover:text-gray-900 font-medium py-2">
-                  Contact
-                </Link>
-                <div className="flex items-center gap-2 py-2">
-                  <span className="w-4 h-3 flex rounded-sm overflow-hidden">
-                    <span className="flex-1 bg-green-600"></span>
-                    <span className="flex-1 bg-white"></span>
-                    <span className="flex-1 bg-red-600"></span>
-                  </span>
-                  <span className="text-sm font-medium">Italiano</span>
-                </div>
-                <Link href="/login" className="btn-hero-primary text-center">
-                  Login
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
       {/* Hero Content */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-24">
         <div className="text-center">
           {/* Trust Badge */}
           <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/90 backdrop-blur-md rounded-full shadow-lg mb-8 animate-slide-down">
