@@ -61,11 +61,12 @@ export default function ApulinkHomepage() {
     setFormData(prev => {
       const currentValue = prev[field as keyof typeof formData]
       if (Array.isArray(currentValue)) {
+        const arrayValue = currentValue as string[]
         return {
           ...prev,
-          [field]: currentValue.includes(value)
-            ? currentValue.filter(item => item !== value)
-            : [...currentValue, value]
+          [field]: arrayValue.includes(value)
+            ? arrayValue.filter(item => item !== value)
+            : [...arrayValue, value]
         }
       }
       return prev
