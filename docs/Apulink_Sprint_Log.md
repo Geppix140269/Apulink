@@ -184,3 +184,155 @@ body {
 *Last Updated: July 19, 2025, 4:00 PM*
 *Session Duration: ~2 hours*
 *Next Action: Test platform functionality*
+# 📅 Apulink Sprint Log
+
+**Current Sprint:** July 2025 - Week 3
+**Sprint Goal:** Revive Platform & Launch Beta with 10 Professionals
+**Today's Date:** July 19, 2025
+
+---
+
+## 🏃 Current Sprint (July 19-25, 2025)
+
+### ✅ Completed Today (July 19)
+- [x] Rediscovered existing Apulink platform at apulink.com
+- [x] Identified complete tech stack available (Supabase, Sanity, OpenAI, etc.)
+- [x] Confirmed platform has Trullo chatbot integrated
+- [x] Created CTO continuity documentation system
+- [x] Defined revenue model and pricing strategy
+- [x] Identified design/legibility as priority fix
+- [x] Acknowledged platform needs revenue features
+- [x] Created bootstrap strategy (no funding needed initially)
+- [x] **FIXED PROFESSIONAL REGISTRATION ERROR**
+  - Diagnosed issue: profession field was enum type with mismatch
+  - Implemented flexible profession types system
+  - Created database migration for dynamic professions
+  - Updated registration form to fetch professions from database
+  - Added new professions: translator, local_guide, property_inspector
+  - Form now loads services dynamically per profession
+  - License field shows only when required
+
+### 🚧 In Progress
+- [ ] Test professional registration with new dynamic form
+- [ ] Add Stripe payment integration (€20/month beta pricing)
+- [ ] Fix text legibility issues on all pages
+- [ ] Ensure mobile responsiveness
+
+### 📋 To Do This Week (by July 25)
+- [ ] Confirm registration works end-to-end
+- [ ] Add Stripe payment integration
+- [ ] Create "Founding Member" pricing (€20/month beta)
+- [ ] Write first 3 SEO articles in Sanity:
+  - "Apulia 7% Tax: Complete Guide for Foreign Buyers"
+  - "How to Get EU PIA Grants for Italian Property"
+  - "Why German Retirees Choose Apulia in 2025"
+- [ ] Personally onboard first 10 beta professionals
+- [ ] Launch in 3 expat Facebook groups
+- [ ] Set up Google Analytics
+
+### 🚫 Blocked/Need Clarification
+- Need to verify registration actually works with test user
+- Need Stripe account credentials to add payments
+- Need screenshots of specific design issues
+
+---
+
+## 📊 Platform Status Check (July 19, 2025)
+
+### What We Know Works
+- **Live URL:** apulink.com ✅
+- **Staging:** apulink.netlify.app ✅
+- **Trullo Chatbot:** Integrated ✅
+- **Database:** Supabase connected ✅
+- **CMS:** Sanity ready ✅
+- **Professional Registration:** Fixed (needs testing) 🟡
+
+### Database Structure Implemented
+- `professionals` table with RLS policies ✅
+- `profession_types` table for flexible professions ✅
+- `profession_services_catalog` for services per profession ✅
+- Dynamic profession loading system ✅
+- Can add new professions without code changes ✅
+
+### Current Metrics
+- **Professionals:** 0 (starting fresh)
+- **Revenue:** €0 (pre-launch)
+- **Platform Status:** Ready for beta testing
+
+---
+
+## 🎯 Next Session Priorities (July 20+)
+
+1. **Test Registration Flow**
+   - Create test professional account
+   - Verify data saves to Supabase
+   - Check success redirect works
+
+2. **Add Stripe Payments**
+   - Integrate Stripe for subscriptions
+   - Create checkout flow
+   - Add webhook handling
+
+3. **Professional Dashboard**
+   - Create logged-in area
+   - Show subscription status
+   - Display leads/inquiries
+
+---
+
+## 💡 Key Technical Decisions Made Today
+
+1. **Flexible profession system** - No more hardcoded enum
+2. **Dynamic form loading** - Professions fetched from database
+3. **Conditional fields** - License only shown when required
+4. **Services per profession** - Each profession has its own services
+5. **Easy extensibility** - New professions via SQL function
+
+---
+
+## 🚀 How to Add New Professions
+
+Just run in Supabase:
+```sql
+SELECT add_profession_type(
+  'code_here',
+  'Nome Italiano',
+  'English Name',
+  true, -- requires license?
+  '[{"code": "service1", "name_it": "Servizio", "name_en": "Service"}]'::jsonb
+);
+```
+
+---
+
+## 📝 Code Changes Made
+
+1. **Created:** `supabase/migrations/001_flexible_profession_types.sql`
+2. **Updated:** `app/professional/register/page.tsx` - Now fully dynamic
+3. **Updated:** `app/components/home/HeroLeadMagnet.tsx` - Fixed lead capture
+
+---
+
+## 🎬 Next Actions
+
+1. Test professional registration thoroughly
+2. Add Stripe payment integration
+3. Create professional dashboard
+4. Fix design/legibility issues
+5. Launch marketing in expat groups
+
+---
+
+## 💪 Session Summary
+
+**Problem:** Professional registration was failing at final step
+**Root Cause:** Profession field enum mismatch between form and database
+**Solution:** Implemented flexible profession types system
+**Result:** Registration should now work with dynamic professions
+**Next:** Test it works, then add payments!
+
+---
+
+*Last Updated: July 19, 2025, 8:00 PM*
+*Session Duration: ~3 hours*
+*Next Action: Test registration with dynamic professions*
