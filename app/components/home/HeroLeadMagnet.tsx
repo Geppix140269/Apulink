@@ -1,16 +1,108 @@
+// PATH: app/components/home/HeroLeadMagnet.tsx
 'use client'
 
 import React, { useState } from 'react'
-import { MapPin, Users, Shield, Clock } from 'lucide-react'
+import { MapPin, Users, Shield, Clock, CheckCircle } from 'lucide-react'
+import { submitBuyerInquiry } from '@/lib/supabase/client'
 
 export default function HeroLeadMagnet() {
   const [email, setEmail] = useState('')
   const [propertyLocation, setPropertyLocation] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    console.log('Form submitted:', { email, propertyLocation })
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      // Create a basic inquiry to capture the lead using YOUR schema
+      const result = await submitBuyerInquiry({
+        email: email,
+        first_name: 'Lead', // We'll get full details later
+        last_name: 'Capture',
+        property_types: ['Not specified'],
+        budget: 'Not specified',
+        budget_range: 'Not specified',
+        locations: [propertyLocation],
+        preferred_locations: [propertyLocation],
+        timeline: 'Researching',
+        purpose: 'investment',
+        purchase_purpose: 'investment',
+        has_visited_puglia: false,
+        needs_financing: false,
+        is_survey_request: false,
+        additional_notes: `Lead magnet signup from: ${propertyLocation}`,
+        urgency: 'low',
+        status: 'new',
+        priority: 'normal'
+      })
+
+      if (!result.success) {
+        console.error('Database error:', result.error)
+        setError('There was an issue saving your information. Please try again.')
+        return
+      }
+
+      // Send email with guide (you can implement this later)
+      try {
+        await fetch('/api/emails/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'lead_magnet',
+            data: {
+              email: email,
+              location: propertyLocation
+            }
+          })
+        })
+      } catch (emailError) {
+        console.error('Email error:', emailError)
+        // Don't fail the whole process if email fails
+      }
+
+      // Show success message
+      setShowSuccess(true)
+      
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setEmail('')
+        setPropertyLocation('')
+        setShowSuccess(false)
+      }, 3000)
+
+    } catch (error) {
+      console.error('Submission error:', error)
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (showSuccess) {
+    return (
+      <section className="relative bg-gradient-to-br from-terracotta via-sea to-olive animate-gradient-shift text-white overflow-hidden">
+        <div className="container mx-auto px-6 py-24 relative z-10">
+          <div className="max-w-xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl text-center">
+              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-400" />
+              <h3 className="text-2xl font-playfair font-bold mb-2">
+                Success! Check Your Email
+              </h3>
+              <p className="text-white/80 mb-6">
+                We've sent your free guide to {email}. You'll also receive personalized professional matches within 24 hours.
+              </p>
+              <p className="text-sm text-white/60">
+                Redirecting you to more resources...
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -82,6 +174,7 @@ export default function HeroLeadMagnet() {
                   placeholder="e.g., Puglia, Tuscany, Lake Como..."
                   className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-md"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -97,14 +190,36 @@ export default function HeroLeadMagnet() {
                   placeholder="Enter your email"
                   className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg placeholder-white/60 text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-md"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
+              {error && (
+                <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-sm">
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full bg-white text-terracotta font-bold py-4 px-6 rounded-lg hover:bg-white/90 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
+                disabled={isSubmitting}
+                className={`w-full font-bold py-4 px-6 rounded-lg transition-all duration-200 transform shadow-lg ${
+                  isSubmitting 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-white text-terracotta hover:bg-white/90 hover:scale-[1.02]'
+                }`}
               >
-                Get Free Guide + Professional Access
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : (
+                  'Get Free Guide + Professional Access'
+                )}
               </button>
 
               <p className="text-xs text-center text-white/70 mt-4">
