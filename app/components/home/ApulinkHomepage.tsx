@@ -2,10 +2,81 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, CheckCircle, Home, FileText, Calculator, Users, Globe, Shield, Menu, X } from 'lucide-react'
+import { ArrowRight, CheckCircle, Home, FileText, Calculator, Users, Globe, Shield, Menu, X, ChevronRight, Euro, Calendar, MapPin, Briefcase, Languages, Phone } from 'lucide-react'
+
+// Cloudinary media assets
+const mediaAssets = {
+  videos: [
+    'https://res.cloudinary.com/dbvghnclx/video/upload/v1752960658/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_3_mycs2i.mp4',
+    'https://res.cloudinary.com/dbvghnclx/video/upload/v1752960657/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_02fb68c3-5806-40b5-984f-f47e14c23456_0_pczlqg.mp4',
+    'https://res.cloudinary.com/dbvghnclx/video/upload/v1752960679/TrulloClip_cqvxxm.mp4'
+  ],
+  images: {
+    hero1: 'https://res.cloudinary.com/dbvghnclx/image/upload/v1752960636/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_fd98a3fb-f692-494c-8b15-225d1ae77875_0_x7gjaf.png',
+    hero2: 'https://res.cloudinary.com/dbvghnclx/image/upload/v1752960659/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_8cc82465-1b62-45b5-863f-f8ca2c75318a_3_gukcwi.png',
+    lifestyle1: 'https://res.cloudinary.com/dbvghnclx/image/upload/v1752960662/geppix1402_81420_Homepage_design_concept_for_Apulink.com_a_mo_0ee381a8-a249-4e17-b53d-fca4decaba9c_0_eeu8qq.png',
+    lifestyle2: 'https://res.cloudinary.com/dbvghnclx/image/upload/v1752960663/geppix1402_81420_Homepage_design_concept_for_Apulink.com_a_mo_0ee381a8-a249-4e17-b53d-fca4decaba9c_3_cp2mdt.png'
+  }
+}
 
 export default function ApulinkHomepage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [assessmentStep, setAssessmentStep] = useState(1)
+  const [formData, setFormData] = useState({
+    // Step 1: Basic Info
+    fullName: '',
+    email: '',
+    phone: '',
+    nationality: '',
+    currentCountry: '',
+    
+    // Step 2: Property Goals
+    buyerType: '',
+    timeline: '',
+    budget: '',
+    financingNeeded: false,
+    
+    // Step 3: Property Preferences
+    propertyTypes: [],
+    regions: [],
+    mustHaves: [],
+    
+    // Step 4: Services Needed
+    servicesNeeded: [],
+    languagesSpoken: [],
+    specificRequirements: ''
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked
+      setFormData(prev => ({ ...prev, [name]: checked }))
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }))
+    }
+  }
+
+  const handleArrayInput = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field as keyof typeof formData].includes(value)
+        ? (prev[field as keyof typeof formData] as string[]).filter(item => item !== value)
+        : [...(prev[field as keyof typeof formData] as string[]), value]
+    }))
+  }
+
+  const nextStep = () => {
+    if (assessmentStep < 4) {
+      setAssessmentStep(assessmentStep + 1)
+    }
+  }
+
+  const prevStep = () => {
+    if (assessmentStep > 1) {
+      setAssessmentStep(assessmentStep - 1)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F2ED]">
@@ -24,14 +95,14 @@ export default function ApulinkHomepage() {
               <Link href="/how-it-works" className="text-[#2C3E50] hover:text-[#D4A574] transition">
                 How It Works
               </Link>
-              <Link href="/services" className="text-[#2C3E50] hover:text-[#D4A574] transition">
-                Services
+              <Link href="/tax-benefits" className="text-[#2C3E50] hover:text-[#D4A574] transition">
+                7% Tax Benefits
               </Link>
-              <Link href="/about" className="text-[#2C3E50] hover:text-[#D4A574] transition">
-                About
+              <Link href="/regions" className="text-[#2C3E50] hover:text-[#D4A574] transition">
+                Regions
               </Link>
-              <Link href="/professional/register" className="bg-[#D4A574] text-white px-6 py-2 rounded-full hover:bg-[#C4955A] transition">
-                Join as Professional
+              <Link href="/professional/login" className="text-[#2C3E50] hover:text-[#D4A574] transition">
+                Professional Login
               </Link>
             </div>
 
@@ -52,22 +123,22 @@ export default function ApulinkHomepage() {
               <Link href="/how-it-works" className="block px-3 py-2 text-[#2C3E50] hover:text-[#D4A574]">
                 How It Works
               </Link>
-              <Link href="/services" className="block px-3 py-2 text-[#2C3E50] hover:text-[#D4A574]">
-                Services
+              <Link href="/tax-benefits" className="block px-3 py-2 text-[#2C3E50] hover:text-[#D4A574]">
+                7% Tax Benefits
               </Link>
-              <Link href="/about" className="block px-3 py-2 text-[#2C3E50] hover:text-[#D4A574]">
-                About
+              <Link href="/regions" className="block px-3 py-2 text-[#2C3E50] hover:text-[#D4A574]">
+                Regions
               </Link>
-              <Link href="/professional/register" className="block px-3 py-2 bg-[#D4A574] text-white rounded-full text-center">
-                Join as Professional
+              <Link href="/professional/login" className="block px-3 py-2 text-[#2C3E50] hover:text-[#D4A574]">
+                Professional Login
               </Link>
             </div>
           </div>
         )}
       </nav>
 
-      {/* Hero Section with Video Background */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Hero Section with Assessment Form */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         {/* Video Background */}
         <div className="absolute inset-0 w-full h-full">
           <video
@@ -77,395 +148,528 @@ export default function ApulinkHomepage() {
             playsInline
             className="absolute w-full h-full object-cover"
           >
-            <source src="https://res.cloudinary.com/dbvghnclx/video/upload/v1752960658/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_3_mycs2i.mp4" type="video/mp4" />
+            <source src={mediaAssets.videos[0]} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Your Gateway to<br />Italian Property Dreams
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
-            Connect with trusted professionals in Apulia. Leverage 7% flat tax benefits and EU grants for your Mediterranean investment.
-          </p>
-          
-          {/* CTA Form */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-lg p-6 max-w-xl mx-auto">
-            <h3 className="text-[#2C3E50] text-lg font-semibold mb-4">Start Your Property Journey</h3>
-            <form className="space-y-4">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574] text-[#2C3E50]"
-              />
-              <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574] text-[#2C3E50]">
-                <option>Select Service Needed</option>
-                <option>Real Estate Agent</option>
-                <option>Tax Advisor</option>
-                <option>Legal Consultant</option>
-                <option>Architect</option>
-                <option>Property Inspector</option>
-                <option>Translator</option>
-              </select>
-              <button
-                type="submit"
-                className="w-full bg-[#D4A574] text-white py-3 rounded-lg hover:bg-[#C4955A] transition font-semibold"
-              >
-                Get Matched with Professionals
-              </button>
+        {/* Hero Content - Split Screen */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center min-h-screen">
+          {/* Left Side - Value Proposition */}
+          <div className="text-white">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              Your Italian Property Journey Starts Here
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 text-gray-200">
+              Get matched with trusted professionals who understand your needs
+            </p>
+            
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center">
+                <CheckCircle className="text-[#8B9A7B] mr-3 flex-shrink-0" size={24} />
+                <p className="text-lg">Save up to 93% on taxes with the 7% flat rate</p>
+              </div>
+              <div className="flex items-center">
+                <CheckCircle className="text-[#8B9A7B] mr-3 flex-shrink-0" size={24} />
+                <p className="text-lg">Access EU grants up to €200,000 for renovations</p>
+              </div>
+              <div className="flex items-center">
+                <CheckCircle className="text-[#8B9A7B] mr-3 flex-shrink-0" size={24} />
+                <p className="text-lg">Connect with English-speaking professionals</p>
+              </div>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="flex items-center space-x-8 text-sm text-gray-300">
+              <div>
+                <span className="text-2xl font-bold text-white block">500+</span>
+                Happy Buyers
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-white block">€45M</span>
+                Property Value
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-white block">200+</span>
+                Professionals
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Assessment Form */}
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl">
+            {/* Progress Bar */}
+            <div className="mb-6">
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Step {assessmentStep} of 4</span>
+                <span>{Math.round((assessmentStep / 4) * 100)}% Complete</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-[#D4A574] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(assessmentStep / 4) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">
+              Let's Find Your Perfect Match
+            </h2>
+
+            <form className="space-y-6">
+              {/* Step 1: Basic Information */}
+              {assessmentStep === 1 && (
+                <>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">
+                      Tell us about yourself
+                    </h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nationality *
+                        </label>
+                        <select
+                          name="nationality"
+                          value={formData.nationality}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                          required
+                        >
+                          <option value="">Select</option>
+                          <option value="german">German</option>
+                          <option value="uk">British</option>
+                          <option value="us">American</option>
+                          <option value="dutch">Dutch</option>
+                          <option value="french">French</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Currently Living In *
+                        </label>
+                        <input
+                          type="text"
+                          name="currentCountry"
+                          value={formData.currentCountry}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Step 2: Property Goals */}
+              {assessmentStep === 2 && (
+                <>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">
+                      What are your property goals?
+                    </h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        I am looking to: *
+                      </label>
+                      <div className="space-y-3">
+                        {['Buy a holiday home', 'Relocate permanently', 'Investment property', 'Retirement home'].map((type) => (
+                          <label key={type} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="radio"
+                              name="buyerType"
+                              value={type}
+                              checked={formData.buyerType === type}
+                              onChange={handleInputChange}
+                              className="mr-3"
+                            />
+                            <span>{type}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Timeline *
+                      </label>
+                      <select
+                        name="timeline"
+                        value={formData.timeline}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                        required
+                      >
+                        <option value="">Select timeline</option>
+                        <option value="immediate">Ready to buy now</option>
+                        <option value="3months">Within 3 months</option>
+                        <option value="6months">Within 6 months</option>
+                        <option value="1year">Within 1 year</option>
+                        <option value="exploring">Just exploring</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Budget Range (EUR) *
+                      </label>
+                      <select
+                        name="budget"
+                        value={formData.budget}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                        required
+                      >
+                        <option value="">Select budget</option>
+                        <option value="under100k">Under €100,000</option>
+                        <option value="100-250k">€100,000 - €250,000</option>
+                        <option value="250-500k">€250,000 - €500,000</option>
+                        <option value="500k-1m">€500,000 - €1,000,000</option>
+                        <option value="over1m">Over €1,000,000</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="financingNeeded"
+                          checked={formData.financingNeeded}
+                          onChange={handleInputChange}
+                          className="mr-3"
+                        />
+                        <span className="text-sm text-gray-700">I need help with financing/mortgage</span>
+                      </label>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Step 3: Property Preferences */}
+              {assessmentStep === 3 && (
+                <>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">
+                      Property preferences
+                    </h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Property Type (select all that apply) *
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['Trullo', 'Masseria', 'Villa', 'Apartment', 'Townhouse', 'Land to build'].map((type) => (
+                          <label key={type} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="checkbox"
+                              checked={formData.propertyTypes.includes(type)}
+                              onChange={() => handleArrayInput('propertyTypes', type)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm">{type}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Preferred Regions *
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['Valle d\'Itria', 'Salento', 'Gargano', 'Bari Coast', 'Anywhere in Apulia', 'Not sure yet'].map((region) => (
+                          <label key={region} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="checkbox"
+                              checked={formData.regions.includes(region)}
+                              onChange={() => handleArrayInput('regions', region)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm">{region}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Must-haves
+                      </label>
+                      <div className="space-y-2">
+                        {['Sea view', 'Swimming pool', 'Garden', 'Garage', 'Move-in ready', 'Renovation project'].map((feature) => (
+                          <label key={feature} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={formData.mustHaves.includes(feature)}
+                              onChange={() => handleArrayInput('mustHaves', feature)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm">{feature}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Step 4: Services Needed */}
+              {assessmentStep === 4 && (
+                <>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-[#2C3E50] mb-4">
+                      Which professionals do you need?
+                    </h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select all services you need *
+                      </label>
+                      <div className="space-y-3">
+                        {[
+                          { service: 'Real Estate Agent', icon: Home },
+                          { service: 'Tax Advisor (7% regime)', icon: Calculator },
+                          { service: 'Legal Consultant', icon: Shield },
+                          { service: 'Architect/Engineer', icon: Briefcase },
+                          { service: 'Property Inspector', icon: FileText },
+                          { service: 'Translator', icon: Globe }
+                        ].map(({ service, icon: Icon }) => (
+                          <label key={service} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input
+                              type="checkbox"
+                              checked={formData.servicesNeeded.includes(service)}
+                              onChange={() => handleArrayInput('servicesNeeded', service)}
+                              className="mr-3"
+                            />
+                            <Icon className="text-[#D4A574] mr-3" size={20} />
+                            <span>{service}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Languages you speak
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {['English', 'German', 'Italian', 'French', 'Dutch', 'Spanish'].map((lang) => (
+                          <label key={lang} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={formData.languagesSpoken.includes(lang)}
+                              onChange={() => handleArrayInput('languagesSpoken', lang)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm">{lang}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Any specific requirements or questions?
+                      </label>
+                      <textarea
+                        name="specificRequirements"
+                        value={formData.specificRequirements}
+                        onChange={handleInputChange}
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4A574]"
+                        placeholder="E.g., Need help with residency permit, interested in commercial properties, specific renovation needs..."
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between pt-6">
+                {assessmentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    className="px-6 py-3 border border-[#D4A574] text-[#D4A574] rounded-lg hover:bg-[#D4A574] hover:text-white transition"
+                  >
+                    Previous
+                  </button>
+                )}
+                
+                {assessmentStep < 4 ? (
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="ml-auto px-6 py-3 bg-[#D4A574] text-white rounded-lg hover:bg-[#C4955A] transition flex items-center"
+                  >
+                    Next
+                    <ChevronRight className="ml-2" size={20} />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="ml-auto px-8 py-3 bg-[#8B9A7B] text-white rounded-lg hover:bg-[#7A8A6A] transition font-semibold"
+                  >
+                    Get My Matches
+                  </button>
+                )}
+              </div>
             </form>
+
+            {/* Trust Message */}
+            <p className="text-xs text-gray-500 text-center mt-6">
+              Your information is secure and will only be shared with matched professionals
+            </p>
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* Benefits Section with Images */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-[#2C3E50] mb-16">
-            How Apulink Works
+            Why Choose Apulink?
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Step 1 */}
+            {/* Benefit 1 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-[#8B9A7B] rounded-full flex items-center justify-center mx-auto mb-6">
-                <FileText className="text-white" size={32} />
+              <div className="relative h-64 mb-6 rounded-lg overflow-hidden">
+                <img 
+                  src={mediaAssets.images.lifestyle1} 
+                  alt="Italian lifestyle"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h3 className="text-xl font-semibold text-white">Vetted Professionals</h3>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-[#2C3E50] mb-3">1. Share Your Project</h3>
               <p className="text-gray-600">
-                Tell us about your property needs, budget, preferred regions, and timeline. Our intelligent form captures every detail.
+                Every professional is verified, licensed, and speaks your language. No more communication barriers or trust issues.
               </p>
             </div>
 
-            {/* Step 2 */}
+            {/* Benefit 2 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-[#D4A574] rounded-full flex items-center justify-center mx-auto mb-6">
-                <Users className="text-white" size={32} />
+              <div className="relative h-64 mb-6 rounded-lg overflow-hidden">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  <source src={mediaAssets.videos[2]} type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h3 className="text-xl font-semibold text-white">Local Expertise</h3>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-[#2C3E50] mb-3">2. Get Matched</h3>
               <p className="text-gray-600">
-                We connect you with up to 3 vetted professionals who specialize in your needs and speak your language.
+                Our professionals know Apulia inside out. From hidden gems to tax benefits, they'll guide you through everything.
               </p>
             </div>
 
-            {/* Step 3 */}
+            {/* Benefit 3 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-[#2C3E50] rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="text-white" size={32} />
+              <div className="relative h-64 mb-6 rounded-lg overflow-hidden">
+                <img 
+                  src={mediaAssets.images.lifestyle2} 
+                  alt="Italian property"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <h3 className="text-xl font-semibold text-white">End-to-End Support</h3>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-[#2C3E50] mb-3">3. Choose & Connect</h3>
               <p className="text-gray-600">
-                Review quotes, compare professionals, and choose the best fit. We facilitate secure communication throughout.
+                From property search to renovation grants, we match you with all the professionals you need for a smooth journey.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section className="py-20 bg-[#F5F2ED]">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center text-[#2C3E50] mb-6">
-            Professional Services for Every Need
-          </h2>
-          <p className="text-xl text-center text-gray-600 mb-16 max-w-3xl mx-auto">
-            From finding your dream property to navigating Italian bureaucracy, our network of professionals has you covered.
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Real Estate Agents */}
-            <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition">
-              <div className="w-16 h-16 bg-[#D4A574]/20 rounded-lg flex items-center justify-center mb-6">
-                <Home className="text-[#D4A574]" size={32} />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#2C3E50] mb-3">Real Estate Agents</h3>
-              <p className="text-gray-600 mb-4">
-                Licensed agents who understand foreign buyer needs and speak your language.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Property searches & viewings
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Price negotiations
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Local market insights
-                </li>
-              </ul>
-            </div>
-
-            {/* Tax Advisors */}
-            <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition">
-              <div className="w-16 h-16 bg-[#8B9A7B]/20 rounded-lg flex items-center justify-center mb-6">
-                <Calculator className="text-[#8B9A7B]" size={32} />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#2C3E50] mb-3">Tax Advisors</h3>
-              <p className="text-gray-600 mb-4">
-                Experts in the 7% flat tax regime and international tax planning.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  7% tax application assistance
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  EU grant applications
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Cross-border tax optimization
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal Consultants */}
-            <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition">
-              <div className="w-16 h-16 bg-[#2C3E50]/20 rounded-lg flex items-center justify-center mb-6">
-                <Shield className="text-[#2C3E50]" size={32} />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#2C3E50] mb-3">Legal Consultants</h3>
-              <p className="text-gray-600 mb-4">
-                Navigate Italian property law with confidence and security.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Contract review & drafting
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Due diligence
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Residency permits
-                </li>
-              </ul>
-            </div>
-
-            {/* Architects */}
-            <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition">
-              <div className="w-16 h-16 bg-[#D4A574]/20 rounded-lg flex items-center justify-center mb-6">
-                <Home className="text-[#D4A574]" size={32} />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#2C3E50] mb-3">Architects</h3>
-              <p className="text-gray-600 mb-4">
-                Transform your Italian property with local expertise and style.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Renovation planning
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Permit applications
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Project management
-                </li>
-              </ul>
-            </div>
-
-            {/* Property Inspectors */}
-            <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition">
-              <div className="w-16 h-16 bg-[#8B9A7B]/20 rounded-lg flex items-center justify-center mb-6">
-                <Shield className="text-[#8B9A7B]" size={32} />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#2C3E50] mb-3">Property Inspectors</h3>
-              <p className="text-gray-600 mb-4">
-                Ensure your investment is sound with thorough inspections.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Structural assessments
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Energy certifications
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Detailed reports
-                </li>
-              </ul>
-            </div>
-
-            {/* Translators */}
-            <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition">
-              <div className="w-16 h-16 bg-[#2C3E50]/20 rounded-lg flex items-center justify-center mb-6">
-                <Globe className="text-[#2C3E50]" size={32} />
-              </div>
-              <h3 className="text-2xl font-semibold text-[#2C3E50] mb-3">Translators</h3>
-              <p className="text-gray-600 mb-4">
-                Break down language barriers for smooth transactions.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Document translation
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Meeting interpretation
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="text-[#8B9A7B] mr-2 mt-0.5" size={16} />
-                  Certified translations
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Professional CTA Section */}
-      <section className="py-20 bg-[#2C3E50]">
+      {/* CTA Section for Professionals */}
+      <section className="py-16 bg-[#2C3E50]">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl font-bold text-white mb-4">
             Are You a Professional in Apulia?
           </h2>
           <p className="text-xl text-gray-300 mb-8">
-            Join our network and connect with international property buyers. 
-            Be part of the trusted community helping dreams come true.
+            Join our network and connect with qualified international buyers
           </p>
-          
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 mb-8">
-            <h3 className="text-2xl font-semibold text-white mb-6">Founding Member Special</h3>
-            <div className="text-5xl font-bold text-[#D4A574] mb-2">€20/month</div>
-            <p className="text-gray-300 mb-6">Regular price €79/month - Save 75%</p>
-            
-            <ul className="text-left max-w-sm mx-auto space-y-3 mb-8">
-              <li className="flex items-start text-white">
-                <CheckCircle className="text-[#8B9A7B] mr-3 mt-0.5" size={20} />
-                Unlimited buyer inquiries
-              </li>
-              <li className="flex items-start text-white">
-                <CheckCircle className="text-[#8B9A7B] mr-3 mt-0.5" size={20} />
-                Priority matching algorithm
-              </li>
-              <li className="flex items-start text-white">
-                <CheckCircle className="text-[#8B9A7B] mr-3 mt-0.5" size={20} />
-                Professional profile page
-              </li>
-              <li className="flex items-start text-white">
-                <CheckCircle className="text-[#8B9A7B] mr-3 mt-0.5" size={20} />
-                Direct client messaging
-              </li>
-            </ul>
-            
-            <Link
-              href="/professional/register"
-              className="inline-flex items-center bg-[#D4A574] text-white px-8 py-3 rounded-full hover:bg-[#C4955A] transition font-semibold"
-            >
-              Join as a Founding Member
-              <ArrowRight className="ml-2" size={20} />
-            </Link>
-          </div>
-          
-          <p className="text-sm text-gray-400">
-            Limited to first 100 professionals • No setup fees • Cancel anytime
-          </p>
+          <Link
+            href="/professional/register"
+            className="inline-flex items-center bg-[#D4A574] text-white px-8 py-3 rounded-full hover:bg-[#C4955A] transition font-semibold"
+          >
+            Apply to Join
+            <ArrowRight className="ml-2" size={20} />
+          </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-white py-16">
+      {/* Simple Footer */}
+      <footer className="bg-white py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
-            {/* Logo and Description */}
-            <div className="md:col-span-2">
-              <h3 className="text-2xl font-bold text-[#2C3E50] mb-4">Apulink</h3>
-              <p className="text-gray-600 mb-6">
-                Your trusted marketplace for Italian property services. 
-                Connecting international buyers with vetted professionals in Apulia.
-              </p>
-              <div className="flex space-x-4">
-                {/* Social links would go here */}
-              </div>
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-4 md:mb-0">
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Apulink</h3>
+              <p className="text-gray-600 mt-2">Connecting dreams with expertise</p>
             </div>
-            
-            {/* For Buyers */}
-            <div>
-              <h4 className="font-semibold text-[#2C3E50] mb-4">For Buyers</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/how-it-works" className="text-gray-600 hover:text-[#D4A574] transition">
-                    How It Works
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tax-benefits" className="text-gray-600 hover:text-[#D4A574] transition">
-                    7% Tax Benefits
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/grants" className="text-gray-600 hover:text-[#D4A574] transition">
-                    EU Grants Guide
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/regions" className="text-gray-600 hover:text-[#D4A574] transition">
-                    Apulia Regions
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            
-            {/* For Professionals */}
-            <div>
-              <h4 className="font-semibold text-[#2C3E50] mb-4">For Professionals</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/professional/register" className="text-gray-600 hover:text-[#D4A574] transition">
-                    Join Our Network
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/professional/login" className="text-gray-600 hover:text-[#D4A574] transition">
-                    Professional Login
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/pricing" className="text-gray-600 hover:text-[#D4A574] transition">
-                    Pricing Plans
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/success-stories" className="text-gray-600 hover:text-[#D4A574] transition">
-                    Success Stories
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          {/* Bottom Footer */}
-          <div className="border-t pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-600 text-sm mb-4 md:mb-0">
-                © 2025 Apulink. All rights reserved.
-              </p>
-              <div className="flex space-x-6">
-                <Link href="/privacy" className="text-gray-600 hover:text-[#D4A574] text-sm transition">
-                  Privacy Policy
-                </Link>
-                <Link href="/terms" className="text-gray-600 hover:text-[#D4A574] text-sm transition">
-                  Terms of Service
-                </Link>
-                <Link href="/contact" className="text-gray-600 hover:text-[#D4A574] text-sm transition">
-                  Contact
-                </Link>
-              </div>
+            <div className="flex space-x-6">
+              <Link href="/privacy" className="text-gray-600 hover:text-[#D4A574]">Privacy</Link>
+              <Link href="/terms" className="text-gray-600 hover:text-[#D4A574]">Terms</Link>
+              <Link href="/contact" className="text-gray-600 hover:text-[#D4A574]">Contact</Link>
             </div>
           </div>
         </div>
