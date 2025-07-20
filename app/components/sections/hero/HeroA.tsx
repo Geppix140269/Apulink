@@ -22,7 +22,20 @@ export default function HeroA({
   ctaLink = '#assessment',
   showStats = true
 }: HeroAProps) {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
+
+  // Array of video URLs
+  const videos = [
+    "https://res.cloudinary.com/dbvghnclx/video/upload/v1752960658/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_3_mycs2i.mp4",
+    "https://res.cloudinary.com/dusubfxgo/video/upload/v1753030843/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_0_aar9z8.mp4"
+  ];
+
+  // Auto-advance to next video when current one ends
+  const handleVideoEnd = () => {
+    setVideoLoaded(false);
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+  };
 
   const scrollToSection = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -37,19 +50,19 @@ export default function HeroA({
       {/* Video Background */}
       <div className="absolute inset-0 w-full h-full">
         <video
+          key={currentVideoIndex}
           autoPlay
           loop
           muted
           playsInline
           onLoadedData={() => setVideoLoaded(true)}
+          onEnded={handleVideoEnd}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             videoLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         >
           <source 
-            src="https://res.cloudinary.com/dbvghnclx/video/upload/v1752960658/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_3_mycs2i.mp4" 
-            type="video/mp4" 
-            src="https://res.cloudinary.com/dusubfxgo/video/upload/v1753030843/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_0_aar9z8.mp4" 
+            src={videos[currentVideoIndex]} 
             type="video/mp4" 
           />
         </video>
@@ -63,6 +76,18 @@ export default function HeroA({
             backgroundImage: 'url(https://res.cloudinary.com/dbvghnclx/image/upload/v1752960844/apulia-trullo-landscape_qtpwxe.jpg)'
           }}
         />
+        
+        {/* Optional: Video indicators */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+          {videos.map((_, index) => (
+            <div
+              key={index}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                index === currentVideoIndex ? 'bg-white w-8' : 'bg-white/50 w-2'
+              }`}
+            />
+          ))}
+        </div>
       </div>
       
       {/* Gradient Overlay */}
