@@ -1,6 +1,6 @@
 // PATH: app/components/language-selector.tsx
 'use client'
-import { useLanguage } from '@/app/providers/language-provider'
+import { useLanguage } from '@/providers/language-provider'  // Remove 'app/' here
 
 export function LanguageSelector() {
   const { language, setLanguage, languages } = useLanguage()
