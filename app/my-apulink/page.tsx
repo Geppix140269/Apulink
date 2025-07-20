@@ -227,12 +227,11 @@ const MyApulinkDashboard = () => {
     }
   ];
 
-  const budgetData = {
-    realistic: { total: 660000, grant: 297000, net: 363000 },
-    optimistic: { total: 622000, grant: 279900, net: 342100 },
-    conservative: { total: 708000, grant: 318600, net: 389400 }
-  };
-
+ const budgetData: Record<BudgetScenarioType, { total: number; grant: number; net: number }> = {
+  realistic: { total: 660000, grant: 297000, net: 363000 },
+  optimistic: { total: 622000, grant: 279900, net: 342100 },
+  conservative: { total: 708000, grant: 318600, net: 389400 }
+};
   // Enhanced timeline with more details
   const timeline = [
     {
@@ -962,7 +961,7 @@ const MyApulinkDashboard = () => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                   <h3 className="text-lg md:text-xl font-semibold">Investment Scenarios</h3>
                   <div className="flex gap-2 flex-wrap">
-                    {['optimistic', 'realistic', 'conservative'].map((scenario) => (
+                    {(['optimistic', 'realistic', 'conservative'] as BudgetScenarioType[]).map((scenario) => (
                       <button
                         key={scenario}
                         onClick={() => setBudgetScenario(scenario)}
