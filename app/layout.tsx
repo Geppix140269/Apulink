@@ -1,28 +1,37 @@
-// Path: app/layout.tsx
-// Root layout with AuthProvider and navigation
+// PATH: app/layout.tsx
+// Root layout with AuthProvider and navigation - UPDATED WITH BRAND FONTS
 
 import TrulloChatbot from '../components/TrulloChatbot'
 import type { Metadata } from "next";
-import { Playfair_Display, Open_Sans } from "next/font/google";
-import "./global.css";
+import { Inter, Playfair_Display } from "next/font/google";
+import "./globals.css";
 import { LanguageProvider } from './providers/language-provider';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageSelector } from './components/language-selector';
 import Image from 'next/image';
+import { Toaster } from "react-hot-toast";
 
+// Brand Primary Font - Inter (replacing Open Sans)
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+// Brand Display Font - Playfair Display (keeping as is)
 const playfair = Playfair_Display({ 
   subsets: ["latin"],
   variable: "--font-playfair",
-});
-
-const openSans = Open_Sans({ 
-  subsets: ["latin"],
-  variable: "--font-opensans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Apulink | Your Bridge to Puglia Property Investment",
-  description: "Connecting foreign investors with trusted local professionals for seamless property purchases in Puglia, Italy.",
+  title: "Apulink - Professional Project Management for Italian Property Investment",
+  description: "Connect with verified Italian property professionals and manage your investment project from search to keys. Secure document storage, budget tracking, and team collaboration.",
+  keywords: "Italian property, property investment Italy, real estate project management, Italian property professionals",
+  authors: [{ name: "Apulink" }],
+  viewport: "width=device-width, initial-scale=1",
+  themeColor: "#9333ea",
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -32,6 +41,18 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
     shortcut: '/favicon.ico',
   },
+  openGraph: {
+    title: "Apulink - Your Trusted Partner for Italian Property Investment",
+    description: "Professional project management platform for international property buyers in Italy",
+    type: "website",
+    locale: "en_US",
+    alternateLocale: ["it_IT"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Apulink - Italian Property Investment Platform",
+    description: "Connect with professionals and manage your Italian property project",
+  },
 };
 
 function Navigation() {
@@ -39,15 +60,15 @@ function Navigation() {
     <nav className="hidden md:flex items-center space-x-8">
       <a href="/how-it-works" className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 group">
         How it Works
-        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-primary transition-all duration-300 group-hover:w-full"></span>
       </a>
       <a href="/about" className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 group">
         About
-        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-primary transition-all duration-300 group-hover:w-full"></span>
       </a>
       <a href="/contact" className="relative text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 group">
         Contact
-        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-primary transition-all duration-300 group-hover:w-full"></span>
       </a>
     </nav>
   );
@@ -59,13 +80,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${openSans.variable}`}>
-      <body className={`${openSans.className} antialiased`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+      <head>
+        {/* Add JetBrains Mono for code/monospace elements */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="font-primary antialiased">
         <AuthProvider>
           <LanguageProvider>
-            <div className="min-h-screen bg-stone-50">
-              {/* Modern Fixed Header */}
-              <header className="fixed w-full top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
+            <div className="min-h-screen bg-gray-50">
+              {/* Modern Fixed Header - Updated with glass effect */}
+              <header className="fixed w-full top-0 z-50 glass-card border-b border-white/20">
                 <div className="container mx-auto px-6">
                   <div className="flex justify-between items-center h-20 md:h-24">
                     {/* Logo - Much Larger */}
@@ -85,18 +115,18 @@ export default function RootLayout({
 
                     {/* Right Section */}
                     <div className="flex items-center space-x-4">
-                      {/* Language Selector */}
-                      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all cursor-pointer shadow-sm hover:shadow-md border border-gray-100">
+                      {/* Language Selector - Updated with glass effect */}
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-full glass-card hover:bg-white/90 transition-all cursor-pointer">
                         <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
                         <LanguageSelector />
                       </div>
 
-                      {/* Login Button - Modern Style */}
+                      {/* Login Button - Updated with brand gradient */}
                       <a 
                         href="/login" 
-                        className="btn-hero-primary hidden md:inline-flex items-center"
+                        className="btn-primary hidden md:inline-flex items-center"
                       >
                         <span className="font-semibold">Login</span>
                         <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,15 +151,15 @@ export default function RootLayout({
               {/* Main content */}
               <main className="relative">{children}</main>
 
-              {/* Footer */}
+              {/* Footer - Updated with brand colors */}
               <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white pt-16 pb-8 mt-20">
                 <div className="container mx-auto px-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
                     {/* Company */}
                     <div>
-                      <h3 className="font-playfair text-xl font-bold mb-4">Apulink</h3>
+                      <h3 className="font-display text-xl font-bold mb-4">Apulink</h3>
                       <p className="text-gray-300 mb-4">
-                        Your trusted partner for property investment in Puglia, Italy.
+                        Your trusted partner for property investment in Italy.
                       </p>
                       <div className="flex space-x-4">
                         <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -147,7 +177,7 @@ export default function RootLayout({
 
                     {/* Services */}
                     <div>
-                      <h3 className="font-playfair text-xl font-bold mb-4">Services</h3>
+                      <h3 className="font-display text-xl font-bold mb-4">Services</h3>
                       <ul className="space-y-2">
                         <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Property Search</a></li>
                         <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Professional Network</a></li>
@@ -158,7 +188,7 @@ export default function RootLayout({
 
                     {/* Resources */}
                     <div>
-                      <h3 className="font-playfair text-xl font-bold mb-4">Resources</h3>
+                      <h3 className="font-display text-xl font-bold mb-4">Resources</h3>
                       <ul className="space-y-2">
                         <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Blog</a></li>
                         <li><a href="#" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
@@ -169,7 +199,7 @@ export default function RootLayout({
 
                     {/* Contact */}
                     <div>
-                      <h3 className="font-playfair text-xl font-bold mb-4">Contact</h3>
+                      <h3 className="font-display text-xl font-bold mb-4">Contact</h3>
                       <ul className="space-y-2 text-gray-300">
                         <li className="flex items-center">
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +218,7 @@ export default function RootLayout({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          Puglia, Italy
+                          Italy
                         </li>
                       </ul>
                     </div>
@@ -197,7 +227,7 @@ export default function RootLayout({
                   {/* Bottom bar */}
                   <div className="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
                     <p className="text-gray-400 text-sm mb-4 md:mb-0">
-                      © 2024 Apulink. All rights reserved.
+                      © 2025 Apulink. All rights reserved.
                     </p>
                     <div className="flex space-x-6 text-sm">
                       <a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
@@ -211,6 +241,33 @@ export default function RootLayout({
               {/* Trullo Chatbot */}
               <TrulloChatbot />
             </div>
+
+            {/* Toast Notifications */}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: "white",
+                  color: "#111827",
+                  borderRadius: "1rem",
+                  padding: "1rem",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+                },
+                success: {
+                  iconTheme: {
+                    primary: "#059669",
+                    secondary: "white",
+                  },
+                },
+                error: {
+                  iconTheme: {
+                    primary: "#ef4444",
+                    secondary: "white",
+                  },
+                },
+              }}
+            />
           </LanguageProvider>
         </AuthProvider>
       </body>
