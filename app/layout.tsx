@@ -4,7 +4,7 @@
 import TrulloChatbot from '../components/TrulloChatbot'
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
-import "./globals.css";
+import "./global.css";
 import { LanguageProvider } from './providers/language-provider';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageSelector } from './components/language-selector';
