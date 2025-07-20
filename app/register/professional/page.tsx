@@ -1,6 +1,8 @@
 // Path: app/register/professional/page.tsx
 // Professional registration with no visible fees and progressive profiling
 
+export const dynamic = 'force-dynamic';
+
 'use client';
 
 import { useState } from 'react';
