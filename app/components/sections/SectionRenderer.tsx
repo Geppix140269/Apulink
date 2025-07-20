@@ -4,11 +4,19 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { SectionConfig } from '@/types/sections';
+import { SectionConfig, SectionType, SectionVariant } from '@/types/sections';
+import { ComponentType } from 'react';
+
+// Define the structure for section components with explicit typing
+type SectionComponentMap = {
+  [K in SectionType]: {
+    [V in SectionVariant]?: ComponentType<any>;
+  };
+};
 
 // Dynamically import section components to enable code splitting
 // Map the type names from sections.ts to the actual component folders
-const sectionComponents = {
+const sectionComponents: SectionComponentMap = {
   hero: {
     A: dynamic(() => import('./hero/HeroA'), { ssr: true }),
   },
@@ -59,7 +67,8 @@ export default function SectionRenderer({ section, index }: SectionRendererProps
   }
 
   // Get the appropriate component based on type and variant
-  const SectionComponent = sectionComponents[section.type]?.[section.variant];
+  const componentMap = sectionComponents[section.type];
+  const SectionComponent = componentMap ? componentMap[section.variant] : undefined;
 
   if (!SectionComponent) {
     console.warn(`No component found for section type: ${section.type}, variant: ${section.variant}`);
