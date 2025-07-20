@@ -18,6 +18,10 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 
 const MyApulinkDashboard = () => {
+  // Define types first, before any state declarations
+  type BudgetScenarioType = 'realistic' | 'optimistic' | 'conservative';
+  
+  // Then declare your states
   const router = useRouter();
   const { user, signOut } = useAuth();
   const [activeSection, setActiveSection] = useState('overview');
