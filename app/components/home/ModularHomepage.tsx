@@ -42,7 +42,8 @@ const SectionRenderer = ({ config }: { config: SectionConfig }) => {
     return null;
   }
 
-  return <Component {...props} />;
+  // Type assertion to handle the props spreading
+  return <Component {...(props as any)} />;
 };
 
 export default function ModularHomepage({ config, userType = 'unknown' }: ModularHomepageProps) {
