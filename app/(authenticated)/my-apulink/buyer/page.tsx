@@ -68,21 +68,32 @@ export default function BuyerDashboard() {
   useEffect(() => {
     // In production, fetch from Supabase
     setDocuments([
-      {
-        id: '1',
-        name: 'Property Visura.pdf',
-        type: 'PDF',
-        uploadedAt: new Date('2025-07-15'),
-        size: '2.4 MB',
-        category: 'visura',
-      },
-      {
-        id: '2',
-        name: 'Anna Bianchi',
-        role: 'Notary',
-        email: 'anna@example.com',
-        status: 'active',
-      },
+  {
+    id: '1',
+    name: 'Property Visura.pdf',
+    type: 'PDF',
+    uploadedAt: new Date('2025-07-15'),
+    size: '2.4 MB',
+    category: 'visura',
+  },
+  {
+    id: '2',
+    name: 'Floor Plans.pdf',  // ← Should be a document
+    type: 'PDF',
+    uploadedAt: new Date('2025-07-18'),
+    size: '5.1 MB',
+    category: 'planimetria',
+  },
+]);
+
+setTeam([  // ← Team data should be in a separate array
+  {
+    id: '1',
+    name: 'Marco Rossi',
+    role: 'Real Estate Agent',
+    email: 'marco@example.com',
+    status: 'active',
+  },
       {
         id: '3',
         name: 'Giuseppe Verdi',
