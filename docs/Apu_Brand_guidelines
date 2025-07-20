@@ -1,0 +1,647 @@
+# 🎨 Apulink Brand Guidelines
+**Version 1.0 | July 2025**  
+**Status: Official Design System**
+
+---
+
+## Table of Contents
+1. [Brand Philosophy](#brand-philosophy)
+2. [Logo & Identity](#logo--identity)
+3. [Color System](#color-system)
+4. [Typography](#typography)
+5. [Design Principles](#design-principles)
+6. [Component Library](#component-library)
+7. [Layout & Spacing](#layout--spacing)
+8. [Motion & Animation](#motion--animation)
+9. [Icons & Imagery](#icons--imagery)
+10. [Code Standards](#code-standards)
+
+---
+
+## Brand Philosophy
+
+### Mission
+"We're not connecting buyers to professionals. We're orchestrating successful property investments."
+
+### Core Values
+- **Trust** - Every pixel must build confidence
+- **Sophistication** - Premium aesthetic without ostentation
+- **Clarity** - Complex made simple
+- **Innovation** - Modern tools, timeless values
+
+### Design Principles
+1. **Professional, Not Corporate** - Approachable expertise
+2. **Mediterranean Elegance** - Inspired by Italian sophistication
+3. **Data-Driven Beauty** - Function guides form
+4. **Mobile-First Luxury** - Premium experience on any device
+
+---
+
+## Logo & Identity
+
+### Primary Logo
+```
+Apulink
+```
+- Font: Inter Bold with custom kerning
+- Always paired with tagline in smaller weight
+- Minimum clear space: 2x the x-height
+
+### Logo Variations
+1. **Full Logo**: Apulink + Tagline
+2. **Compact**: Apulink only
+3. **Icon**: Stylized "A" for app icons
+
+### Tagline
+"Professional Project Management for Italian Property Investment"
+
+### Usage Rules
+- ❌ Never distort or rotate
+- ❌ Never place on busy backgrounds
+- ✅ Use gradient version on light backgrounds
+- ✅ Use white version on dark/gradient backgrounds
+
+---
+
+## Color System
+
+### Primary Colors
+
+```css
+/* Brand Gradients */
+--gradient-primary: linear-gradient(135deg, #9333ea 0%, #6366f1 100%);
+--gradient-secondary: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+--gradient-accent: linear-gradient(135deg, #9333ea 0%, #16a34a 100%);
+
+/* Purple Spectrum */
+--purple-50: #faf5ff;
+--purple-100: #f3e8ff;
+--purple-200: #e9d5ff;
+--purple-300: #d8b4fe;
+--purple-400: #c084fc;
+--purple-500: #a855f7;
+--purple-600: #9333ea;
+--purple-700: #7c3aed;
+--purple-800: #6b21a8;
+--purple-900: #581c87;
+
+/* Emerald Spectrum */
+--emerald-50: #ecfdf5;
+--emerald-100: #d1fae5;
+--emerald-200: #a7f3d0;
+--emerald-300: #6ee7b7;
+--emerald-400: #34d399;
+--emerald-500: #10b981;
+--emerald-600: #059669;
+--emerald-700: #047857;
+--emerald-800: #065f46;
+--emerald-900: #064e3b;
+```
+
+### Supporting Colors
+
+```css
+/* Status Colors */
+--success: #059669;
+--warning: #f59e0b;
+--error: #ef4444;
+--info: #3b82f6;
+
+/* Neutral Palette */
+--gray-50: #f9fafb;
+--gray-100: #f3f4f6;
+--gray-200: #e5e7eb;
+--gray-300: #d1d5db;
+--gray-400: #9ca3af;
+--gray-500: #6b7280;
+--gray-600: #4b5563;
+--gray-700: #374151;
+--gray-800: #1f2937;
+--gray-900: #111827;
+```
+
+### Glass Morphism Effects
+
+```css
+/* Glass Card Styles */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.glass-card-dark {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+```
+
+---
+
+## Typography
+
+### Font Stack
+```css
+--font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+--font-display: 'Playfair Display', Georgia, serif;
+--font-mono: 'JetBrains Mono', 'Courier New', monospace;
+```
+
+### Type Scale
+```css
+/* Headings */
+--text-6xl: 3.75rem;    /* 60px - Hero headlines */
+--text-5xl: 3rem;       /* 48px - Page titles */
+--text-4xl: 2.25rem;    /* 36px - Section headers */
+--text-3xl: 1.875rem;   /* 30px - Subsections */
+--text-2xl: 1.5rem;     /* 24px - Card titles */
+--text-xl: 1.25rem;     /* 20px - Large body */
+--text-lg: 1.125rem;    /* 18px - Emphasized body */
+--text-base: 1rem;      /* 16px - Body text */
+--text-sm: 0.875rem;    /* 14px - Small text */
+--text-xs: 0.75rem;     /* 12px - Captions */
+```
+
+### Text Styles
+```css
+/* Gradient Text */
+.text-gradient {
+  background: linear-gradient(135deg, var(--purple-600), var(--emerald-600));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Font Weights */
+.font-light: 300;
+.font-regular: 400;
+.font-medium: 500;
+.font-semibold: 600;
+.font-bold: 700;
+```
+
+---
+
+## Design Principles
+
+### 1. Visual Hierarchy
+- **Primary actions**: Gradient backgrounds with shadow
+- **Secondary actions**: Ghost buttons with borders
+- **Tertiary actions**: Text links with hover states
+
+### 2. Whitespace Philosophy
+```css
+/* Spacing Scale */
+--space-xs: 0.5rem;     /* 8px */
+--space-sm: 1rem;       /* 16px */
+--space-md: 1.5rem;     /* 24px */
+--space-lg: 2rem;       /* 32px */
+--space-xl: 3rem;       /* 48px */
+--space-2xl: 4rem;      /* 64px */
+--space-3xl: 6rem;      /* 96px */
+```
+
+### 3. Border Radius System
+```css
+--radius-sm: 0.5rem;    /* 8px - Small elements */
+--radius-md: 0.75rem;   /* 12px - Inputs */
+--radius-lg: 1rem;      /* 16px - Cards */
+--radius-xl: 1.5rem;    /* 24px - Modals */
+--radius-2xl: 2rem;     /* 32px - Large cards */
+--radius-3xl: 3rem;     /* 48px - Hero sections */
+--radius-full: 9999px;  /* Pills & circles */
+```
+
+---
+
+## Component Library
+
+### Buttons
+
+```css
+/* Primary Button */
+.btn-primary {
+  background: linear-gradient(135deg, #9333ea 0%, #059669 100%);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: transparent;
+  color: var(--purple-600);
+  padding: 0.75rem 2rem;
+  border: 2px solid var(--purple-200);
+  border-radius: 9999px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+/* Glass Button */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+}
+```
+
+### Cards
+
+```css
+/* Standard Card */
+.card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Glass Card */
+.card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1.5rem;
+  padding: 2rem;
+}
+```
+
+### Form Elements
+
+```css
+/* Input Field */
+.input {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--purple-200);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--purple-600);
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+}
+
+/* Select Dropdown */
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,...");
+  background-position: right 1rem center;
+  background-repeat: no-repeat;
+  padding-right: 3rem;
+}
+```
+
+### Badges & Pills
+
+```css
+/* Status Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, var(--emerald-100), var(--emerald-200));
+  color: var(--emerald-700);
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+}
+```
+
+---
+
+## Layout & Spacing
+
+### Grid System
+```css
+/* Responsive Grid */
+.grid-auto {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+```
+
+### Container Widths
+```css
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.container-sm { max-width: 640px; }
+.container-md { max-width: 768px; }
+.container-lg { max-width: 1024px; }
+.container-xl { max-width: 1280px; }
+.container-2xl { max-width: 1536px; }
+```
+
+### Section Spacing
+```css
+.section {
+  padding: var(--space-3xl) 0;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: var(--space-2xl) 0;
+  }
+}
+```
+
+---
+
+## Motion & Animation
+
+### Timing Functions
+```css
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+--ease-out: cubic-bezier(0, 0, 0.2, 1);
+--ease-in: cubic-bezier(0.4, 0, 1, 1);
+--bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+```
+
+### Standard Animations
+```css
+/* Fade In */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Slide Up */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Float */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Gradient Animation */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+```
+
+### Interaction States
+```css
+/* Hover Lift */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover Glow */
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+}
+```
+
+---
+
+## Icons & Imagery
+
+### Icon Library
+- **Primary**: Lucide React icons
+- **Size classes**: 16px, 20px, 24px, 32px
+- **Style**: Outline for navigation, Filled for emphasis
+
+### Icon Usage
+```jsx
+// Navigation
+<Home className="w-5 h-5" />
+
+// Actions
+<Upload className="w-4 h-4" />
+
+// Status
+<CheckCircle className="w-5 h-5 text-emerald-600" />
+```
+
+### Image Guidelines
+1. **Photography Style**
+   - Authentic Italian properties
+   - Natural lighting preferred
+   - Professional but not sterile
+   - Include people for trust
+
+2. **Image Treatments**
+   ```css
+   .image-overlay {
+     position: relative;
+     overflow: hidden;
+   }
+   
+   .image-overlay::after {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4));
+   }
+   ```
+
+3. **Aspect Ratios**
+   - Hero images: 16:9
+   - Property cards: 4:3
+   - Team photos: 1:1
+   - Thumbnails: 3:2
+
+---
+
+## Code Standards
+
+### React Component Structure
+```jsx
+// Component template
+import React from 'react';
+import { iconName } from 'lucide-react';
+
+const ComponentName = ({ prop1, prop2 }) => {
+  return (
+    <div className="component-wrapper">
+      {/* Content */}
+    </div>
+  );
+};
+
+export default ComponentName;
+```
+
+### CSS Class Naming
+```css
+/* Use semantic, descriptive names */
+.dashboard-header { }
+.property-card { }
+.team-member-avatar { }
+
+/* State modifiers */
+.btn--loading { }
+.card--highlighted { }
+.input--error { }
+```
+
+### Responsive Design
+```css
+/* Mobile First Approach */
+.element {
+  /* Mobile styles (default) */
+}
+
+@media (min-width: 768px) {
+  .element {
+    /* Tablet styles */
+  }
+}
+
+@media (min-width: 1024px) {
+  .element {
+    /* Desktop styles */
+  }
+}
+```
+
+### Accessibility Requirements
+1. **Color Contrast**: Minimum 4.5:1 for normal text
+2. **Focus States**: Visible keyboard navigation
+3. **ARIA Labels**: For interactive elements
+4. **Semantic HTML**: Proper heading hierarchy
+
+---
+
+## Implementation Checklist
+
+### For Every New Component:
+- [ ] Uses brand colors from palette
+- [ ] Implements glass morphism where appropriate
+- [ ] Includes hover/focus states
+- [ ] Follows spacing system
+- [ ] Has proper mobile styles
+- [ ] Includes loading states
+- [ ] Tested on light/dark backgrounds
+- [ ] Accessibility compliant
+
+### For Every New Page:
+- [ ] Gradient backgrounds positioned correctly
+- [ ] Professional photography or illustrations
+- [ ] Consistent section spacing
+- [ ] CTA buttons use primary styles
+- [ ] Form elements follow design system
+- [ ] Animations are subtle and purposeful
+- [ ] Mobile experience matches desktop quality
+
+---
+
+## Quick Reference
+
+### Essential Classes
+```css
+/* Backgrounds */
+.bg-gradient-primary { background: linear-gradient(135deg, #9333ea 0%, #059669 100%); }
+.bg-glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+
+/* Text */
+.text-gradient { background: linear-gradient(135deg, #9333ea, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* Effects */
+.shadow-premium { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); }
+.border-glass { border: 1px solid rgba(255, 255, 255, 0.2); }
+
+/* Animations */
+.animate-fadeIn { animation: fadeIn 0.6s ease-out; }
+.animate-slideUp { animation: slideUp 0.4s ease-out; }
+```
+
+### Do's and Don'ts
+✅ **DO**
+- Use gradients for primary actions
+- Apply glass effects on overlays
+- Keep whitespace generous
+- Make interactions smooth
+- Test on real devices
+
+❌ **DON'T**
+- Use plain gray backgrounds
+- Create harsh shadows
+- Overcrowd interfaces
+- Use system fonts
+- Ignore loading states
+
+---
+
+## Version History
+- **v1.0** (July 2025): Initial brand guidelines based on Apulink strategic pivot
+
+---
+
+*"Every pixel must build trust and deliver value."*
