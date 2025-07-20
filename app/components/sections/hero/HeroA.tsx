@@ -49,6 +49,8 @@ export default function HeroA({
           <source 
             src="https://res.cloudinary.com/dbvghnclx/video/upload/v1752960658/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_3_mycs2i.mp4" 
             type="video/mp4" 
+            src="https://res.cloudinary.com/dusubfxgo/video/upload/v1753030843/geppix1402_81420_Homepage_concept_for_Apulink.com_a_modern_di_467a1d17-0990-46ea-b88e-7545ae48e598_0_aar9z8.mp4" 
+            type="video/mp4" 
           />
         </video>
         
