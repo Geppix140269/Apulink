@@ -43,7 +43,7 @@ function ProfessionalRegistrationForm() {
     bio: ''
   });
 
-  const redirect = searchParams.get('redirect') || '/my-apulink/professional';
+  const redirect = searchParams.get('redirect') || '/complete-profile?type=professional';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -76,25 +76,19 @@ function ProfessionalRegistrationForm() {
     setLoading(true);
 
     try {
-      const { error } = await signUp({
-        email: formData.email,
-        password: formData.password,
-        userData: {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-          company: formData.company,
-          profession: formData.profession,
-          location: formData.location,
-          bio: formData.bio,
-          user_type: 'professional'
-        }
-      });
+      const { error } = await signUp(
+        formData.email,
+        formData.password,
+        'professional'
+      );
       
       if (error) {
         setError(error.message);
       } else {
-        router.push(redirect);
+        // After successful signup, we need to create the professional profile
+        // This would typically be done via an API route or edge function
+        // For now, we'll redirect to a profile completion page
+        router.push('/complete-profile?type=professional');
       }
     } catch (err: any) {
       setError('An unexpected error occurred. Please try again.');
