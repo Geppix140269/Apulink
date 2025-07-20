@@ -7,41 +7,27 @@ import dynamic from 'next/dynamic';
 import { SectionConfig } from '@/types/sections';
 
 // Dynamically import section components to enable code splitting
+// Currently only 'A' variants exist
 const sectionComponents = {
   hero: {
     A: dynamic(() => import('./hero/HeroA'), { ssr: true }),
-    B: dynamic(() => import('./hero/HeroB'), { ssr: true }),
-    C: dynamic(() => import('./hero/HeroC'), { ssr: true }),
   },
   'value-proposition': {
     A: dynamic(() => import('./value-proposition/ValuePropositionA'), { ssr: true }),
-    B: dynamic(() => import('./value-proposition/ValuePropositionB'), { ssr: true }),
-    C: dynamic(() => import('./value-proposition/ValuePropositionC'), { ssr: true }),
   },
   'professional-showcase': {
     A: dynamic(() => import('./professional-showcase/ProfessionalShowcaseA'), { ssr: true }),
-    B: dynamic(() => import('./professional-showcase/ProfessionalShowcaseB'), { ssr: true }),
-    C: dynamic(() => import('./professional-showcase/ProfessionalShowcaseC'), { ssr: true }),
   },
   'trust-builders': {
     A: dynamic(() => import('./trust-builders/TrustBuildersA'), { ssr: true }),
-    B: dynamic(() => import('./trust-builders/TrustBuildersB'), { ssr: true }),
-    C: dynamic(() => import('./trust-builders/TrustBuildersC'), { ssr: true }),
   },
   cta: {
-    A: dynamic(() => import('./cta/CTAA'), { ssr: true }),
-    B: dynamic(() => import('./cta/CTAB'), { ssr: true }),
-    C: dynamic(() => import('./cta/CTAC'), { ssr: true }),
+    // Note: Based on sprint log, we have CTABuyer and CTAProfessional
+    Buyer: dynamic(() => import('./cta/CTABuyer'), { ssr: true }),
+    Professional: dynamic(() => import('./cta/CTAProfessional'), { ssr: true }),
   },
   process: {
     A: dynamic(() => import('./process/ProcessA'), { ssr: true }),
-    B: dynamic(() => import('./process/ProcessB'), { ssr: true }),
-    C: dynamic(() => import('./process/ProcessC'), { ssr: true }),
-  },
-  benefits: {
-    A: dynamic(() => import('./benefits/BenefitsA'), { ssr: true }),
-    B: dynamic(() => import('./benefits/BenefitsB'), { ssr: true }),
-    C: dynamic(() => import('./benefits/BenefitsC'), { ssr: true }),
   },
 };
 
