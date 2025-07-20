@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Star, MapPin, Languages, Briefcase, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { Star, MapPin, Languages, Briefcase, ChevronLeft, ChevronRight, Play, ArrowRight } from 'lucide-react';
 
 interface ProfessionalAProps {
   title?: string;
