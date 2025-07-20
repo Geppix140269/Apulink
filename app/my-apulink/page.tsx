@@ -25,7 +25,7 @@ const MyApulinkDashboard = () => {
   const [showGrantCalculator, setShowGrantCalculator] = useState(false);
   const [grantAmount, setGrantAmount] = useState(0);
   const [investmentAmount, setInvestmentAmount] = useState('');
-  const [budgetScenario, setBudgetScenario] = useState('realistic');
+  const [budgetScenario, setBudgetScenario] = useState<'realistic' | 'optimistic' | 'conservative'>('realistic');
   const [selectedDocCategory, setSelectedDocCategory] = useState('all');
   const [showProfessionalSearch, setShowProfessionalSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
