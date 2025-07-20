@@ -43,7 +43,7 @@ function ProfessionalRegistrationForm() {
     bio: ''
   });
 
-  const redirect = searchParams.get('redirect') || '/complete-profile?type=professional';
+  const redirect = searchParams.get('redirect') || '/register/success?type=professional';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -85,10 +85,8 @@ function ProfessionalRegistrationForm() {
       if (error) {
         setError(error.message);
       } else {
-        // After successful signup, we need to create the professional profile
-        // This would typically be done via an API route or edge function
-        // For now, we'll redirect to a profile completion page
-        router.push('/complete-profile?type=professional');
+        // After successful signup, redirect to success page
+        router.push('/register/success?type=professional');
       }
     } catch (err: any) {
       setError('An unexpected error occurred. Please try again.');
