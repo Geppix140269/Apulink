@@ -1,94 +1,40 @@
-// Path: app/components/sections/process/ProcessA.tsx
-// Process section showing how Apulink works
+// Path: /app/components/sections/process/ProcessA.tsx
+// Process section variant A - Step-by-step layout
 
 'use client';
 
-import { ArrowRight } from 'lucide-react';
+import { ProcessProps } from '@/types/sections';
 
-interface ProcessStep {
-  number: string;
-  title: string;
-  description: string;
-  image?: string;
-}
-
-interface ProcessAProps {
-  title: string;
-  subtitle?: string;
-  steps: ProcessStep[];
-}
-
-export default function ProcessA({
-  title,
-  subtitle,
-  steps,
-}: ProcessAProps) {
+export default function ProcessA({ title, subtitle, steps }: ProcessProps) {
   return (
-    <section className="py-20 lg:py-28 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section header */}
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#2C3E50] mb-4">
             {title}
           </h2>
-          {subtitle && (
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              {subtitle}
-            </p>
-          )}
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            {subtitle}
+          </p>
         </div>
 
-        {/* Process steps */}
-        <div className="relative">
-          {/* Connection line (desktop only) */}
-          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          {/* Connection lines for desktop */}
+          <div className="hidden md:block absolute top-1/3 left-1/4 right-1/4 h-0.5 bg-[#D4A574]" />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-            {steps.map((step, index) => (
-              <div key={index} className="relative">
-                {/* Step card */}
-                <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 relative z-10">
-                  {/* Step number */}
-                  <div className="absolute -top-4 -left-4 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
-                    {step.number}
-                  </div>
-
-                  {/* Mobile connection line */}
-                  {index < steps.length - 1 && (
-                    <div className="md:hidden absolute top-full left-1/2 w-0.5 h-8 bg-gray-200 -translate-x-1/2" />
-                  )}
-
-                  {/* Content */}
-                  <div className="pt-4">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                      {step.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {step.description}
-                    </p>
-                  </div>
-
-                  {/* Arrow indicator (desktop) */}
-                  {index < steps.length - 1 && (
-                    <div className="hidden lg:flex absolute top-1/2 -right-12 transform -translate-y-1/2 z-20">
-                      <ArrowRight className="w-6 h-6 text-gray-400" />
-                    </div>
-                  )}
-                </div>
+          {steps.map((step, index) => (
+            <div key={index} className="relative text-center">
+              <div className="bg-[#8B9A7B] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 relative z-10">
+                {step.number}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <a
-            href="/get-started"
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-          >
-            Start Your Property Journey
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </a>
+              <h3 className="text-xl font-semibold text-[#2C3E50] mb-3">
+                {step.title}
+              </h3>
+              <p className="text-gray-600">
+                {step.description}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
