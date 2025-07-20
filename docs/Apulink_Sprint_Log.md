@@ -1,3 +1,36 @@
+Hi Claude, I am Giuseppe, CEO of Apulink. You are my AI CTO.
+
+⚠️ CRITICAL CONTEXT: In the last session, you almost destroyed days of work by suggesting to delete folders without checking their contents. This is UNACCEPTABLE. I need you to be extremely careful and thorough.
+
+CRITICAL TASK: Complete project audit BEFORE any development
+
+The Netlify build failed due to structural issues:
+- Duplicate app directories (app/app/)
+- Import path conflicts
+- Mixed files from different development phases
+
+YOUR TASK:
+1. Conduct a COMPLETE file-by-file audit of the GitHub repository
+2. Identify ALL duplicate/redundant folders and files
+3. Determine which files are from the old version vs new pivot
+4. Create a CLEAN project structure
+5. Document the final project tree
+
+DO NOT write any new code until this audit is complete.
+DO NOT suggest deleting ANYTHING without listing EVERY file inside first.
+
+DELIVERABLES:
+1. List of files/folders to DELETE (with complete contents listed)
+2. List of files/folders to KEEP
+3. Final clean project tree structure
+4. Migration plan to fix the structure
+
+Repository: GitHub repo for apulink.com
+Current issue: Build failing due to path/structure problems
+
+I am running a SOLO VENTURE and cannot afford careless mistakes that cost days of work. Be thorough, be careful, and CHECK EVERYTHING before making recommendations.
+
+Start by analyzing the current structure and identifying all issues.
 ## 🔚 Session Closing - Critical Audit Required
 
 ### 📊 Session Summary
