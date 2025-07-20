@@ -1,0 +1,832 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Home, FileText, Euro, Users, Calendar, MessageSquare, 
+  TrendingUp, Shield, Upload, Clock, CheckCircle, AlertCircle,
+  BarChart3, FolderOpen, Bell, Settings, LogOut, ChevronRight,
+  MapPin, Building2, Briefcase, Star, ArrowUpRight, Download,
+  Calculator, FileSearch, Globe, Zap, Info, Video, Phone,
+  Filter, Search, Eye, Lock, X, HelpCircle
+} from 'lucide-react';
+
+const ApulinkDashboard = () => {
+  const [activeSection, setActiveSection] = useState('overview');
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showGrantCalculator, setShowGrantCalculator] = useState(false);
+  const [grantAmount, setGrantAmount] = useState(0);
+  const [investmentAmount, setInvestmentAmount] = useState('');
+  const [budgetScenario, setBudgetScenario] = useState('realistic');
+  const [selectedDocCategory, setSelectedDocCategory] = useState('all');
+
+  const sidebarItems = [
+    { id: 'overview', label: 'My Command Center', icon: Home },
+    { id: 'properties', label: 'Property Analysis', icon: Building2 },
+    { id: 'documents', label: 'Document Vault', icon: FileText },
+    { id: 'timeline', label: 'Project Timeline', icon: Calendar },
+    { id: 'budget', label: 'Financial Planning', icon: Euro },
+    { id: 'team', label: 'My Expert Team', icon: Users },
+    { id: 'grants', label: 'Grant Optimizer', icon: Calculator },
+  ];
+
+  const properties = [
+    {
+      id: 1,
+      name: 'Villa Rossi - Lecce Historic Center',
+      price: '€450,000',
+      grantEligible: '€202,500',
+      roi: '28%',
+      status: 'under-review',
+      score: 92,
+      highlights: ['Prime location', 'Historical value', 'Grant approved'],
+    },
+    {
+      id: 2,
+      name: 'Masseria del Sol - Ostuni',
+      price: '€850,000',
+      grantEligible: '€382,500',
+      roi: '34%',
+      status: 'shortlisted',
+      score: 88,
+      highlights: ['Large land', 'Tourist area', 'Pool included'],
+    },
+    {
+      id: 3,
+      name: 'Seaside Apartment - Gallipoli',
+      price: '€320,000',
+      grantEligible: '€144,000',
+      roi: '42%',
+      status: 'new',
+      score: 85,
+      highlights: ['Sea view', 'High rental yield', 'Low maintenance'],
+    },
+  ];
+
+  const teamMembers = [
+    { 
+      name: 'Marco Rossi', 
+      role: 'Real Estate Expert', 
+      rating: 4.9, 
+      status: 'online',
+      expertise: ['Lecce specialist', '15 years experience'],
+    },
+    { 
+      name: 'Elena Bianchi', 
+      role: 'Legal Advisor', 
+      rating: 5.0, 
+      status: 'online',
+      expertise: ['International law', 'Grant applications'],
+    },
+    { 
+      name: 'Giuseppe Conti', 
+      role: 'Architect', 
+      rating: 4.8, 
+      status: 'busy',
+      expertise: ['Historic preservation', 'Cost optimization'],
+    },
+    {
+      name: 'Sofia Romano',
+      role: 'Tax Strategist',
+      rating: 4.9,
+      status: 'online',
+      expertise: ['International tax', 'ROI optimization'],
+    }
+  ];
+
+  const budgetData = {
+    realistic: { total: 660000, grant: 297000, net: 363000 },
+    optimistic: { total: 622000, grant: 279900, net: 342100 },
+    conservative: { total: 708000, grant: 318600, net: 389400 }
+  };
+
+  // Timeline data
+  const timeline = [
+    {
+      title: 'Property Search & Selection',
+      status: 'completed',
+      date: 'Jun 2025',
+      duration: '2 weeks',
+      responsible: ['Real Estate Agent', 'You'],
+      tasks: ['Property viewings', 'Market analysis', 'Initial selection']
+    },
+    {
+      title: 'Due Diligence & Legal Review',
+      status: 'completed',
+      date: 'Jul 2025',
+      duration: '3 weeks',
+      responsible: ['Legal Advisor', 'Geometra'],
+      tasks: ['Title search', 'Technical survey', 'Legal compliance']
+    },
+    {
+      title: 'Preliminary Agreement',
+      status: 'current',
+      date: 'Jul 2025',
+      duration: '3 weeks',
+      responsible: ['Legal Advisor', 'Notary'],
+      tasks: ['Draft Compromesso', 'Negotiate terms', 'Sign & register']
+    },
+    {
+      title: 'Grant Application',
+      status: 'current',
+      date: 'Aug 2025',
+      duration: '4 weeks',
+      responsible: ['Grant Consultant'],
+      tasks: ['Business plan', 'Mini PIA form', 'Submit application']
+    },
+    {
+      title: 'Financing & Final Purchase',
+      status: 'upcoming',
+      date: 'Sep 2025',
+      duration: '2 weeks',
+      responsible: ['Bank', 'Notary'],
+      tasks: ['Mortgage approval', 'Final deed', 'Property registration']
+    },
+    {
+      title: 'Renovation & Launch',
+      status: 'upcoming',
+      date: 'Oct 2025 - Feb 2026',
+      duration: '5 months',
+      responsible: ['Contractor', 'Architect'],
+      tasks: ['Construction', 'Inspections', 'Final certification']
+    }
+  ];
+
+  // Documents data
+  const documents = [
+    {
+      name: 'Proposta_di_Acquisto.pdf',
+      english: 'Purchase Proposal',
+      status: 'signed',
+      type: 'contract',
+      date: 'Jul 20, 2025',
+      size: '245 KB'
+    },
+    {
+      name: 'Compromesso_Preliminare.pdf',
+      english: 'Preliminary Agreement',
+      status: 'in-review',
+      type: 'contract',
+      date: 'Jul 19, 2025',
+      size: '1.2 MB'
+    },
+    {
+      name: 'Visura_Catastale.pdf',
+      english: 'Cadastral Survey',
+      status: 'verified',
+      type: 'official',
+      date: 'Jul 17, 2025',
+      size: '890 KB'
+    },
+    {
+      name: 'Planimetria_Catastale.pdf',
+      english: 'Floor Plans',
+      status: 'verified',
+      type: 'technical',
+      date: 'Jul 17, 2025',
+      size: '2.3 MB'
+    },
+    {
+      name: 'APE_Certificazione.pdf',
+      english: 'Energy Certificate',
+      status: 'verified',
+      type: 'technical',
+      date: 'Jul 16, 2025',
+      size: '456 KB'
+    },
+    {
+      name: 'Visura_Ipotecaria.pdf',
+      english: 'Mortgage Search',
+      status: 'verified',
+      type: 'legal',
+      date: 'Jul 15, 2025',
+      size: '567 KB'
+    },
+    {
+      name: 'Perizia_Immobiliare.pdf',
+      english: 'Property Valuation',
+      status: 'verified',
+      type: 'financial',
+      date: 'Jul 14, 2025',
+      size: '1.8 MB'
+    },
+    {
+      name: 'Mini_PIA_Application.pdf',
+      english: 'Grant Application',
+      status: 'draft',
+      type: 'grant',
+      date: 'Jul 12, 2025',
+      size: '2.1 MB'
+    }
+  ];
+
+  // Calculate grant in real-time (45%)
+  useEffect(() => {
+    if (investmentAmount) {
+      const amount = parseFloat(investmentAmount.replace(/[^\d]/g, ''));
+      if (!isNaN(amount)) {
+        setGrantAmount(Math.min(amount * 0.45, 2250000));
+      }
+    }
+  }, [investmentAmount]);
+
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-purple-50 via-white to-emerald-50 relative">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setShowMobileSidebar(!showMobileSidebar)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white/80 backdrop-blur-xl rounded-lg shadow-lg"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={showMobileSidebar ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+        </svg>
+      </button>
+
+      {/* Mobile Overlay */}
+      {showMobileSidebar && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setShowMobileSidebar(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`${showMobileSidebar ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative w-72 h-full bg-white/80 backdrop-blur-xl border-r border-purple-100 flex flex-col transition-transform duration-300 z-40`}>
+        <div className="p-6 border-b border-purple-100">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-emerald-600 bg-clip-text text-transparent">MyApulink</h1>
+          <p className="text-sm text-gray-600 mt-1">Your Investment Command Center</p>
+        </div>
+        
+        <nav className="flex-1 px-4 py-4 overflow-y-auto">
+          {sidebarItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setActiveSection(item.id);
+                setShowMobileSidebar(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2 ${
+                activeSection === item.id
+                  ? 'bg-gradient-to-r from-purple-100 to-emerald-100 text-purple-700 shadow-lg'
+                  : 'text-gray-600 hover:bg-purple-50/50'
+              }`}
+            >
+              <item.icon className="w-5 h-5" />
+              <span className="font-medium">{item.label}</span>
+              {item.id === 'documents' && (
+                <span className="ml-auto bg-purple-600 text-white text-xs px-2 py-1 rounded-full">8</span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* User Profile Section */}
+        <div className="p-4 border-t border-purple-100">
+          <div className="bg-gradient-to-r from-purple-100 to-emerald-100 rounded-xl p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-emerald-600 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">JD</span>
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">John Doe</p>
+                <p className="text-xs text-gray-600">Premium Investor</p>
+              </div>
+            </div>
+            <div className="flex justify-between text-xs text-gray-600">
+              <span>Investment Power</span>
+              <span className="font-semibold text-purple-700">€1.2M</span>
+            </div>
+            <div className="mt-2 w-full bg-purple-200 rounded-full h-2">
+              <div className="bg-gradient-to-r from-purple-600 to-emerald-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+            </div>
+          </div>
+          
+          <div className="flex gap-2 mt-4">
+            <button className="flex-1 p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all">
+              <HelpCircle className="w-5 h-5 mx-auto" />
+            </button>
+            <button className="flex-1 p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all">
+              <Bell className="w-5 h-5 mx-auto" />
+            </button>
+            <button className="flex-1 p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all">
+              <Settings className="w-5 h-5 mx-auto" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-hidden flex flex-col w-full">
+        {/* Top Bar */}
+        <div className="bg-white/70 backdrop-blur-lg border-b border-purple-100 px-4 md:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-emerald-600 bg-clip-text text-transparent pl-12 lg:pl-0">
+              {activeSection === 'overview' && 'Welcome back, John! Your journey is 35% complete'}
+              {activeSection === 'properties' && 'Property Intelligence Dashboard'}
+              {activeSection === 'documents' && 'Secure Document Vault'}
+              {activeSection === 'timeline' && 'Project Timeline & Milestones'}
+              {activeSection === 'budget' && 'Financial Planning Studio'}
+              {activeSection === 'team' && 'Your Expert Advisory Team'}
+              {activeSection === 'grants' && 'Grant Optimization Center'}
+            </h2>
+            <button className="hidden md:flex px-4 py-2 bg-gradient-to-r from-purple-600 to-emerald-600 text-white rounded-full hover:shadow-lg transition-all items-center gap-2 font-semibold">
+              <Phone className="w-4 h-4" />
+              Get Help
+            </button>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-20">
+          {/* Overview Section */}
+          {activeSection === 'overview' && (
+            <div className="max-w-7xl mx-auto space-y-6">
+              {/* Key Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-4 md:p-6 text-center">
+                  <Euro className="w-6 md:w-8 h-6 md:h-8 text-purple-600 mx-auto mb-2" />
+                  <p className="text-xl md:text-3xl font-bold text-gray-900">€1.2M</p>
+                  <p className="text-xs md:text-sm text-gray-600">Total Budget</p>
+                  <p className="text-xs text-purple-600 mt-1 md:mt-2 hidden md:block">€660K after grants</p>
+                </div>
+                
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-4 md:p-6 text-center">
+                  <TrendingUp className="w-6 md:w-8 h-6 md:h-8 text-emerald-600 mx-auto mb-2" />
+                  <p className="text-xl md:text-3xl font-bold text-gray-900">€540K</p>
+                  <p className="text-xs md:text-sm text-gray-600">Grant Value</p>
+                  <p className="text-xs text-emerald-600 mt-1 md:mt-2 hidden md:block">45% of investment</p>
+                </div>
+                
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-4 md:p-6 text-center">
+                  <Building2 className="w-6 md:w-8 h-6 md:h-8 text-blue-600 mx-auto mb-2" />
+                  <p className="text-xl md:text-3xl font-bold text-gray-900">3</p>
+                  <p className="text-xs md:text-sm text-gray-600">Properties</p>
+                  <p className="text-xs text-blue-600 mt-1 md:mt-2 hidden md:block">1 under review</p>
+                </div>
+                
+                <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-4 md:p-6 text-center">
+                  <Calendar className="w-6 md:w-8 h-6 md:h-8 text-orange-600 mx-auto mb-2" />
+                  <p className="text-xl md:text-3xl font-bold text-gray-900">6</p>
+                  <p className="text-xs md:text-sm text-gray-600">Months</p>
+                  <p className="text-xs text-orange-600 mt-1 md:mt-2 hidden md:block">On schedule</p>
+                </div>
+              </div>
+
+              {/* Action Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button 
+                  onClick={() => setShowGrantCalculator(true)}
+                  className="p-4 md:p-6 bg-gradient-to-br from-purple-500/10 to-purple-600/10 rounded-2xl border border-purple-200 hover:shadow-lg transition-all text-left group"
+                >
+                  <Calculator className="w-5 md:w-6 h-5 md:h-6 text-purple-600 mb-2 md:mb-3" />
+                  <h4 className="font-semibold text-gray-900 text-sm md:text-base">Calculate My Grant</h4>
+                  <p className="text-xs md:text-sm text-gray-600">See how much you save</p>
+                  <ArrowUpRight className="w-4 h-4 text-purple-600 mt-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </button>
+                
+                <button 
+                  onClick={() => setActiveSection('properties')}
+                  className="p-4 md:p-6 bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 rounded-2xl border border-emerald-200 hover:shadow-lg transition-all text-left group"
+                >
+                  <FileSearch className="w-5 md:w-6 h-5 md:h-6 text-emerald-600 mb-2 md:mb-3" />
+                  <h4 className="font-semibold text-gray-900 text-sm md:text-base">Property Analysis</h4>
+                  <p className="text-xs md:text-sm text-gray-600">3 properties ready</p>
+                  <ArrowUpRight className="w-4 h-4 text-emerald-600 mt-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </button>
+                
+                <button className="p-4 md:p-6 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-2xl border border-blue-200 hover:shadow-lg transition-all text-left group">
+                  <MessageSquare className="w-5 md:w-6 h-5 md:h-6 text-blue-600 mb-2 md:mb-3" />
+                  <h4 className="font-semibold text-gray-900 text-sm md:text-base">Chat with Team</h4>
+                  <p className="text-xs md:text-sm text-gray-600">4 experts online</p>
+                  <ArrowUpRight className="w-4 h-4 text-blue-600 mt-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </button>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-6">
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-emerald-600 bg-clip-text text-transparent mb-4">
+                  Recent Activity
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">Legal review completed</p>
+                      <p className="text-xs text-gray-600">Villa Rossi property cleared • 2 hours ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">Grant analysis ready</p>
+                      <p className="text-xs text-gray-600">You qualify for €540,000 • Yesterday</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Properties Section */}
+          {activeSection === 'properties' && (
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                {properties.map((property) => (
+                  <div key={property.id} className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 overflow-hidden hover:shadow-2xl transition-all">
+                    <div className="p-4 md:p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 className="font-bold text-gray-900 text-sm md:text-base pr-2">{property.name}</h4>
+                        <span className={`px-2 md:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                          property.status === 'under-review' ? 'bg-purple-100 text-purple-700' :
+                          property.status === 'shortlisted' ? 'bg-emerald-100 text-emerald-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {property.status.replace('-', ' ')}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Price</span>
+                          <span className="font-semibold text-gray-900">{property.price}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Grant (45%)</span>
+                          <span className="font-semibold text-emerald-600">{property.grantEligible}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Est. ROI</span>
+                          <span className="font-semibold text-purple-600">{property.roi}</span>
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm text-gray-600">Investment Score</span>
+                          <span className="font-bold text-gray-900">{property.score}/100</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-purple-600 to-emerald-600 h-2 rounded-full"
+                            style={{ width: `${property.score}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <button className="w-full py-3 bg-gradient-to-r from-purple-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold">
+                        View Full Analysis
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Documents Section */}
+          {activeSection === 'documents' && (
+            <div className="max-w-7xl mx-auto space-y-6">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {['All', 'Contracts', 'Official', 'Technical', 'Financial', 'Grants'].map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedDocCategory(category.toLowerCase())}
+                    className={`px-4 py-2 rounded-lg text-sm ${
+                      selectedDocCategory === category.toLowerCase() || (selectedDocCategory === 'all' && category === 'All')
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {documents
+                  .filter(doc => selectedDocCategory === 'all' || doc.type === selectedDocCategory)
+                  .map((doc, index) => (
+                  <div key={index} className="bg-white/70 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/50 hover:shadow-xl transition-all">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        doc.type === 'contract' ? 'bg-purple-100' :
+                        doc.type === 'official' ? 'bg-blue-100' :
+                        doc.type === 'technical' ? 'bg-orange-100' :
+                        doc.type === 'financial' ? 'bg-emerald-100' :
+                        doc.type === 'grant' ? 'bg-pink-100' :
+                        'bg-gray-100'
+                      }`}>
+                        <FileText className="w-6 h-6 text-gray-600" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900">{doc.english}</h4>
+                        <p className="text-sm text-gray-500">{doc.name}</p>
+                        <div className="flex items-center gap-3 mt-2 text-xs">
+                          <span className={`px-2 py-1 rounded-full ${
+                            doc.status === 'verified' || doc.status === 'signed' 
+                              ? 'bg-emerald-100 text-emerald-700' :
+                            doc.status === 'in-review' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {doc.status}
+                          </span>
+                          <span className="text-gray-500">{doc.size}</span>
+                          <span className="text-gray-500">{doc.date}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all">
+                          <Download className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-50 to-emerald-50 rounded-2xl p-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-purple-700">{documents.length}</p>
+                    <p className="text-sm text-gray-600">Total</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-700">
+                      {documents.filter(d => d.status === 'verified' || d.status === 'signed').length}
+                    </p>
+                    <p className="text-sm text-gray-600">Complete</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-700">
+                      {documents.filter(d => d.status === 'in-review').length}
+                    </p>
+                    <p className="text-sm text-gray-600">In Review</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-orange-700">
+                      {documents.filter(d => d.status === 'draft').length}
+                    </p>
+                    <p className="text-sm text-gray-600">Pending</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Timeline Section */}
+          {activeSection === 'timeline' && (
+            <div className="max-w-7xl mx-auto space-y-6">
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-semibold">Project Progress</h3>
+                  <span className="text-2xl font-bold text-purple-700">65%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 mb-8">
+                  <div className="bg-gradient-to-r from-purple-600 to-emerald-600 h-3 rounded-full" style={{ width: '65%' }}></div>
+                </div>
+
+                <div className="space-y-4">
+                  {timeline.map((phase, index) => (
+                    <div key={index} className="relative">
+                      {index < timeline.length - 1 && (
+                        <div className={`absolute left-6 top-12 bottom-0 w-0.5 ${
+                          phase.status === 'completed' ? 'bg-emerald-300' : 'bg-gray-300'
+                        }`}></div>
+                      )}
+                      
+                      <div className={`relative bg-white rounded-2xl p-6 shadow-lg border-2 ${
+                        phase.status === 'completed' ? 'border-emerald-200' :
+                        phase.status === 'current' ? 'border-purple-200' :
+                        'border-gray-200'
+                      }`}>
+                        <div className={`absolute -left-3 top-8 w-12 h-12 rounded-full flex items-center justify-center bg-white shadow-lg ${
+                          phase.status === 'completed' ? 'border-4 border-emerald-500' :
+                          phase.status === 'current' ? 'border-4 border-purple-500' :
+                          'border-4 border-gray-300'
+                        }`}>
+                          {phase.status === 'completed' ? (
+                            <CheckCircle className="w-6 h-6 text-emerald-600" />
+                          ) : phase.status === 'current' ? (
+                            <Clock className="w-6 h-6 text-purple-600 animate-pulse" />
+                          ) : (
+                            <div className="w-3 h-3 bg-gray-400 rounded-full" />
+                          )}
+                        </div>
+                        
+                        <div className="ml-8">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="text-lg font-bold text-gray-900">{phase.title}</h4>
+                              <p className="text-sm text-gray-600">{phase.date} • {phase.duration}</p>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              phase.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+                              phase.status === 'current' ? 'bg-purple-100 text-purple-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {phase.status === 'current' ? 'in progress' : phase.status}
+                            </span>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {phase.responsible.map((person, i) => (
+                              <span key={i} className="text-xs bg-purple-50 text-purple-700 px-3 py-1 rounded-full">
+                                {person}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          {phase.status === 'current' && (
+                            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                              {phase.tasks.map((task, i) => (
+                                <div key={i} className="flex items-center gap-2 text-sm text-gray-700">
+                                  <div className="w-4 h-4 rounded-full border-2 border-purple-300"></div>
+                                  {task}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Budget Section */}
+          {activeSection === 'budget' && (
+            <div className="max-w-7xl mx-auto">
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-4 md:p-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                  <h3 className="text-lg md:text-xl font-semibold">Budget Scenarios</h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {['optimistic', 'realistic', 'conservative'].map((scenario) => (
+                      <button
+                        key={scenario}
+                        onClick={() => setBudgetScenario(scenario)}
+                        className={`px-3 md:px-4 py-2 rounded-lg capitalize text-sm ${
+                          budgetScenario === scenario 
+                            ? 'bg-purple-100 text-purple-700' 
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {scenario}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                  <div className="p-4 md:p-6 bg-purple-50 rounded-xl text-center">
+                    <p className="text-xs md:text-sm text-gray-600 mb-2">Total Investment</p>
+                    <p className="text-xl md:text-2xl font-bold text-purple-700">
+                      €{budgetData[budgetScenario].total.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-4 md:p-6 bg-emerald-50 rounded-xl text-center">
+                    <p className="text-xs md:text-sm text-gray-600 mb-2">Grant (45%)</p>
+                    <p className="text-xl md:text-2xl font-bold text-emerald-700">
+                      €{budgetData[budgetScenario].grant.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-4 md:p-6 bg-gradient-to-r from-purple-50 to-emerald-50 rounded-xl text-center">
+                    <p className="text-xs md:text-sm text-gray-600 mb-2">Your Investment</p>
+                    <p className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-emerald-600 bg-clip-text text-transparent">
+                      €{budgetData[budgetScenario].net.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900">Tax Optimization Available</p>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Schedule a call with Sofia Romano to explore additional tax savings of up to €45,000
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Team Section */}
+          {activeSection === 'team' && (
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                {teamMembers.map((member, index) => (
+                  <div key={index} className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-4 md:p-6">
+                    <div className="flex items-center gap-3 md:gap-4 mb-4">
+                      <div className="w-12 md:w-16 h-12 md:h-16 bg-gradient-to-br from-purple-100 to-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Briefcase className="w-6 md:w-8 h-6 md:h-8 text-purple-700" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-gray-900 text-sm md:text-base truncate">{member.name}</h4>
+                        <p className="text-xs md:text-sm text-gray-600 truncate">{member.role}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Star className="w-3 md:w-4 h-3 md:h-4 text-yellow-500 fill-current" />
+                          <span className="text-xs md:text-sm font-semibold">{member.rating}</span>
+                          <span className={`w-2 h-2 rounded-full ${
+                            member.status === 'online' ? 'bg-emerald-500' : 'bg-yellow-500'
+                          }`} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="flex-1 py-2 bg-gradient-to-r from-purple-600 to-emerald-600 text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm">
+                        Message
+                      </button>
+                      <button className="flex-1 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all font-medium text-sm">
+                        Schedule
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Grants Section */}
+          {activeSection === 'grants' && (
+            <div className="max-w-7xl mx-auto">
+              <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-4 md:p-8">
+                <div className="max-w-2xl mx-auto">
+                  <h3 className="text-lg md:text-xl font-semibold text-center mb-6">Calculate Your Grant</h3>
+                  <input
+                    type="text"
+                    value={investmentAmount}
+                    onChange={(e) => setInvestmentAmount(e.target.value)}
+                    placeholder="Enter investment amount"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl mb-6 text-sm md:text-base"
+                  />
+                  
+                  <div className="p-6 bg-gradient-to-r from-purple-50 to-emerald-50 rounded-2xl text-center">
+                    <p className="text-xs md:text-sm text-gray-600 mb-2">Estimated Grant</p>
+                    <p className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-emerald-600 bg-clip-text text-transparent">
+                      €{grantAmount.toLocaleString()}
+                    </p>
+                    <p className="text-xs md:text-sm text-gray-600 mt-2">Up to 45% of eligible costs</p>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl">
+                      <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-gray-900">Tourism Properties Eligible</p>
+                        <p className="text-sm text-gray-600 mt-1">Hotels, B&Bs, vacation rentals qualify</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl">
+                      <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-gray-900">45% Grant Coverage</p>
+                        <p className="text-sm text-gray-600 mt-1">Up to €2.25M maximum grant amount</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Grant Calculator Modal */}
+      {showGrantCalculator && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-6 md:p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl md:text-2xl font-bold">Grant Calculator</h3>
+              <button onClick={() => setShowGrantCalculator(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 md:w-6 h-5 md:h-6" />
+              </button>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-600 mb-8 text-sm md:text-base">
+                Calculate your potential grant savings (45% of eligible costs)
+              </p>
+              <button 
+                onClick={() => setShowGrantCalculator(false)}
+                className="px-6 md:px-8 py-3 bg-gradient-to-r from-purple-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold text-sm md:text-base"
+              >
+                Close Calculator
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ApulinkDashboard;
