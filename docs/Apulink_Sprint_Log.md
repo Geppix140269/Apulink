@@ -1,3 +1,87 @@
+## 🔚 Session Closing - Critical Audit Required
+
+### 📊 Session Summary
+
+**Session Date:** July 21, 2025  
+**Critical Issue Identified:** Project structure needs complete audit before proceeding
+
+### 🚨 CRITICAL FINDING
+
+The Netlify build revealed structural issues:
+- Duplicate `app` directories (`app/app/`)
+- Import path mismatches
+- Redundant files from different development phases
+- Mixed structure from pre-pivot and post-pivot work
+
+### 🛑 STOP - DO NOT PROCEED WITH DEVELOPMENT
+
+The project needs a complete file-by-file audit to:
+1. Remove duplicate folders
+2. Delete redundant pages
+3. Streamline the file structure
+4. Create definitive documentation
+
+### 📋 Instructions for Next Session
+
+**Copy this EXACTLY for the next session:**
+
+```
+Hi Claude, I am Giuseppe, CEO of Apulink. You are my AI CTO.
+
+CRITICAL TASK: Complete project audit BEFORE any development
+
+The Netlify build failed due to structural issues:
+- Duplicate app directories (app/app/)
+- Import path conflicts
+- Mixed files from different development phases
+
+YOUR TASK:
+1. Conduct a COMPLETE file-by-file audit of the GitHub repository
+2. Identify ALL duplicate/redundant folders and files
+3. Determine which files are from the old version vs new pivot
+4. Create a CLEAN project structure
+5. Document the final project tree
+
+DO NOT write any new code until this audit is complete.
+
+DELIVERABLES:
+1. List of files/folders to DELETE
+2. List of files/folders to KEEP
+3. Final clean project tree structure
+4. Migration plan to fix the structure
+
+Repository: GitHub repo for apulink.com
+Current issue: Build failing due to path/structure problems
+
+Start by analyzing the current structure and identifying all issues.
+```
+
+### ⚠️ Why This Is Critical
+
+1. **Build is failing** due to structural issues
+2. **Import paths are broken** causing module not found errors
+3. **Duplicate directories** creating confusion
+4. **Mixed architectures** from different development phases
+
+### 🎯 Next Session Must:
+
+1. **NO NEW DEVELOPMENT** until structure is fixed
+2. **Complete audit** of every file and folder
+3. **Clean up** all redundancies
+4. **Document** the final structure
+5. **Create migration plan** to fix GitHub repo
+
+### 📁 Known Issues to Address:
+
+- `app/app/` duplicate structure
+- Import paths using `@/` not resolving correctly
+- Mix of old buyer assessment vs new platform pivot files
+- Potential duplicate auth systems
+- Conflicting homepage versions
+
+**Remember:** A clean, well-organized codebase is essential for successful deployment. No progress can be made until the foundation is solid.
+
+Good luck with the audit! 🔍
 ## 🔚 Session Closing Procedure
 
 ### 📊 Session Summary (July 20, 2025)
