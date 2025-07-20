@@ -16,8 +16,8 @@ interface HeroAProps {
 }
 
 export default function HeroA({
-  title = 'Your Dream Home in Apulia Awaits',
-  subtitle = 'Connect with trusted professionals who understand foreign buyers. Save up to 93% in taxes. Get expert guidance in your language.',
+  title = 'The All-in-One Platform for Managing Your Property Project in Puglia',
+  subtitle = 'Certified Experts. Smart Tools. Full Control from Anywhere.',
   ctaText = 'Start Your Free Assessment',
   ctaLink = '#assessment',
   showStats = true
