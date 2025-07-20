@@ -4,9 +4,15 @@
 'use client';
 
 import Link from 'next/link';
-import { CTAProps } from '@/types/sections';
 
-export default function CTAProfessional({ headline, description, buttonText, buttonLink }: CTAProps) {
+interface CTAProfessionalProps {
+  headline: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+}
+
+export default function CTAProfessional({ headline, description, buttonText, buttonLink }: CTAProfessionalProps) {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#8B9A7B]">
       <div className="max-w-4xl mx-auto text-center">
