@@ -30,7 +30,15 @@ const MyApulinkDashboard = () => {
   const [showProfessionalSearch, setShowProfessionalSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExpertise, setSelectedExpertise] = useState('all');
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState<{
+  id: number;
+  type: string;
+  from: string;
+  content: string;
+  time: string;
+  read: boolean;
+  status: string;
+}[]>([]);
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const [unreadCount, setUnreadCount] = useState(3);
 
