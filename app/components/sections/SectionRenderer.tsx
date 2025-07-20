@@ -57,10 +57,10 @@ export default function SectionRenderer({ section, index }: SectionRendererProps
         data-section-variant={section.variant}
       >
         <CTAProfessional 
-          headline={section.props.headline}
-          description={section.props.description}
-          buttonText={section.props.buttonText}
-          buttonLink={section.props.buttonLink}
+          title={section.props.headline}
+          subtitle={section.props.description}
+          ctaText={section.props.buttonText}
+          ctaLink={section.props.buttonLink}
         />
       </section>
     );
