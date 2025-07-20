@@ -1,4 +1,4 @@
-import TrulloChatbot from '@/components/TrulloChatbot'
+import TrulloChatbot from '../components/TrulloChatbot'
 import type { Metadata } from "next";
 import { Playfair_Display, Open_Sans } from "next/font/google";
 import "./global.css";
