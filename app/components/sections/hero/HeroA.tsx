@@ -1,5 +1,4 @@
 // Path: app/components/sections/hero/HeroA.tsx
-// Hero section variant A - Trust-focused with professional design
 
 'use client';
 
