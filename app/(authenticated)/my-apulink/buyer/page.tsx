@@ -86,7 +86,7 @@ export default function BuyerDashboard() {
   },
 ]);
 
-setTeam([  // ← Team data should be in a separate array
+setTeam([  
   {
     id: '1',
     name: 'Marco Rossi',
@@ -94,14 +94,21 @@ setTeam([  // ← Team data should be in a separate array
     email: 'marco@example.com',
     status: 'active',
   },
-      {
-        id: '3',
-        name: 'Giuseppe Verdi',
-        role: 'Architect',
-        email: 'giuseppe@example.com',
-        status: 'pending',
-      },
-    ]);
+  {
+    id: '2',
+    name: 'Anna Bianchi',
+    role: 'Notary',
+    email: 'anna@example.com',
+    status: 'active',
+  },
+  {
+    id: '3',
+    name: 'Giuseppe Verdi',
+    role: 'Architect',
+    email: 'giuseppe@example.com',
+    status: 'pending',
+  },
+]);
 
     setBudget([
       { id: '1', category: 'Property Purchase', budgeted: 150000, spent: 0, variance: 150000 },
@@ -420,21 +427,3 @@ setTeam([  // ← Team data should be in a separate array
     </div>
   );
 }
-        name: 'Floor Plans.pdf',
-        type: 'PDF',
-        uploadedAt: new Date('2025-07-18'),
-        size: '5.1 MB',
-        category: 'planimetria',
-      },
-    ]);
-
-    setTeam([
-      {
-        id: '1',
-        name: 'Marco Rossi',
-        role: 'Real Estate Agent',
-        email: 'marco@example.com',
-        status: 'active',
-      },
-      {
-        id: '2',
