@@ -1,5 +1,5 @@
 // Path: app/login/page.tsx
-// Login page with Apulink brand guidelines - purple to emerald gradients and glass morphism
+// Login page with fixed syntax and proper imports
 
 'use client';
 
@@ -31,7 +31,7 @@ function LoginForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/my-apulink`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/my-apulink`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -56,12 +56,20 @@ function LoginForm() {
       
       if (error) {
         setError(error.message);
+        setLoading(false);
       } else {
-        router.push(redirect);
+        // Force redirect after successful login
+        console.log('Login successful, redirecting...');
+        await router.push('/my-apulink');
+        router.refresh();
+        
+        // Fallback if router doesn't work
+        setTimeout(() => {
+          window.location.href = '/my-apulink';
+        }, 100);
       }
     } catch (err: any) {
       setError('An unexpected error occurred. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -72,11 +80,16 @@ function LoginForm() {
     }
   };
 
+  const patternBackground = `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239333ea' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E`;
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-white to-emerald-50">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239333ea" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        <div 
+          className="absolute inset-0 opacity-50"
+          style={{ backgroundImage: `url("${patternBackground}")` }}
+        />
       </div>
 
       <div className="relative flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -133,7 +146,7 @@ function LoginForm() {
 
             <div className="space-y-5">
               {error && (
-                <div className="p-4 bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-700 rounded-2xl text-sm animate-fadeIn">
+                <div className="p-4 bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-700 rounded-2xl text-sm">
                   {error}
                 </div>
               )}
@@ -242,14 +255,14 @@ function LoginForm() {
                   className="group w-full inline-flex items-center justify-center py-3 px-4 bg-white/60 backdrop-blur-sm border-2 border-purple-200 rounded-2xl shadow-sm text-sm font-semibold text-gray-700 hover:bg-purple-50 hover:border-purple-300 hover:shadow-md transition-all"
                 >
                   <User className="w-4 h-4 mr-2 text-purple-600" />
-                  I'm a buyer
+                  I&apos;m a buyer
                 </Link>
                 <Link
                   href="/register/professional"
                   className="group w-full inline-flex items-center justify-center py-3 px-4 bg-white/60 backdrop-blur-sm border-2 border-emerald-200 rounded-2xl shadow-sm text-sm font-semibold text-gray-700 hover:bg-emerald-50 hover:border-emerald-300 hover:shadow-md transition-all"
                 >
                   <Building2 className="w-4 h-4 mr-2 text-emerald-600" />
-                  I'm a professional
+                  I&apos;m a professional
                 </Link>
               </div>
             </div>
@@ -277,24 +290,6 @@ function LoginForm() {
           </div>
         </div>
       </div>
-
-      {/* Add animation keyframes */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
