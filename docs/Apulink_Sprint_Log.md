@@ -1,4 +1,78 @@
-## 🔚 Session Closing Document - Build Fixes & Missing Files
+# Apulink Authentication Setup - Session Summary
+
+## Current Status: ✅ Authentication Working
+
+### What We Accomplished:
+1. **Email Authentication**: ✅ Working
+   - Users can register with email
+   - Confirmation emails send with custom branded template
+   - Email confirmation redirects to production site (fixed from localhost)
+
+2. **Google OAuth**: ✅ Working
+   - Fixed redirect_uri_mismatch error
+   - Google OAuth now successfully authenticates users
+   - Issue: Shows Supabase URL during auth flow
+
+3. **Key Fixes Applied**:
+   - Updated Supabase Site URL from `localhost:3000` to `https://apulink.com`
+   - Added correct redirect URI in Google Console: `https://kocfdabcibhkqiyyfsdt.supabase.co/auth/v1/callback`
+   - Created professional email templates following brand guidelines
+
+### Remaining Issues:
+
+1. **No Redirect After Login**
+   - Users authenticate successfully but stay on login page
+   - Need to implement auth callback route
+   - Need to add redirect logic to login components
+
+2. **Google OAuth Shows Supabase URL**
+   - Shows "continue to kocfdabcibhkqiyyfsdt.supabase.co" instead of "Apulink"
+   - Solution requires auth callback implementation
+
+### Next Steps for Next Session:
+
+1. **Create Auth Callback Route** at `/app/auth/callback/route.ts`:
+```typescript
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function GET(request: Request) {
+  const requestUrl = new URL(request.url)
+  const code = requestUrl.searchParams.get('code')
+  const next = requestUrl.searchParams.get('next') ?? '/my-apulink'
+
+  if (code) {
+    const supabase = createClient()
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) {
+      return NextResponse.redirect(new URL(next, requestUrl.origin))
+    }
+  }
+  return NextResponse.redirect(new URL('/login', requestUrl.origin))
+}
+```
+
+2. **Update Login Components** to handle redirects:
+   - Add redirectTo parameter to OAuth calls
+   - Add manual redirect for email/password login
+   - Implement auth state listener
+
+3. **Environment Details**:
+   - Supabase Project URL: `https://kocfdabcibhkqiyyfsdt.supabase.co`
+   - Production URL: `https://apulink.com`
+   - Google OAuth Client configured and working
+
+### References:
+- Brand Guidelines: Professional purple-to-emerald gradients, Inter font
+- Strategic Pivot: Platform is "Professional Project Management for Italian Property Investment"
+- Target redirect after login: `/my-apulink` (dashboard)
+
+### Quick Test:
+- Email login: ✅ Works but no redirect
+- Google login: ✅ Works but no redirect
+- Email confirmation: ✅ Works and redirects correctly
+
+**Priority for next session: Implement auth callback route to fix post-login redirects**## 🔚 Session Closing Document - Build Fixes & Missing Files
 
 ### 📊 Session Summary
 
