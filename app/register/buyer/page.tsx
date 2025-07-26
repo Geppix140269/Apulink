@@ -1,294 +1,340 @@
-// Path: app/register/buyer/page.tsx
-// Simple buyer registration page with Google auth option
+// Path: /app/register/buyer/page.tsx
+// Buyer registration page with brand-compliant design
 
-'use client';
+'use client'
 
-import { Suspense } from 'react';
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
+import { Eye, EyeOff, ArrowRight } from 'lucide-react'
 
-function BuyerRegistrationForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { signUp } = useAuth();
-  
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+export default function BuyerRegistrationPage() {
+  const router = useRouter()
+  const { signUp } = useAuth()
+  const [step, setStep] = useState(1)
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: '',
+    phone: '',
+    country: '',
+    propertyBudget: '',
+    propertyLocation: '',
+    propertyType: '',
+    timeline: '',
+  })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const redirect = searchParams.get('redirect') || '/register/success?type=buyer';
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
+  }
 
-  const handleGoogleSignUp = async () => {
-    setError('');
-    setGoogleLoading(true);
-    
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/register/success?type=buyer`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      });
-      
-      if (error) throw error;
-    } catch (err: any) {
-      setError('Failed to sign up with Google. Please try again.');
-      setGoogleLoading(false);
+  const handleStep1Submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      return
     }
-  };
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
+    setError('')
+    setStep(2)
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    
-    // Validation
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-    
-    setLoading(true);
+  const handleFinalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
     try {
-      const { error } = await signUp(
-        email,
-        password,
-        'buyer'
-      );
+      // Sign up the user
+      await signUp(formData.email, formData.password, 'buyer')
+
+      // Create extended profile
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
       
-      if (error) {
-        setError(error.message);
-      } else {
-        router.push(redirect);
+      if (user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: formData.fullName,
+            phone: formData.phone,
+            country: formData.country,
+            property_budget: formData.propertyBudget,
+            property_location: formData.propertyLocation,
+            property_type: formData.propertyType,
+            timeline: formData.timeline,
+          })
+          .eq('id', user.id)
+
+        if (profileError) throw profileError
       }
+
+      // Redirect to dashboard
+      router.push('/my-apulink')
     } catch (err: any) {
-      setError('An unexpected error occurred. Please try again.');
+      setError(err.message || 'An error occurred during registration')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">A</span>
-            </div>
-            <span className="text-2xl font-bold text-gray-900">Apulink</span>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-emerald-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        {/* Logo and Title */}
+        <div className="text-center">
+          <Link href="/" className="inline-block">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-emerald-600 bg-clip-text text-transparent">
+              Apulink
+            </h1>
           </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Start Your Property Journey
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+            Create your buyer account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join thousands investing in Italian property with confidence
+            Already have an account?{' '}
+            <Link href="/login" className="font-medium text-purple-600 hover:text-purple-500">
+              Sign in
+            </Link>
           </p>
         </div>
 
-        {/* Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Google Sign Up */}
-          <button
-            onClick={handleGoogleSignUp}
-            disabled={googleLoading}
-            className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
-          >
-            {googleLoading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-700"></div>
-            ) : (
-              <>
-                <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continue with Google
-              </>
-            )}
-          </button>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or register with email</span>
-            </div>
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center space-x-4">
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+            step >= 1 ? 'bg-purple-600 text-white' : 'bg-gray-300 text-gray-600'
+          }`}>
+            1
           </div>
+          <div className={`w-24 h-1 ${step >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`} />
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+            step >= 2 ? 'bg-purple-600 text-white' : 'bg-gray-300 text-gray-600'
+          }`}>
+            2
+          </div>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+        {/* Registration Form Card */}
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl p-8 border border-white/20">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
+          {step === 1 ? (
+            <form onSubmit={handleStep1Submit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email address
+                </label>
                 <input
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm"
                   placeholder="you@example.com"
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-400" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="••••••••"
-                />
               </div>
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
-            </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                  Confirm Password
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-400" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
                 </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="••••••••"
-                />
               </div>
-            </div>
 
-            <div className="flex items-start">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                required
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5"
-              />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                I agree to the{' '}
-                <Link href="/terms" className="text-blue-600 hover:text-blue-700">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="text-blue-600 hover:text-blue-700">
-                  Privacy Policy
-                </Link>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full flex items-center justify-center px-4 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {loading ? (
-                'Creating account...'
-              ) : (
-                <>
-                  Create account
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Already have an account?</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <Link
-                href="/login"
-                className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+              <button
+                type="submit"
+                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200"
               >
-                Sign in
-              </Link>
-              <Link
-                href="/register/professional"
-                className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                I&apos;m a professional
-              </Link>
-            </div>
-          </div>
+                Continue
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleFinalSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                    Full Name
+                  </label>
+                  <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    required
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                    Phone Number
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                    Country
+                  </label>
+                  <input
+                    id="country"
+                    name="country"
+                    type="text"
+                    required
+                    value={formData.country}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="propertyBudget" className="block text-sm font-medium text-gray-700">
+                    Property Budget (€)
+                  </label>
+                  <select
+                    id="propertyBudget"
+                    name="propertyBudget"
+                    value={formData.propertyBudget}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm"
+                  >
+                    <option value="">Select budget range</option>
+                    <option value="0-100000">Up to €100,000</option>
+                    <option value="100000-250000">€100,000 - €250,000</option>
+                    <option value="250000-500000">€250,000 - €500,000</option>
+                    <option value="500000-1000000">€500,000 - €1,000,000</option>
+                    <option value="1000000+">€1,000,000+</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="propertyLocation" className="block text-sm font-medium text-gray-700">
+                    Preferred Location in Italy
+                  </label>
+                  <input
+                    id="propertyLocation"
+                    name="propertyLocation"
+                    type="text"
+                    value={formData.propertyLocation}
+                    onChange={handleChange}
+                    placeholder="e.g., Tuscany, Milan, Sicily"
+                    className="mt-1 block w-full px-3 py-2 bg-white/50 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex-1 py-3 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 flex justify-center items-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-emerald-600 hover:from-purple-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  {loading ? 'Creating account...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        {/* Alternative Registration */}
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Are you a professional?{' '}
+            <Link href="/register/professional" className="font-medium text-purple-600 hover:text-purple-500">
+              Register as a professional
+            </Link>
+          </p>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function BuyerRegistrationPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    }>
-      <BuyerRegistrationForm />
-    </Suspense>
-  );
+  )
 }
