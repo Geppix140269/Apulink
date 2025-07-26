@@ -1,66 +1,109 @@
-// Path: middleware.ts
-// Middleware for protecting routes based on authentication
+// Path: /middleware.ts
+// Middleware for authentication and route protection
 
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Protected routes that require authentication
   const protectedRoutes = [
     '/my-apulink',
     '/projects',
+    '/documents',
+    '/messages',
     '/settings',
-    '/professional/dashboard',
-    '/buyer/dashboard',
-    '/admin',
-  ];
+    '/team',
+    '/budget',
+    '/calendar',
+    '/leads',
+    '/invoices',
+  ]
 
-  // Auth routes that should redirect if already logged in
-  const authRoutes = ['/login', '/register', '/auth'];
+  const isProtectedRoute = protectedRoutes.some(route => 
+    request.nextUrl.pathname.startsWith(route)
+  )
 
-  const path = req.nextUrl.pathname;
-
-  // Check if the current path is protected
-  const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
-  const isAuthRoute = authRoutes.some(route => path.startsWith(route));
-
-  // Redirect to login if accessing protected route without session
-  if (isProtectedRoute && !session) {
-    const redirectUrl = new URL('/login', req.url);
-    redirectUrl.searchParams.set('redirect', path);
-    return NextResponse.redirect(redirectUrl);
+  // If trying to access a protected route without being authenticated
+  if (isProtectedRoute && !user) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname)
+    return NextResponse.redirect(redirectUrl)
   }
 
-  // Redirect to appropriate dashboard if accessing auth routes while logged in
-  if (isAuthRoute && session) {
-    // Determine user role and redirect accordingly
-    // For now, redirect to a general dashboard
-    return NextResponse.redirect(new URL('/my-apulink', req.url));
+  // If authenticated and trying to access login/register pages
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname.startsWith('/register'))) {
+    return NextResponse.redirect(new URL('/my-apulink', request.url))
   }
 
-  // Role-based route protection
-  if (session) {
-    // Admin routes
-    if (path.startsWith('/admin') && !session.user.email?.endsWith('@apulink.com')) {
-      return NextResponse.redirect(new URL('/my-apulink', req.url));
-    }
-
-    // You can add more role-based checks here
-  }
-
-  return res;
+  return response
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - api routes
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api).*)',
   ],
-};
+}
