@@ -1,265 +1,323 @@
-// Path: app/(authenticated)/layout.tsx
-// Layout for authenticated pages with navigation
+// app/(authenticated)/layout.tsx
+'use client'
 
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  Home, 
-  FileText, 
-  Users, 
-  Settings, 
-  LogOut,
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
+import { User } from '@supabase/supabase-js'
+import {
+  Home,
+  Search,
+  Users,
+  Calendar,
+  FileText,
+  Settings,
   Menu,
   X,
+  ChevronLeft,
   Bell,
-  User,
+  User as UserIcon,
+  LogOut,
+  ChevronDown,
   Briefcase,
-  FolderOpen
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+  MessageSquare,
+  Bot,
+  DollarSign,
+  CreditCard,
+  PlusCircle,
+  Building2
+} from 'lucide-react'
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-  roles: Array<'buyer' | 'professional' | 'admin'>;
+interface AuthenticatedLayoutProps {
+  children: React.ReactNode
 }
 
-const navItems: NavItem[] = [
-  {
-    label: 'Dashboard',
-    href: '/my-apulink',
-    icon: Home,
-    roles: ['buyer', 'professional', 'admin'],
-  },
-  {
-    label: 'Projects',
-    href: '/projects',
-    icon: FolderOpen,
-    roles: ['buyer', 'professional'],
-  },
-  {
-    label: 'Documents',
-    href: '/documents',
-    icon: FileText,
-    roles: ['buyer', 'professional'],
-  },
-  {
-    label: 'Team',
-    href: '/team',
-    icon: Users,
-    roles: ['buyer'],
-  },
-  {
-    label: 'Clients',
-    href: '/clients',
-    icon: Briefcase,
-    roles: ['professional'],
-  },
-  {
-    label: 'Settings',
-    href: '/settings',
-    icon: Settings,
-    roles: ['buyer', 'professional', 'admin'],
-  },
-];
+interface UserProfile {
+  id: string
+  fullName: string
+  email: string
+  role: 'buyer' | 'professional'
+  avatar?: string
+}
 
-function AuthenticatedLayoutContent({ children }: { children: React.ReactNode }) {
-  const { user, role, signOut, loading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState(0);
+export default function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          router.push('/login')
+          return
+        }
+        setUser(user)
+
+        // Fetch user profile from your profiles table
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        if (profile) {
+          setUserProfile({
+            id: profile.id,
+            fullName: profile.full_name || profile.fullName || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+            role: profile.role || 'buyer',
+            avatar: profile.avatar_url || profile.avatar
+          })
+        } else {
+          // Fallback if no profile exists
+          setUserProfile({
+            id: user.id,
+            fullName: user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+            role: 'buyer'
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+        router.push('/login')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [user, loading, router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+    checkUser()
 
-  if (!user || !role) {
-    return null;
-  }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        router.push('/login')
+      }
+    })
 
-  const filteredNavItems = navItems.filter(item => item.roles.includes(role));
+    return () => subscription.unsubscribe()
+  }, [router, supabase])
 
   const handleSignOut = async () => {
-    await signOut();
-    router.push('/');
-  };
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
+  const navigation = userProfile?.role === 'professional' ? [
+    { name: 'Dashboard', href: '/my-apulink', icon: Home },
+    { name: 'Projects', href: '/projects', icon: Briefcase },
+    { name: 'Leads', href: '/leads', icon: Users },
+    { name: 'Calendar', href: '/calendar', icon: Calendar },
+    { name: 'Documents', href: '/documents', icon: FileText },
+    { name: 'Invoices', href: '/invoices', icon: DollarSign },
+    { name: 'Messages', href: '/messages', icon: MessageSquare },
+    { name: 'Settings', href: '/settings', icon: Settings },
+  ] : [
+    { name: 'Dashboard', href: '/my-apulink', icon: Home },
+    { name: 'Projects', href: '/projects', icon: Briefcase },
+    { name: 'Find Professionals', href: '/professionals', icon: Search },
+    { name: 'Team', href: '/team', icon: Users },
+    { name: 'Documents', href: '/documents', icon: FileText },
+    { name: 'Budget', href: '/budget', icon: CreditCard },
+    { name: 'Messages', href: '/messages', icon: MessageSquare },
+    { name: 'Settings', href: '/settings', icon: Settings },
+  ]
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r px-6 pb-4">
-          {/* Logo */}
-          <div className="flex h-16 shrink-0 items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">A</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">Apulink</span>
-            </Link>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex flex-1 flex-col">
-            <ul role="list" className="flex flex-1 flex-col gap-y-7">
-              <li>
-                <ul role="list" className="-mx-2 space-y-1">
-                  {filteredNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = pathname.startsWith(item.href);
-
-                    return (
-                      <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
-                            isActive
-                              ? 'bg-blue-50 text-blue-600'
-                              : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                          }`}
-                        >
-                          <Icon className={`h-6 w-6 shrink-0 ${
-                            isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'
-                          }`} />
-                          {item.label}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-
-              {/* User section at bottom */}
-              <li className="mt-auto">
-                <div className="border-t pt-4">
-                  <div className="flex items-center gap-x-4 px-2 py-3">
-                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="h-6 w-6 text-gray-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {user.profile?.fullName || user.email}
-                      </p>
-                      <p className="text-xs text-gray-500 capitalize">{role}</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleSignOut}
-                    className="group flex w-full gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-blue-600"
-                  >
-                    <LogOut className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-blue-600" />
-                    Sign out
-                  </button>
-                </div>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
-
-      {/* Mobile header */}
-      <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(true)}
-          className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-        <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
-          {filteredNavItems.find(item => pathname.startsWith(item.href))?.label || 'Dashboard'}
-        </div>
-        <button className="relative p-2">
-          <Bell className="h-6 w-6 text-gray-600" />
-          {notifications > 0 && (
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" />
-          )}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="relative z-50 lg:hidden">
-          <div
-            className="fixed inset-0 bg-gray-900/80"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className="fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">A</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">Apulink</span>
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar - Desktop */}
+      <div className="hidden md:flex md:flex-shrink-0">
+        <div className="flex flex-col w-64">
+          <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto bg-white border-r border-gray-200">
+            <div className="flex items-center flex-shrink-0 px-4">
+              <Link href="/my-apulink" className="flex items-center">
+                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-emerald-600 bg-clip-text text-transparent">
+                  Apulink
+                </span>
               </Link>
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                className="-m-2.5 rounded-md p-2.5 text-gray-700"
-              >
-                <X className="h-6 w-6" />
+            </div>
+            
+            {/* User info in sidebar */}
+            <div className="mt-8 px-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-emerald-600 flex items-center justify-center text-white font-semibold">
+                    {userProfile?.fullName.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">
+                    {userProfile?.fullName}
+                  </p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {userProfile?.role}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <nav className="mt-8 flex-1 px-2 space-y-1">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`
+                      group flex items-center px-2 py-2 text-sm font-medium rounded-md
+                      ${isActive
+                        ? 'bg-gradient-to-r from-purple-50 to-emerald-50 text-purple-600 border-l-4 border-purple-600'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }
+                    `}
+                  >
+                    <item.icon
+                      className={`
+                        mr-3 h-5 w-5
+                        ${isActive ? 'text-purple-600' : 'text-gray-400 group-hover:text-gray-500'}
+                      `}
+                    />
+                    {item.name}
+                  </Link>
+                )
+              })}
+            </nav>
+
+            {/* Trullo AI Assistant */}
+            <div className="px-4 py-4 border-t border-gray-200">
+              <button className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-50 to-emerald-50 rounded-lg hover:from-purple-100 hover:to-emerald-100 transition-colors">
+                <div className="flex items-center">
+                  <Bot className="h-5 w-5 text-purple-600 mr-3" />
+                  <span className="text-sm font-medium text-gray-900">Trullo Assistant</span>
+                </div>
+                <ChevronLeft className="h-4 w-4 text-gray-400" />
               </button>
             </div>
-            <nav className="mt-6">
-              <ul className="-my-2 divide-y divide-gray-100">
-                {filteredNavItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = pathname.startsWith(item.href);
-
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`group flex items-center gap-x-3 rounded-md py-4 text-base leading-7 font-semibold ${
-                          isActive ? 'text-blue-600' : 'text-gray-900'
-                        }`}
-                      >
-                        <Icon className={`h-6 w-6 ${
-                          isActive ? 'text-blue-600' : 'text-gray-400'
-                        }`} />
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Main content */}
-      <main className="lg:pl-72">
-        {children}
-      </main>
-    </div>
-  );
-}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Top navigation bar */}
+        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
+          {/* Mobile menu button */}
+          <button
+            type="button"
+            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 md:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <span className="sr-only">Open sidebar</span>
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
 
-export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <AuthProvider>
-      <AuthenticatedLayoutContent>{children}</AuthenticatedLayoutContent>
-    </AuthProvider>
-  );
+          <div className="flex-1 px-4 flex justify-between">
+            <div className="flex-1 flex">
+              {/* Search can go here if needed */}
+            </div>
+            <div className="ml-4 flex items-center md:ml-6 space-x-4">
+              {/* Notifications */}
+              <button className="p-2 text-gray-400 hover:text-gray-500 relative">
+                <span className="sr-only">View notifications</span>
+                <Bell className="h-6 w-6" />
+                <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+              </button>
+
+              {/* Profile dropdown */}
+              <div className="relative">
+                <button
+                  className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                >
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-emerald-600 flex items-center justify-center text-white font-semibold">
+                    {userProfile?.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <ChevronDown className="ml-2 h-4 w-4 text-gray-400" />
+                </button>
+
+                {isUserMenuOpen && (
+                  <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      <Link
+                        href="/settings"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <UserIcon className="mr-3 h-4 w-4" />
+                        Profile
+                      </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <LogOut className="mr-3 h-4 w-4" />
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="pt-2 pb-3 space-y-1">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`
+                      block pl-3 pr-4 py-2 border-l-4 text-base font-medium
+                      ${isActive
+                        ? 'bg-purple-50 border-purple-500 text-purple-700'
+                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                      }
+                    `}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <div className="flex items-center">
+                      <item.icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Page content */}
+        <main className="flex-1 relative overflow-y-auto focus:outline-none">
+          {children}
+        </main>
+      </div>
+    </div>
+  )
 }
