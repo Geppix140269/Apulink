@@ -5,150 +5,134 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
-type UserRole = 'buyer' | 'professional' | 'admin' | null;
+const supabase = createClient();
+
+interface AuthUser extends User {
+  userRole?: 'buyer' | 'professional' | 'admin';
+}
 
 interface AuthContextType {
-  user: User | null;
-  role: UserRole;
+  user: AuthUser | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, role: UserRole) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, role: 'buyer' | 'professional') => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<UserRole>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    checkUser();
+    // Check active session
+    const checkSession = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Get user role from profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          
+          setUser({ ...user, userRole: profile?.role });
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Listen for changes on auth state (sign in, sign out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        setUser(session.user);
-        getUserRole(session.user.id);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUser({ ...session.user, userRole: profile?.role });
       } else {
         setUser(null);
-        setRole(null);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function checkUser() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        await getUserRole(session.user.id);
-      }
-    } catch (error) {
-      console.error('Error checking user:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function getUserRole(userId: string) {
-    try {
-      // First check if user is a professional
-      const { data: professional } = await supabase
-        .from('professionals')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-
-      if (professional) {
-        setRole('professional');
-        return;
-      }
-
-      // Then check if user is a buyer
-      const { data: buyer } = await supabase
-        .from('buyers')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-
-      if (buyer) {
-        setRole('buyer');
-        return;
-      }
-
-      // Check user metadata for role
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.user_metadata?.role) {
-        setRole(user.user_metadata.role as UserRole);
-      } else {
-        setRole('buyer'); // Default to buyer if no role found
-      }
-    } catch (error) {
-      console.error('Error getting user role:', error);
-      setRole('buyer'); // Default to buyer on error
-    }
-  }
-
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (!error && data.user) {
-      setUser(data.user);
-      await getUserRole(data.user.id);
-    }
+    if (error) throw error;
 
-    return { error };
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+      
+      const userWithRole = { ...data.user, userRole: profile?.role };
+      setUser(userWithRole);
+      
+      // Redirect based on role
+      if (profile?.role === 'buyer') {
+        router.push('/my-apulink/buyer');
+      } else if (profile?.role === 'professional') {
+        router.push('/my-apulink/professional');
+      } else {
+        router.push('/dashboard');
+      }
+    }
   };
 
-  const signUp = async (email: string, password: string, userRole: UserRole = 'buyer') => {
-    const { error, data } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, role: 'buyer' | 'professional') => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          role: userRole,
-        },
-      },
     });
 
-    if (!error && data.user) {
-      setUser(data.user);
-      setRole(userRole);
-    }
+    if (error) throw error;
 
-    return { error };
+    if (data.user) {
+      // Create profile with role
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          role: role,
+        });
+
+      if (profileError) throw profileError;
+    }
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setRole(null);
     router.push('/');
   };
 
-  const value = {
-    user,
-    role,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
