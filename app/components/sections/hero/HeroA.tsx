@@ -19,7 +19,7 @@ export default function HeroA({
   title = 'The All-in-One Platform for Managing Your Property Project in Puglia',
   subtitle = 'Certified Experts. Smart Tools. Full Control from Anywhere.',
   ctaText = 'Start Your Free Assessment',
-  ctaLink = '#assessment',
+  ctaLink = '/my-apulink/buyer',  // FIXED: Changed from '#assessment' to '/my-apulink/buyer'
   showStats = true
 }: HeroAProps) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -113,7 +113,6 @@ export default function HeroA({
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-slideUp">
             <Link 
               href={ctaLink}
-              onClick={(e) => scrollToSection(e, ctaLink)}
               className="btn-primary inline-flex items-center justify-center gap-2 text-lg"
             >
               {ctaText}
@@ -124,7 +123,7 @@ export default function HeroA({
               href="/professional/register"
               className="btn-glass inline-flex items-center justify-center gap-2 text-lg text-white hover:bg-white/20"
             >
-              I'm a Professional
+              I&apos;m a Professional
               <Shield className="w-5 h-5" />
             </Link>
           </div>
