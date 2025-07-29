@@ -76,18 +76,14 @@ function ProfessionalRegistrationForm() {
     setLoading(true);
 
     try {
-      const { error } = await signUp(
-        formData.email,
-        formData.password,
-        'professional'
-      );
-      
-      if (error) {
-        setError(error.message);
-      } else {
-        // After successful signup, redirect to success page
-        router.push('/register/success?type=professional');
-      }
+      await signUp(
+  formData.email,
+  formData.password,
+  'professional'
+);
+
+// After successful signup, redirect to success page
+router.push('/register/success?type=professional');
     } catch (err: any) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
