@@ -19,7 +19,7 @@ export default function HeroA({
   title = 'The All-in-One Platform for Managing Your Property Project in Puglia',
   subtitle = 'Certified Experts. Smart Tools. Full Control from Anywhere.',
   ctaText = 'Start Your Free Assessment',
-  ctaLink = '/my-apulink/buyer',  // FIXED: Changed from '#assessment' to '/my-apulink/buyer'
+  ctaLink = '/my-apulink',  // FIXED: Changed from '#assessment' to '/my-apulink/buyer'
   showStats = true
 }: HeroAProps) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
