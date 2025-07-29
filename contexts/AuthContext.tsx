@@ -5,7 +5,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '../lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
 const supabase = createClient();
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .eq('id', user.id)
             .single();
           
-          setUser({ ...user, userRole: profile?.role });
+          setUser({ ...user, userRole: profile?.role || undefined });
         }
       } catch (error) {
         console.error('Session check error:', error);
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('id', session.user.id)
           .single();
         
-        setUser({ ...session.user, userRole: profile?.role });
+        setUser({ ...session.user, userRole: profile?.role || undefined });
       } else {
         setUser(null);
       }
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', data.user.id)
         .single();
       
-      const userWithRole = { ...data.user, userRole: profile?.role };
+      const userWithRole = { ...data.user, userRole: profile?.role || undefined };
       setUser(userWithRole);
       
       // Redirect based on role
@@ -114,16 +114,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .insert({
           id: data.user.id,
-          email: data.user.email,
+          email: data.user.email || '',
           role: role,
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw profileError;
+      }
     }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Sign out error:', error);
+    }
     setUser(null);
     router.push('/');
   };
