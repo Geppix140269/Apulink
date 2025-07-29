@@ -128,7 +128,7 @@ const getMetricTrend = (growth: string, trend: string) => (
     </div>
   );
 
-  const getActivityIcon = (type) => {
+const getActivityIcon = (type: string) => {
     switch (type) {
       case 'survey': return <FileText className="w-4 h-4 text-blue-600" />;
       case 'signup': return <Users className="w-4 h-4 text-green-600" />;
