@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '../../../lib/supabase/client'
+import { createClient } from '../../../../lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import {
   Home,
