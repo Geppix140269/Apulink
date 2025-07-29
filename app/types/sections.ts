@@ -86,7 +86,7 @@ export const defaultHomepageConfig: SectionConfig[] = [
       headline: 'Your Trusted Partner for Italian Property Investment',
       subheadline: 'Connect with verified professionals and manage your entire property project in one platform',
       ctaText: 'Start Your Project',
-      ctaLink: '/register',
+      ctaLink: '/my-apulink',
       videoUrl: 'https://res.cloudinary.com/your-cloud/video/hero-bg.mp4'
     }
   },
