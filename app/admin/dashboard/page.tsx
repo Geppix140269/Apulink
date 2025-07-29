@@ -121,7 +121,7 @@ const DynamicApulinkDashboard = () => {
     setIsLoading(false);
   };
 
-  const getMetricTrend = (growth, trend) => (
+const getMetricTrend = (growth: string, trend: string) => (
     <div className={`flex items-center gap-1 text-sm ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
       {trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
       <span>{growth}</span>
