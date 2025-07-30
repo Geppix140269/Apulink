@@ -259,7 +259,7 @@ export default function TeamManager() {
     }
   };
 
-  const roleColors = {
+  const roleColors: Record<string, string> = {
     architect: 'bg-blue-100 text-blue-700',
     engineer: 'bg-purple-100 text-purple-700',
     lawyer: 'bg-green-100 text-green-700',
