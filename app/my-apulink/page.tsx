@@ -19,7 +19,7 @@ import GrantCalculator from './components/GrantCalculator';
 import NotificationCenter from './components/NotificationCenter';
 
 // Import icons for quick actions
-import { Calculator, Upload, MessageSquare, ArrowUpRight, Loader2 } from 'lucide-react';
+import { Calculator, Upload, MessageSquare, ArrowUpRight, Loader2, X } from 'lucide-react';
 
 export default function MyApulinkDashboard() {
   const router = useRouter();
