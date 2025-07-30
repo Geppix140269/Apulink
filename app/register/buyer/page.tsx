@@ -9,20 +9,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { Eye, EyeOff, ArrowRight } from 'lucide-react'
-import type { Metadata, Viewport } from 'next'
-
-// Export metadata separately
-export const metadata: Metadata = {
-  title: 'Register as Buyer - Apulink',
-  description: 'Create your buyer account on Apulink to connect with property professionals in Italy'
-}
-
-// Export viewport separately
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  themeColor: '#9333ea'
-}
 
 export default function BuyerRegistrationPage() {
   const router = useRouter()
