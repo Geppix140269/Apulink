@@ -1,0 +1,280 @@
+# 🏛️ APULINK PROJECT DASHBOARD
+
+## 🎯 Project Overview
+
+### Vision Statement
+> **Apulink**: The bridge connecting international property investors with Italian real estate professionals, managing the complete lifecycle of property purchases, renovations, and grant applications in Italy.
+
+### Key Metrics
+- **Status**: MVP with working buyer dashboard ✅
+- **Tech Stack**: Next.js 14 + TypeScript + Supabase + Tailwind CSS
+- **Launch Target**: 3 weeks (Week 3 includes payment integration)
+- **Revenue Model**: 1% success fee (max €5,000) + Professional subscriptions (€49-299/month)
+
+---
+
+## 🚀 Sprint Board
+
+### Week 1: Make Dashboard Real 🔴
+- [ ] Connect existing UI to Supabase tables
+- [ ] Implement document upload to Storage
+- [ ] Create project CRUD operations
+- [ ] Set up real-time notifications
+
+### Week 2: Professional Side 🟡
+- [ ] Build professional dashboard
+- [ ] Implement invitation system
+- [ ] Create quote/proposal workflow
+- [ ] Add messaging between users
+
+### Week 3: Payments & Launch 🟢
+- [ ] Stripe subscription integration
+- [ ] Invoice generation
+- [ ] Email notifications (Resend)
+- [ ] Production deployment
+
+---
+
+## 🏗️ Architecture Map
+
+### Database Schema (35 Tables)
+
+#### User Management
+```
+✅ auth.users          → Supabase native auth
+✅ buyers              → Extended buyer profiles (KYC, preferences)
+✅ professionals       → Professional profiles (certifications, rates)
+```
+
+#### Project Core
+```
+✅ projects            → Main property/renovation projects
+✅ project_team        → Team assignments
+✅ project_messages    → Internal communications
+✅ project_milestones  → Timeline tracking
+✅ documents           → Legal documents, permits
+✅ notifications       → Real-time alerts
+✅ budget_items        → Cost breakdowns
+✅ transactions        → Payment records
+```
+
+#### Service Marketplace
+```
+✅ services            → Available professional services
+✅ service_categories  → Main categories
+✅ service_subcategories → Detailed service types
+✅ professional_services → Services by professional
+✅ service_bundles     → Package deals
+✅ pricing_models      → Hourly, fixed, percentage
+```
+
+#### Matching Engine
+```
+✅ inquiries           → Buyer requests
+✅ matches             → Confirmed connections
+✅ quotes              → Professional proposals
+✅ activity_log        → User activity tracking
+```
+
+---
+
+## 💰 Business Model
+
+### Professional Tiers
+| Tier | Price | Features |
+|------|-------|----------|
+| Basic | €49/month | 5 active projects |
+| Professional | €99/month | Unlimited projects |
+| Agency | €299/month | Team features |
+
+### Buyer Model
+- **Browse & Connect**: Free
+- **Success Fee**: 1% of property value (max €5,000)
+- **Premium Storage**: €9.99/month after 1 year
+
+### Key Financial Rules
+- Grant calculations: 45% of eligible renovation costs (Superbonus)
+- Platform fee: 1% of property value (max €5,000) on completion
+
+---
+
+## 🛠️ Development Status
+
+### ✅ Completed Features
+1. **Buyer Dashboard** (1370 lines - needs refactoring)
+   - Project overview with metrics
+   - Property portfolio management
+   - Document vault with version control
+   - Timeline tracking with milestones
+   - Budget scenarios and grant calculator
+   - Team collaboration UI
+   - Professional search interface
+
+2. **Authentication System**
+   - Email + Google OAuth
+   - Protected routes
+   - User context management
+
+3. **Design System**
+   - Purple (#9333ea) to Emerald (#059669) gradients
+   - Glass morphism effects
+   - Mobile-first responsive design
+   - 8-language support structure
+
+### ⚠️ In Progress
+- Professional Dashboard (needs to be built)
+- Payment Integration (Stripe setup pending)
+- Real Data Connection (currently using mock data)
+- Email System (Resend configured, needs templates)
+
+### ❌ TODO
+- Professional subscription plans implementation
+- Payment processing backend
+- Real-time messaging backend
+- Document upload functionality
+- Grant application workflow
+- Mobile app version (PWA)
+
+---
+
+## 📁 Key Files & Routes
+
+### Critical Files
+```
+/app/my-apulink/page.tsx          # Main dashboard (66KB!)
+/contexts/AuthContext.tsx         # Auth logic
+/lib/supabase/client.ts          # Database connection
+/app/types/sections.ts           # Homepage config
+/app/admin/dashboard/page.tsx    # Admin panel (26KB)
+```
+
+### Public Routes
+- `/` - Homepage with CTA
+- `/login` - User authentication
+- `/register` - User type selection
+- `/register/buyer` - Buyer registration
+- `/register/professional` - Professional registration
+
+### Protected Routes
+- `/my-apulink` - Main dashboard (requires auth)
+- `/my-apulink/projects/[id]` - Individual project view
+- `/admin/dashboard` - Admin panel
+
+---
+
+## 🔥 Critical Issues & Risks
+
+### Technical Issues
+1. **Email rate limit** - Supabase email limits during testing
+2. **Mock data only** - Dashboard not connected to real database
+3. **No payment processing** - Stripe integration pending
+4. **Professional features missing** - Only buyer side complete
+5. **Large file sizes** - Dashboard component is 66KB (needs refactoring)
+
+### Security Requirements
+- [ ] Encrypt sensitive documents at rest
+- [ ] Implement 2FA for high-value accounts
+- [ ] Regular backups of critical data
+- [ ] GDPR compliance for EU users
+- [ ] RLS policies for all tables
+- [ ] Document versioning for legal compliance
+
+### Business Risks
+- **Legal Compliance**: Handling real money and legal documents
+- **Data Security**: Sensitive property and financial information
+- **Professional Liability**: Need insurance coverage
+- **Platform Reliability**: Must be production-ready
+
+---
+
+## 📊 User Flows
+
+### Buyer Journey
+1. **Registration** → Creates entry in `buyers` table
+2. **Project Creation** → New record in `projects` table
+3. **Document Upload** → Files in Supabase Storage
+4. **Team Building** → Search professionals, create inquiries
+5. **Team Assignment** → Records in `project_team`
+6. **Collaboration** → Messages, documents, milestones
+7. **Payments** → Transactions linked to quotes
+
+### Professional Journey
+1. **Registration** → Creates entry in `professionals`
+2. **Service Setup** → Populates `professional_services`
+3. **Receive Inquiries** → Notified via notifications
+4. **Send Quotes** → Creates records in `quotes`
+5. **Join Projects** → Added to `project_team`
+6. **Deliver Services** → Update milestones, upload docs
+7. **Get Paid** → Recorded in `transactions`
+
+---
+
+## 🚨 Action Items
+
+### Immediate (This Week)
+1. **Connect Real Data** - Replace all mock data with Supabase queries
+2. **Fix Dashboard Size** - Refactor 66KB component into smaller modules
+3. **Document Upload** - Implement actual file upload to Supabase Storage
+4. **Test Auth Flow** - Ensure all protected routes work correctly
+
+### Next Sprint
+1. **Professional Dashboard** - Mirror buyer features for professionals
+2. **Stripe Integration** - Set up subscription and payment processing
+3. **Email Templates** - Create all transactional email templates
+4. **Mobile Testing** - Ensure responsive design works on all devices
+
+### Pre-Launch Checklist
+- [ ] Security audit completed
+- [ ] GDPR compliance verified
+- [ ] Terms of Service finalized
+- [ ] Privacy Policy updated
+- [ ] Payment processing tested
+- [ ] Backup strategy implemented
+- [ ] Professional insurance obtained
+- [ ] Beta testers onboarded
+
+---
+
+## 📝 Quick Reference
+
+### Database Credentials
+```
+Project: Apulink Production
+Stack: Next.js 14 + TypeScript + Supabase + Tailwind
+Live URL: apulink.com
+GitHub: [Repository URL]
+```
+
+### Brand Guidelines
+- **Primary**: Purple (#9333ea) to Emerald (#059669)
+- **Style**: Glass morphism, modern, professional
+- **Typography**: Clean, readable, accessible
+- **Voice**: Professional yet approachable
+
+### Support Contacts
+- **CEO**: Giuseppe (Product decisions)
+- **CTO**: AI Assistant (Technical implementation)
+- **Priority Support**: Real money + legal documents = HIGH PRIORITY
+
+---
+
+## 🎯 Success Metrics
+
+### Launch Goals
+- [ ] 10 beta professionals onboarded
+- [ ] 5 complete property projects
+- [ ] €50,000 in property value managed
+- [ ] 95% uptime in first month
+- [ ] <3s page load times
+
+### Long-term KPIs
+- Professional retention rate
+- Average project completion time
+- Grant approval success rate
+- Platform transaction volume
+- User satisfaction scores
+
+---
+
+*Last Updated: July 30, 2025*
+*This is a production platform handling real money and legal documents. Every decision must prioritize security, compliance, and reliability.*
