@@ -1,20 +1,22 @@
 // Path: app/my-apulink/page.tsx
 // Fixed modular dashboard with correct imports
 'use client';
-// Add this line at the very top of the file (after imports)
+
+// Force dynamic rendering - prevents static generation errors
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext'; // Fixed path
+import { useAuth } from '../../contexts/AuthContext';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-// Import all dashboard components
+// Import dashboard components (only the ones that exist)
 import DashboardLayout from './components/DashboardLayout';
 import DashboardMetrics from './components/DashboardMetrics';
 import ProjectList from './components/ProjectList';
 import DocumentVault from './components/DocumentVault';
-import TeamManager from './components/TeamManager';
+// Removed TeamManager import - component doesn't exist
 import Timeline from './components/Timeline';
 import BudgetPlanner from './components/BudgetPlanner';
 import GrantCalculator from './components/GrantCalculator';
@@ -310,6 +312,12 @@ export default function MyApulinkDashboard() {
       {/* Team Section */}
       {activeSection === 'team' && (
         <div className="max-w-7xl mx-auto">
+          <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-6">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+              Team Collaboration
+            </h3>
+            <p className="text-gray-600">Team collaboration features coming soon. Connect with your architects, surveyors, and other professionals here.</p>
+          </div>
         </div>
       )}
 
