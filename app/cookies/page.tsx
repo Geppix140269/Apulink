@@ -1,4 +1,19 @@
 // PATH: app/cookies/page.tsx
+import type { Metadata, Viewport } from 'next'
+
+// Export metadata separately
+export const metadata: Metadata = {
+  title: 'Cookie Policy - Apulink',
+  description: 'Learn about how Apulink uses cookies to improve your experience'
+}
+
+// Export viewport separately
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#9333ea'
+}
+
 export default function CookiePolicyPage() {
   return (
     <div className="min-h-screen bg-stone-50 py-8">
