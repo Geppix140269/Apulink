@@ -5,6 +5,20 @@
 
 import React, { useState } from 'react';
 import { Calendar, Users, Euro, TrendingUp, AlertCircle, CheckCircle, Clock, Search, LucideIcon } from 'lucide-react';
+import type { Metadata, Viewport } from 'next'
+
+// Export metadata separately
+export const metadata: Metadata = {
+  title: 'Admin Dashboard - Apulink',
+  description: 'Manage professionals, inquiries, and financials'
+}
+
+// Export viewport separately
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#9333ea'
+}
 
 // TypeScript interfaces
 interface StatCardProps {
