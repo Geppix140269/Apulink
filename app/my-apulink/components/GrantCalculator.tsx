@@ -1,9 +1,11 @@
 // app/my-apulink/components/GrantCalculator.tsx
+// Dashboard component version - simplified and integrated
 import React, { useState, useEffect } from 'react';
 import { 
   Calculator, Euro, CheckCircle, Info, TrendingUp, 
   FileText, Download, AlertCircle, Loader2, Building2,
-  MapPin, Calendar, Briefcase, Shield
+  MapPin, Calendar, Briefcase, Shield, Sparkles,
+  Hotel, Store, Tractor, Home
 } from 'lucide-react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
@@ -41,10 +43,10 @@ export default function GrantCalculator({ projectId, onCalculation }: GrantCalcu
   const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
 
   const propertyTypes = [
-    { value: 'tourism', label: 'Tourism Property (Hotel, B&B)', percentage: 45 },
-    { value: 'agricultural', label: 'Agricultural/Agriturismo', percentage: 45 },
-    { value: 'commercial', label: 'Commercial Property', percentage: 40 },
-    { value: 'residential', label: 'Residential (Special Cases)', percentage: 35 }
+    { value: 'tourism', label: 'Tourism Property (Hotel, B&B)', percentage: 45, icon: Hotel },
+    { value: 'agricultural', label: 'Agricultural/Agriturismo', percentage: 45, icon: Tractor },
+    { value: 'commercial', label: 'Commercial Property', percentage: 40, icon: Store },
+    { value: 'residential', label: 'Residential (Special Cases)', percentage: 35, icon: Home }
   ];
 
   const eligibleExpenses = [
@@ -58,7 +60,32 @@ export default function GrantCalculator({ projectId, onCalculation }: GrantCalcu
 
   useEffect(() => {
     loadGrantRequirements();
-  }, [propertyType]);
+    if (projectId) {
+      loadProjectData();
+    }
+  }, [propertyType, projectId]);
+
+  async function loadProjectData() {
+    if (!projectId) return;
+    
+    try {
+      const { data: project } = await supabase
+        .from('projects')
+        .select('price, target_budget, property_type')
+        .eq('id', projectId)
+        .single();
+        
+      if (project) {
+        setPropertyValue(project.price?.toString() || '');
+        setRenovationCost(project.target_budget?.toString() || '');
+        if (project.property_type) {
+          setPropertyType(project.property_type);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading project data:', error);
+    }
+  }
 
   async function loadGrantRequirements() {
     // In a real app, this would load from database
@@ -208,24 +235,41 @@ export default function GrantCalculator({ projectId, onCalculation }: GrantCalcu
       {/* Header */}
       <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-6 md:p-8">
         <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">PIA Tourism Grant Calculator</h3>
-          <p className="text-gray-600">Calculate your potential grant savings for Puglia property investments</p>
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-full text-sm font-bold mb-4 shadow-lg">
+            <Sparkles className="w-4 h-4" />
+            PIA GRANT CALCULATOR
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Calculate Your PIA Tourism Grant</h3>
+          <p className="text-gray-600">
+            Puglia Region offers 45% grants for tourism properties. Calculate your savings instantly.
+          </p>
         </div>
 
         {/* Property Type Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-          <select
-            value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {propertyTypes.map(type => (
-              <option key={type.value} value={type.value}>
-                {type.label} - {type.percentage}% Grant
-              </option>
-            ))}
-          </select>
+          <label className="block text-sm font-medium text-gray-700 mb-3">Property Type</label>
+          <div className="grid grid-cols-2 gap-3">
+            {propertyTypes.map(type => {
+              const Icon = type.icon;
+              return (
+                <button
+                  key={type.value}
+                  onClick={() => setPropertyType(type.value)}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    propertyType === type.value
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300'
+                  }`}
+                >
+                  <Icon className={`w-6 h-6 mx-auto mb-2 ${
+                    propertyType === type.value ? 'text-blue-600' : 'text-gray-400'
+                  }`} />
+                  <p className="text-sm font-medium">{type.label}</p>
+                  <p className="text-xs text-blue-600 font-bold mt-1">{type.percentage}% Grant</p>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Input Fields */}
@@ -340,7 +384,7 @@ export default function GrantCalculator({ projectId, onCalculation }: GrantCalcu
                     {req.isMet ? (
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     ) : (
-                      <Circle className="w-4 h-4 text-gray-400" />
+                      <div className="w-3 h-3 bg-gray-400 rounded-full" />
                     )}
                   </div>
                   <div className="flex-1">
