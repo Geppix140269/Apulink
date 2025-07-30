@@ -1,5 +1,5 @@
 // app/my-apulink/components/DocumentVault.tsx
-// Document management system with proper TypeScript types
+// Document management system with correct data handling
 
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Eye, Users, Upload, Filter, Search, Loader2, Shield, CheckCircle } from 'lucide-react';
@@ -23,13 +23,6 @@ interface Document {
     buyer_id: string;
   };
   profiles?: {
-    first_name: string;
-    last_name: string;
-  };
-}
-
-interface TeamMember {
-  professionals: {
     first_name: string;
     last_name: string;
   };
@@ -100,7 +93,8 @@ export default function DocumentVault({ projectId, userId }: DocumentVaultProps)
           const { data: teamAccess, error: teamError } = await supabase
             .from('project_team')
             .select(`
-              professionals!inner (
+              professional_id,
+              professionals (
                 first_name,
                 last_name
               )
@@ -113,12 +107,17 @@ export default function DocumentVault({ projectId, userId }: DocumentVaultProps)
             return { ...doc, shared_with: [] };
           }
 
-          // Explicitly type the teamAccess data
-          const typedTeamAccess = teamAccess as TeamMember[] | null;
-          
-          const sharedWith = typedTeamAccess?.map(
-            (member: TeamMember) => `${member.professionals.first_name} ${member.professionals.last_name}`
-          ) || [];
+          // Handle the data structure properly
+          const sharedWith = teamAccess?.map((member: any) => {
+            // Check if professionals is an array or object
+            if (Array.isArray(member.professionals) && member.professionals.length > 0) {
+              const prof = member.professionals[0];
+              return `${prof.first_name} ${prof.last_name}`;
+            } else if (member.professionals && !Array.isArray(member.professionals)) {
+              return `${member.professionals.first_name} ${member.professionals.last_name}`;
+            }
+            return 'Unknown';
+          }).filter(name => name !== 'Unknown') || [];
 
           return {
             ...doc,
