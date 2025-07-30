@@ -272,7 +272,7 @@ export default function MyApulinkDashboard() {
             <h3 className="text-lg font-semibold mb-4">Your Projects</h3>
             <ProjectList 
               userId={user.id} 
-              onProjectClick={(projectId) => {
+              onProjectClick={(projectId: string) => {
                 setSelectedProjectId(projectId);
                 setActiveSection('properties');
               }}
@@ -286,7 +286,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <ProjectList 
             userId={user.id}
-            onProjectClick={(projectId) => {
+            onProjectClick={(projectId: string) => {
               setSelectedProjectId(projectId);
             }}
           />
