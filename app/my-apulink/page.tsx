@@ -1,6 +1,8 @@
 // Path: app/my-apulink/page.tsx
 // Fixed modular dashboard with correct imports
 'use client';
+// Add this line at the very top of the file (after imports)
+export const dynamic = 'force-dynamic'
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
