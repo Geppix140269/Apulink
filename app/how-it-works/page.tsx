@@ -20,6 +20,20 @@ import {
   Calculator,
   HardHat
 } from 'lucide-react'
+import type { Metadata, Viewport } from 'next'
+
+// Export metadata separately
+export const metadata: Metadata = {
+  title: 'How It Works - Apulink',
+  description: 'Learn how Apulink connects property buyers with verified professionals in Italy'
+}
+
+// Export viewport separately
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#9333ea'
+}
 
 export default function HowItWorksPage() {
   const [activeView, setActiveView] = useState<'buyer' | 'professional'>('buyer')
