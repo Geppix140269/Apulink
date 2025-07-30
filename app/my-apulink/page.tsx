@@ -370,7 +370,7 @@ export default function MyApulinkDashboard() {
             <div className="p-6">
               <GrantCalculator 
                 projectId={selectedProjectId}
-                onCalculation={(calculation) => {
+                onCalculation={(calculation: any) => {
                   console.log('Grant calculated:', calculation);
                 }}
               />
