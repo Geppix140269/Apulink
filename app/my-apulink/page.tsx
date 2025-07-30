@@ -23,6 +23,15 @@ interface Activity {
   icon: string;
 }
 
+// Define types for components (since we don't have access to the actual component types)
+interface GrantCalculation {
+  totalCost?: number;
+  grantAmount?: number;
+  grantPercentage?: number;
+  eligibleCosts?: number;
+  [key: string]: any; // Allow for additional properties
+}
+
 export default function MyApulinkDashboard() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState('overview');
@@ -104,7 +113,7 @@ export default function MyApulinkDashboard() {
       const activity: Activity[] = [];
       
       if (notifications) {
-        notifications.forEach(n => {
+        notifications.forEach((n: any) => {
           activity.push({
             type: 'notification',
             title: n.title || 'New notification',
@@ -116,7 +125,7 @@ export default function MyApulinkDashboard() {
       }
       
       if (projects) {
-        projects.forEach(p => {
+        projects.forEach((p: any) => {
           activity.push({
             type: 'project',
             title: `Project update: ${p.name || 'Unnamed'}`,
@@ -194,7 +203,7 @@ export default function MyApulinkDashboard() {
   return (
     <DashboardLayout
       activeSection={activeSection}
-      onSectionChange={setActiveSection}
+      onSectionChange={(section: string) => setActiveSection(section)}
       onNotificationClick={() => setShowNotifications(true)}
     >
       {/* Overview Section */}
@@ -340,7 +349,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <GrantCalculator 
             projectId={selectedProjectId}
-            onCalculation={(calculation) => {
+            onCalculation={(calculation: GrantCalculation) => {
               console.log('Grant calculated:', calculation);
             }}
           />
@@ -370,7 +379,7 @@ export default function MyApulinkDashboard() {
             <div className="p-6">
               <GrantCalculator 
                 projectId={selectedProjectId}
-                onCalculation={(calculation: any) => {
+                onCalculation={(calculation: GrantCalculation) => {
                   console.log('Grant calculated:', calculation);
                 }}
               />
