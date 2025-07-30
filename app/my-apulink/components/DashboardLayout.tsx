@@ -1,4 +1,4 @@
-// app/my-apulink/components/DashboardLayout.tsx
+// Path: app/my-apulink/components/DashboardLayout.tsx
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
@@ -6,7 +6,7 @@ import {
   Calculator, Bell, Settings, LogOut, ChevronRight,
   Building2, Menu, X
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext'; // Fixed path - go up 3 levels
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface DashboardLayoutProps {
@@ -48,11 +48,13 @@ export default function DashboardLayout({
   ];
 
   useEffect(() => {
-    loadCounts();
-    const unsubscribe = subscribeToUpdates();
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+    if (user) {
+      loadCounts();
+      const unsubscribe = subscribeToUpdates();
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
+    }
   }, [user]);
 
   async function loadCounts() {
@@ -78,13 +80,21 @@ export default function DashboardLayout({
 
       setProjectCount(projCount || 0);
 
-      // Get documents count
-      const { count: docCount } = await supabase
-        .from('documents')
-        .select('*, projects!inner(buyer_id)', { count: 'exact', head: true })
-        .eq('projects.buyer_id', user.id);
+      // Get documents count - fixed query
+      const { data: projects } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('buyer_id', user.id);
 
-      setDocumentCount(docCount || 0);
+      if (projects && projects.length > 0) {
+        const projectIds = projects.map(p => p.id);
+        const { count: docCount } = await supabase
+          .from('documents')
+          .select('*', { count: 'exact', head: true })
+          .in('project_id', projectIds);
+
+        setDocumentCount(docCount || 0);
+      }
     } catch (error) {
       console.error('Error loading counts:', error);
     }
@@ -158,10 +168,10 @@ export default function DashboardLayout({
         {/* Logo Section */}
         <div className="p-6 border-b border-blue-100">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">A</span>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               MyApulink
             </h1>
           </div>
@@ -179,14 +189,14 @@ export default function DashboardLayout({
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2 ${
                 activeSection === item.id
-                  ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 shadow-lg'
-                  : 'text-gray-600 hover:bg-blue-50/50'
+                  ? 'bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 shadow-lg'
+                  : 'text-gray-600 hover:bg-purple-50/50'
               }`}
             >
               <item.icon className="w-5 h-5" />
               <span className="font-medium flex-1 text-left">{item.label}</span>
               {item.badge && (
-                <span className="text-xs px-2 py-1 bg-blue-600 text-white rounded-full">
+                <span className="text-xs px-2 py-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full">
                   {item.badge}
                 </span>
               )}
@@ -196,9 +206,9 @@ export default function DashboardLayout({
 
         {/* User Profile Section */}
         <div className="p-4 border-t border-blue-100">
-          <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl p-4">
+          <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-4">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-lg">
                   {getUserInitial()}
                 </span>
@@ -210,11 +220,11 @@ export default function DashboardLayout({
             </div>
             <div className="flex justify-between text-xs text-gray-600">
               <span>Active Projects</span>
-              <span className="font-semibold text-blue-700">{projectCount}</span>
+              <span className="font-semibold text-purple-700">{projectCount}</span>
             </div>
-            <div className="mt-2 w-full bg-blue-200 rounded-full h-2">
+            <div className="mt-2 w-full bg-purple-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full transition-all duration-500" 
+                className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-500" 
                 style={{ width: `${Math.min((projectCount / 5) * 100, 100)}%` }}
               />
             </div>
@@ -223,7 +233,7 @@ export default function DashboardLayout({
           <div className="flex gap-2 mt-4">
             <button 
               onClick={onNotificationClick}
-              className="relative flex-1 p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+              className="relative flex-1 p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
             >
               <Bell className="w-5 h-5 mx-auto" />
               {unreadCount > 0 && (
@@ -232,7 +242,7 @@ export default function DashboardLayout({
             </button>
             <button 
               onClick={() => router.push('/my-apulink/settings')}
-              className="flex-1 p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+              className="flex-1 p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
             >
               <Settings className="w-5 h-5 mx-auto" />
             </button>
@@ -251,7 +261,7 @@ export default function DashboardLayout({
         {/* Top Bar */}
         <div className="bg-white/70 backdrop-blur-lg border-b border-blue-100 px-4 md:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent pl-12 lg:pl-0">
+            <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent pl-12 lg:pl-0">
               {activeSection === 'overview' && `Welcome back! You have ${projectCount} active projects`}
               {activeSection === 'properties' && 'Your Active Property Projects'}
               {activeSection === 'documents' && 'Secure Document Vault'}
@@ -271,7 +281,7 @@ export default function DashboardLayout({
               </span>
               <button 
                 onClick={() => window.open('https://apulink.com/help', '_blank')}
-                className="hidden md:flex px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:shadow-lg transition-all items-center gap-2 font-semibold"
+                className="hidden md:flex px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full hover:shadow-lg transition-all items-center gap-2 font-semibold"
               >
                 <MessageSquare className="w-4 h-4" />
                 Ask Trullo
@@ -290,9 +300,9 @@ export default function DashboardLayout({
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => window.open('https://apulink.com/chat', '_blank')}
-          className="group relative w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110"
+          className="group relative w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full animate-ping opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full animate-ping opacity-20" />
           <MessageSquare className="w-7 h-7 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
           <span className="absolute -top-12 right-0 bg-gray-900 text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             Ask Trullo anything!
