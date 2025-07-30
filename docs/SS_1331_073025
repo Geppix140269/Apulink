@@ -1,0 +1,167 @@
+# APULINK PROJECT SUMMARY REPORT
+
+## Executive Summary
+Apulink is a production-ready property investment management platform connecting international buyers with Italian real estate professionals. The platform manages the complete lifecycle of property purchases, renovations, and grant applications in Italy.
+
+## Platform Overview
+
+### Core Value Proposition
+- **For Buyers**: Complete project management for Italian property investments
+- **For Professionals**: Subscription-based access to qualified international clients
+- **Key Differentiator**: Integrated grant calculation and document management (45% Superbonus)
+
+### Current Status
+- ✅ Authentication system (Email + Google OAuth)
+- ✅ Buyer dashboard UI (1370 lines - needs refactoring)
+- ✅ 35 database tables configured in Supabase
+- ⚠️ Using mock data - needs real data connection
+- ❌ Professional dashboard not built
+- ❌ Payment integration pending
+
+## Database Architecture (35 Tables)
+
+### 1. USER MANAGEMENT (3 tables)
+```
+auth.users          → Supabase native auth
+buyers              → Extended buyer profiles (KYC, preferences)
+professionals       → Professional profiles (certifications, rates)
+```
+
+### 2. PROJECT CORE (8 tables)
+```
+projects            → Main property/renovation projects
+project_team        → Team assignments (buyer ↔ professionals)
+project_messages    → Internal project communications
+project_milestones  → Timeline and deadline tracking
+documents           → Legal documents, permits, contracts
+notifications       → Real-time alerts and updates
+budget_items        → Detailed cost breakdowns
+transactions        → Payment records and invoices
+```
+
+### 3. SERVICE MARKETPLACE (6 tables)
+```
+services            → Available professional services
+service_categories  → Main categories (Legal, Construction, etc.)
+service_subcategories → Detailed service types
+professional_services → Services offered by each professional
+service_bundles     → Package deals
+pricing_models      → Hourly, fixed, percentage-based
+```
+
+### 4. MATCHING ENGINE (4 tables)
+```
+inquiries           → Buyer requests for professionals
+matches             → Confirmed buyer-professional connections
+quotes              → Professional proposals and estimates
+activity_log        → User activity tracking for matching
+```
+
+### 5. PROFESSIONAL DETAILS (3 tables)
+```
+professional_types  → Architect, Engineer, Lawyer, etc.
+certifications      → Professional credentials
+reviews             → Client feedback and ratings
+```
+
+### 6. GENERAL COMMUNICATION (1 table)
+```
+messages            → General platform messaging
+```
+
+## Data Flow & User Journey
+
+### Buyer Flow
+1. **Registration** → Creates entry in `buyers` table
+2. **Project Creation** → New record in `projects` table
+3. **Document Upload** → Files stored in Supabase Storage, metadata in `documents`
+4. **Team Building** → Search `professionals`, create `inquiries`
+5. **Team Assignment** → Records in `project_team`
+6. **Collaboration** → `project_messages`, `documents`, `milestones`
+7. **Payments** → `transactions` linked to `quotes`
+
+### Professional Flow
+1. **Registration** → Creates entry in `professionals` table
+2. **Service Setup** → Populates `professional_services`
+3. **Receive Inquiries** → Notified via `inquiries` and `notifications`
+4. **Send Quotes** → Creates records in `quotes`
+5. **Join Projects** → Added to `project_team`
+6. **Deliver Services** → Update `milestones`, upload to `documents`
+7. **Get Paid** → Recorded in `transactions`
+
+## Critical Business Rules
+
+### Financial
+- Grant calculations: 45% of eligible renovation costs (Superbonus)
+- Platform fee: 1% of property value (max €5,000) on completion
+- Professional subscriptions: €49-299/month based on tier
+
+### Security & Compliance
+- All documents require authenticated access
+- RLS policies enforce project-level permissions
+- Audit trail maintained in `activity_log`
+- Document versioning for legal compliance
+
+### Team Management
+- Only active team members can access project data
+- Buyers control team invitations
+- Professionals can decline/accept invitations
+- Role-based permissions (view/edit/admin)
+
+## Implementation Priorities
+
+### Week 1: Make Dashboard Real
+1. Connect existing UI to Supabase tables
+2. Implement document upload to Storage
+3. Create project CRUD operations
+4. Set up real-time notifications
+
+### Week 2: Professional Side
+1. Build professional dashboard
+2. Implement invitation system
+3. Create quote/proposal workflow
+4. Add messaging between users
+
+### Week 3: Payments & Launch
+1. Stripe subscription integration
+2. Invoice generation
+3. Email notifications (Resend)
+4. Production deployment
+
+## Technical Requirements
+
+### For Each Table
+- RLS policies for security
+- Indexes on foreign keys
+- Trigger for updated_at timestamps
+- Proper constraints and validations
+
+### Storage Buckets
+- `project-documents`: Private bucket for legal docs
+- `profile-images`: Public bucket for avatars
+- `company-assets`: Public bucket for professional portfolios
+
+### API Endpoints Needed
+- `/api/projects` - CRUD operations
+- `/api/documents/upload` - Secure file handling
+- `/api/team/invite` - Professional invitations
+- `/api/grants/calculate` - Grant estimations
+- `/api/notifications/subscribe` - Real-time updates
+
+## Risk Mitigation
+
+### Data Security
+- Encrypt sensitive documents at rest
+- Implement 2FA for high-value accounts
+- Regular backups of critical data
+- GDPR compliance for EU users
+
+### Business Continuity
+- Document versioning prevents data loss
+- Audit logs for dispute resolution
+- Clear terms of service
+- Professional liability insurance
+
+---
+
+**This is a real platform handling real money and legal documents. Every feature must be production-ready, secure, and legally compliant.**
