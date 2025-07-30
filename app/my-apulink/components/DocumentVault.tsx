@@ -1,4 +1,6 @@
 // app/my-apulink/components/DocumentVault.tsx
+// Document management system with proper TypeScript types
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Eye, Users, Upload, Filter, Search, Loader2, Shield, CheckCircle } from 'lucide-react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -17,6 +19,20 @@ interface Document {
   uploaded_by: string;
   file_url?: string;
   shared_with?: string[];
+  projects?: {
+    buyer_id: string;
+  };
+  profiles?: {
+    first_name: string;
+    last_name: string;
+  };
+}
+
+interface TeamMember {
+  professionals: {
+    first_name: string;
+    last_name: string;
+  };
 }
 
 interface DocumentVaultProps {
@@ -81,7 +97,7 @@ export default function DocumentVault({ projectId, userId }: DocumentVaultProps)
       const processedDocs = await Promise.all(
         (docs || []).map(async (doc) => {
           // Get team members who have access
-          const { data: teamAccess } = await supabase
+          const { data: teamAccess, error: teamError } = await supabase
             .from('project_team')
             .select(`
               professionals!inner (
@@ -92,8 +108,16 @@ export default function DocumentVault({ projectId, userId }: DocumentVaultProps)
             .eq('project_id', doc.project_id)
             .eq('status', 'active');
 
-          const sharedWith = teamAccess?.map(
-            member => `${member.professionals.first_name} ${member.professionals.last_name}`
+          if (teamError) {
+            console.error('Error fetching team access:', teamError);
+            return { ...doc, shared_with: [] };
+          }
+
+          // Explicitly type the teamAccess data
+          const typedTeamAccess = teamAccess as TeamMember[] | null;
+          
+          const sharedWith = typedTeamAccess?.map(
+            (member: TeamMember) => `${member.professionals.first_name} ${member.professionals.last_name}`
           ) || [];
 
           return {
