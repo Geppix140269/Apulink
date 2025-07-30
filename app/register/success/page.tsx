@@ -7,20 +7,6 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Mail, ArrowRight } from 'lucide-react';
-import type { Metadata, Viewport } from 'next'
-
-// Export metadata separately
-export const metadata: Metadata = {
-  title: 'Registration Successful - Apulink',
-  description: 'Your Apulink registration was successful. Check your email to confirm your account.'
-}
-
-// Export viewport separately
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  themeColor: '#9333ea'
-}
 
 function SuccessContent() {
   const searchParams = useSearchParams();
