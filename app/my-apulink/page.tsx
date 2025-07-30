@@ -5,7 +5,6 @@
 // CRITICAL: Force dynamic rendering to prevent build errors
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
-export const revalidate = false; // Changed from 0 to false to fix build error
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
