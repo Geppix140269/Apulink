@@ -1,10 +1,10 @@
-// app/my-apulink/page.tsx
-// New modular dashboard that imports all components
+// Path: app/my-apulink/page.tsx
+// Fixed modular dashboard with correct imports
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext'; // Fixed path
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 // Import all dashboard components
@@ -21,6 +21,15 @@ import NotificationCenter from './components/NotificationCenter';
 // Import icons for quick actions
 import { Calculator, Upload, MessageSquare, ArrowUpRight, Loader2, X } from 'lucide-react';
 
+// Define types for better TypeScript support
+interface Activity {
+  type: string;
+  title: string;
+  description: string;
+  time: string;
+  icon: string;
+}
+
 export default function MyApulinkDashboard() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -31,7 +40,7 @@ export default function MyApulinkDashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showGrantCalculator, setShowGrantCalculator] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
 
   // Redirect if not authenticated
@@ -49,44 +58,71 @@ export default function MyApulinkDashboard() {
   }, [user, activeSection]);
 
   async function loadRecentActivity() {
+    if (!user) return;
+    
     try {
       setLoadingActivity(true);
       
       // Get recent notifications
-      const { data: notifications } = await supabase
+      const { data: notifications, error: notifError } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
+      if (notifError) {
+        console.error('Error loading notifications:', notifError);
+      }
+
       // Get recent project updates
-      const { data: projects } = await supabase
+      const { data: projects, error: projError } = await supabase
         .from('projects')
-        .select('*, project_milestones(*)')
-        .eq('buyer_id', user?.id)
+        .select(`
+          *,
+          project_milestones (*)
+        `)
+        .eq('buyer_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(3);
 
-      // Combine and format activity
-      const activity = [
-        ...(notifications || []).map(n => ({
-          type: 'notification',
-          title: n.title,
-          description: n.message,
-          time: n.created_at,
-          icon: n.type
-        })),
-        ...(projects || []).map(p => ({
-          type: 'project',
-          title: `Project update: ${p.name}`,
-          description: `Progress: ${p.progress}%`,
-          time: p.updated_at,
-          icon: 'project'
-        }))
-      ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 5);
+      if (projError) {
+        console.error('Error loading projects:', projError);
+      }
 
-      setRecentActivity(activity);
+      // Combine and format activity
+      const activity: Activity[] = [];
+      
+      if (notifications) {
+        notifications.forEach(n => {
+          activity.push({
+            type: 'notification',
+            title: n.title || 'New notification',
+            description: n.message || '',
+            time: n.created_at,
+            icon: n.type || 'bell'
+          });
+        });
+      }
+      
+      if (projects) {
+        projects.forEach(p => {
+          activity.push({
+            type: 'project',
+            title: `Project update: ${p.name || 'Unnamed'}`,
+            description: `Progress: ${p.progress || 0}%`,
+            time: p.updated_at,
+            icon: 'project'
+          });
+        });
+      }
+      
+      // Sort by time and limit to 5
+      const sortedActivity = activity
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .slice(0, 5);
+
+      setRecentActivity(sortedActivity);
     } catch (error) {
       console.error('Error loading activity:', error);
     } finally {
@@ -94,13 +130,44 @@ export default function MyApulinkDashboard() {
     }
   }
 
+  // Helper function for relative time
+  function getRelativeTime(dateString: string): string {
+    const date = new Date(dateString);
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    
+    const intervals = [
+      { label: 'year', seconds: 31536000 },
+      { label: 'month', seconds: 2592000 },
+      { label: 'day', seconds: 86400 },
+      { label: 'hour', seconds: 3600 },
+      { label: 'minute', seconds: 60 }
+    ];
+    
+    for (const interval of intervals) {
+      const count = Math.floor(seconds / interval.seconds);
+      if (count > 0) {
+        return `${count} ${interval.label}${count !== 1 ? 's' : ''} ago`;
+      }
+    }
+    
+    return 'just now';
+  }
+
   // Show loading state
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
       </div>
     );
+  }
+
+  // Show not authenticated state
+  if (!user) {
+    return null; // Will redirect in useEffect
   }
 
   // Render dashboard
@@ -114,7 +181,7 @@ export default function MyApulinkDashboard() {
       {activeSection === 'overview' && (
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Key Metrics */}
-          <DashboardMetrics userId={user?.id} />
+          <DashboardMetrics userId={user.id} />
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -163,13 +230,13 @@ export default function MyApulinkDashboard() {
                 {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <div className="w-4 h-4 text-blue-600">•</div>
+                      <div className="w-2 h-2 bg-blue-600 rounded-full" />
                     </div>
                     <div className="flex-1">
                       <p className="font-medium text-gray-900 text-sm">{activity.title}</p>
                       <p className="text-xs text-gray-600">{activity.description}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {new Date(activity.time).toRelativeTimeString()}
+                        {getRelativeTime(activity.time)}
                       </p>
                     </div>
                   </div>
@@ -184,7 +251,7 @@ export default function MyApulinkDashboard() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Your Projects</h3>
             <ProjectList 
-              userId={user?.id} 
+              userId={user.id} 
               onProjectClick={(projectId) => {
                 setSelectedProjectId(projectId);
                 setActiveSection('properties');
@@ -198,11 +265,11 @@ export default function MyApulinkDashboard() {
       {activeSection === 'properties' && (
         <div className="max-w-7xl mx-auto">
           <ProjectList 
-            userId={user?.id}
+            userId={user.id}
             onProjectClick={(projectId) => {
               setSelectedProjectId(projectId);
               // Could navigate to project detail view
-              router.push(`/my-apulink/projects/${projectId}`);
+              // router.push(`/my-apulink/projects/${projectId}`);
             }}
           />
         </div>
@@ -213,7 +280,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <DocumentVault 
             projectId={selectedProjectId}
-            userId={user?.id}
+            userId={user.id}
           />
         </div>
       )}
@@ -223,7 +290,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <Timeline 
             projectId={selectedProjectId}
-            userId={user?.id}
+            userId={user.id}
           />
         </div>
       )}
@@ -233,7 +300,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <BudgetPlanner 
             projectId={selectedProjectId}
-            userId={user?.id}
+            userId={user.id}
           />
         </div>
       )}
@@ -262,7 +329,7 @@ export default function MyApulinkDashboard() {
       <NotificationCenter 
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
-        userId={user?.id}
+        userId={user.id}
       />
 
       {/* Grant Calculator Modal */}
@@ -291,33 +358,4 @@ export default function MyApulinkDashboard() {
       )}
     </DashboardLayout>
   );
-}
-
-// Helper function for relative time (if not already in global scope)
-declare global {
-  interface Date {
-    toRelativeTimeString(): string;
-  }
-}
-
-if (!Date.prototype.toRelativeTimeString) {
-  Date.prototype.toRelativeTimeString = function() {
-    const seconds = Math.floor((new Date().getTime() - this.getTime()) / 1000);
-    const intervals = [
-      { label: 'year', seconds: 31536000 },
-      { label: 'month', seconds: 2592000 },
-      { label: 'day', seconds: 86400 },
-      { label: 'hour', seconds: 3600 },
-      { label: 'minute', seconds: 60 }
-    ];
-    
-    for (const interval of intervals) {
-      const count = Math.floor(seconds / interval.seconds);
-      if (count > 0) {
-        return `${count} ${interval.label}${count !== 1 ? 's' : ''} ago`;
-      }
-    }
-    
-    return 'just now';
-  };
 }
