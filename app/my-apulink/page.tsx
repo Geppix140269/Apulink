@@ -241,10 +241,7 @@ export default function MyApulinkDashboard() {
       {/* Team Section */}
       {activeSection === 'team' && (
         <div className="max-w-7xl mx-auto">
-          <TeamManager 
-            projectId={selectedProjectId}
-            userId={user?.id}
-          />
+          <TeamManager />
         </div>
       )}
 
