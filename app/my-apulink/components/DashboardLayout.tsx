@@ -38,15 +38,6 @@ export default function DashboardLayout({
   const [projectCount, setProjectCount] = useState(0);
   const [documentCount, setDocumentCount] = useState(0);
 
-  // If no user, show loading
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   const sidebarItems: SidebarItem[] = [
     { id: 'overview', label: 'My Command Center', icon: Home },
     { id: 'properties', label: 'Active Projects', icon: Building2, badge: projectCount || undefined },
@@ -57,7 +48,75 @@ export default function DashboardLayout({
     { id: 'grants', label: 'Grant Optimizer', icon: Calculator },
   ];
 
+  // All hooks MUST be called before any conditional returns
   useEffect(() => {
+    async function loadCounts() {
+      if (!user) return;
+
+      try {
+        // Get unread notifications count
+        const { count: notifCount } = await supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false)
+          .eq('is_archived', false);
+
+        setUnreadCount(notifCount || 0);
+
+        // Get active projects count
+        const { count: projCount } = await supabase
+          .from('projects')
+          .select('*', { count: 'exact', head: true })
+          .eq('buyer_id', user.id)
+          .eq('is_active', true);
+
+        setProjectCount(projCount || 0);
+
+        // Get documents count
+        const { data: projects } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('buyer_id', user.id);
+
+        if (projects && projects.length > 0) {
+          const projectIds = projects.map(p => p.id);
+          const { count: docCount } = await supabase
+            .from('documents')
+            .select('*', { count: 'exact', head: true })
+            .in('project_id', projectIds);
+
+          setDocumentCount(docCount || 0);
+        }
+      } catch (error) {
+        console.error('Error loading counts:', error);
+      }
+    }
+
+    function subscribeToUpdates() {
+      if (!user) return null;
+
+      const channel = supabase
+        .channel('dashboard-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            loadCounts();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+
     if (user) {
       loadCounts();
       const unsubscribe = subscribeToUpdates();
@@ -65,74 +124,7 @@ export default function DashboardLayout({
         if (unsubscribe) unsubscribe();
       };
     }
-  }, [user]);
-
-  async function loadCounts() {
-    if (!user) return;
-
-    try {
-      // Get unread notifications count
-      const { count: notifCount } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('is_read', false)
-        .eq('is_archived', false);
-
-      setUnreadCount(notifCount || 0);
-
-      // Get active projects count
-      const { count: projCount } = await supabase
-        .from('projects')
-        .select('*', { count: 'exact', head: true })
-        .eq('buyer_id', user.id)
-        .eq('is_active', true);
-
-      setProjectCount(projCount || 0);
-
-      // Get documents count
-      const { data: projects } = await supabase
-        .from('projects')
-        .select('id')
-        .eq('buyer_id', user.id);
-
-      if (projects && projects.length > 0) {
-        const projectIds = projects.map(p => p.id);
-        const { count: docCount } = await supabase
-          .from('documents')
-          .select('*', { count: 'exact', head: true })
-          .in('project_id', projectIds);
-
-        setDocumentCount(docCount || 0);
-      }
-    } catch (error) {
-      console.error('Error loading counts:', error);
-    }
-  }
-
-  function subscribeToUpdates() {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('dashboard-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        () => {
-          loadCounts();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }
+  }, [user, supabase]); // Added dependencies
 
   const handleSignOut = async () => {
     await signOut();
@@ -146,6 +138,15 @@ export default function DashboardLayout({
     const name = getUserDisplayName();
     return name.charAt(0).toUpperCase();
   };
+
+  // Conditional return AFTER all hooks
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative">
