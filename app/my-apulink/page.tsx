@@ -52,6 +52,11 @@ export default function MyApulinkDashboard() {
   // Handle auth on client side only
   useEffect(() => {
     if (isClient) {
+      // TEMPORARY: Set fake user for testing
+      setUser({ id: 'test-user-123', email: 'test@apulink.com' });
+      setAuthLoading(false);
+      
+      /* COMMENTED OUT FOR TESTING
       try {
         const { useAuth } = require('../../contexts/AuthContext');
         const auth = useAuth();
@@ -65,6 +70,7 @@ export default function MyApulinkDashboard() {
         console.error('Auth error:', error);
         router.push('/login');
       }
+      */
     }
   }, [isClient, router]);
 
@@ -183,10 +189,12 @@ export default function MyApulinkDashboard() {
     );
   }
 
-  // Show not authenticated state
+  // Show not authenticated state - COMMENTED OUT FOR TESTING
+  /*
   if (!user) {
     return null; // Will redirect in useEffect
   }
+  */
 
   // Dynamically import components to avoid build issues
   const DashboardLayout = require('./components/DashboardLayout').default;
@@ -205,6 +213,11 @@ export default function MyApulinkDashboard() {
       onSectionChange={(section: string) => setActiveSection(section)}
       onNotificationClick={() => setShowNotifications(true)}
     >
+      {/* TESTING NOTICE */}
+      <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded mb-4">
+        <strong>TEST MODE:</strong> Auth bypassed. User: {user?.email}
+      </div>
+
       {/* Overview Section */}
       {activeSection === 'overview' && (
         <div className="max-w-7xl mx-auto space-y-6">
