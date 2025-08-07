@@ -1,8 +1,19 @@
 // PATH: lib/supabase/client.ts
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Fix for process not defined error in browser
+let supabaseUrl: string
+let supabaseAnonKey: string
+
+if (typeof window !== 'undefined') {
+  // We're in the browser - use direct values since process.env isn't working
+  supabaseUrl = 'https://kjyobkrjcmiuusijvrme.supabase.co'
+  supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqeW9ia3JqY21pdXVzaWp2cm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NDM5NzMsImV4cCI6MjA2NjUxOTk3M30.2GxAUtXPal7ufxg7KgWMO7h15RXJOolBWt0-NPygj2I'
+} else {
+  // Server-side - try to use process.env
+  supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kjyobkrjcmiuusijvrme.supabase.co'
+  supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqeW9ia3JqY21pdXVzaWp2cm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NDM5NzMsImV4cCI6MjA2NjUxOTk3M30.2GxAUtXPal7ufxg7KgWMO7h15RXJOolBWt0-NPygj2I'
+}
 
 export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
 
