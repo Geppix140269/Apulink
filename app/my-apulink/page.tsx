@@ -49,24 +49,18 @@ export default function MyApulinkDashboard() {
     setIsClient(true);
   }, []);
 
-  // Handle auth on client side only
+  // Handle auth on client side only - AUTH REMOVED
   useEffect(() => {
     if (isClient) {
-      try {
-        const { useAuth } = require('../../contexts/AuthContext');
-        const auth = useAuth();
-        setUser(auth.user);
-        setAuthLoading(auth.loading);
-        
-        if (!auth.loading && !auth.user) {
-          router.push('/login');
-        }
-      } catch (error) {
-        console.error('Auth error:', error);
-        router.push('/login');
-      }
+      // BYPASS AUTH - Set demo user
+      setUser({ 
+        id: 'demo-user-001', 
+        email: 'demo@apulink.com',
+        user_metadata: { full_name: 'Demo User' }
+      });
+      setAuthLoading(false);
     }
-  }, [isClient, router]);
+  }, [isClient]);
 
   // Load recent activity for overview
   useEffect(() => {
@@ -183,10 +177,7 @@ export default function MyApulinkDashboard() {
     );
   }
 
-  // Show not authenticated state
-  if (!user) {
-    return null; // Will redirect in useEffect
-  }
+  // AUTH CHECK REMOVED - No longer checking for user
 
   // Dynamically import components to avoid build issues
   const DashboardLayout = require('./components/DashboardLayout').default;
@@ -205,6 +196,11 @@ export default function MyApulinkDashboard() {
       onSectionChange={(section: string) => setActiveSection(section)}
       onNotificationClick={() => setShowNotifications(true)}
     >
+      {/* Demo Mode Notice */}
+      <div className="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-2 rounded mb-4">
+        <strong>Demo Mode:</strong> Authentication disabled. Viewing demo dashboard.
+      </div>
+
       {/* Overview Section */}
       {activeSection === 'overview' && (
         <div className="max-w-7xl mx-auto space-y-6">
