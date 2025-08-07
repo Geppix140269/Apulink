@@ -1,5 +1,5 @@
 // Path: app/my-apulink/page.tsx
-// Fixed modular dashboard - NO STATIC GENERATION
+// Fixed modular dashboard - Real Authentication Enabled
 'use client';
 
 // CRITICAL: Force dynamic rendering to prevent build errors
@@ -49,18 +49,28 @@ export default function MyApulinkDashboard() {
     setIsClient(true);
   }, []);
 
-  // Handle auth on client side only - AUTH REMOVED
+  // Handle REAL authentication
   useEffect(() => {
     if (isClient) {
-      // BYPASS AUTH - Set demo user
-      setUser({ 
-        id: 'demo-user-001', 
-        email: 'demo@apulink.com',
-        user_metadata: { full_name: 'Demo User' }
-      });
-      setAuthLoading(false);
+      // Check for real authentication
+      async function checkAuth() {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            router.push('/login');
+            return;
+          }
+          setUser(user);
+        } catch (error) {
+          console.error('Auth error:', error);
+          router.push('/login');
+        } finally {
+          setAuthLoading(false);
+        }
+      }
+      checkAuth();
     }
-  }, [isClient]);
+  }, [isClient, router, supabase]);
 
   // Load recent activity for overview
   useEffect(() => {
@@ -177,7 +187,10 @@ export default function MyApulinkDashboard() {
     );
   }
 
-  // AUTH CHECK REMOVED - No longer checking for user
+  // If we reach here and no user, auth check failed - will redirect
+  if (!user) {
+    return null;
+  }
 
   // Dynamically import components to avoid build issues
   const DashboardLayout = require('./components/DashboardLayout').default;
@@ -196,11 +209,6 @@ export default function MyApulinkDashboard() {
       onSectionChange={(section: string) => setActiveSection(section)}
       onNotificationClick={() => setShowNotifications(true)}
     >
-      {/* Demo Mode Notice */}
-      <div className="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-2 rounded mb-4">
-        <strong>Demo Mode:</strong> Authentication disabled. Viewing demo dashboard.
-      </div>
-
       {/* Overview Section */}
       {activeSection === 'overview' && (
         <div className="max-w-7xl mx-auto space-y-6">

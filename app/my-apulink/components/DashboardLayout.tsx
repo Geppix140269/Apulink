@@ -6,8 +6,7 @@ import {
   Calculator, Bell, Settings, LogOut, ChevronRight,
   Building2, Menu, X
 } from 'lucide-react';
-// AUTH REMOVED - Commented out useAuth import
-// import { useAuth } from '../../../contexts/AuthContext'; // Fixed path - go up 3 levels
+import { useAuth } from '../../../contexts/AuthContext';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface DashboardLayoutProps {
@@ -31,22 +30,22 @@ export default function DashboardLayout({
   onNotificationClick 
 }: DashboardLayoutProps) {
   const router = useRouter();
-  // AUTH REMOVED - Using demo user instead of useAuth
-  const user = { 
-    id: 'demo-user-001', 
-    email: 'demo@apulink.com',
-    user_metadata: { full_name: 'Demo User' }
-  };
-  const signOut = async () => {
-    // Just redirect to home
-    router.push('/');
-  };
+  const { user, signOut } = useAuth();
   
   const supabase = createClientComponentClient();
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [projectCount, setProjectCount] = useState(3); // Demo count
-  const [documentCount, setDocumentCount] = useState(12); // Demo count
+  const [projectCount, setProjectCount] = useState(0);
+  const [documentCount, setDocumentCount] = useState(0);
+
+  // If no user, show loading
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const sidebarItems: SidebarItem[] = [
     { id: 'overview', label: 'My Command Center', icon: Home },
@@ -89,9 +88,9 @@ export default function DashboardLayout({
         .eq('buyer_id', user.id)
         .eq('is_active', true);
 
-      setProjectCount(projCount || 3); // Default to demo count
+      setProjectCount(projCount || 0);
 
-      // Get documents count - fixed query
+      // Get documents count
       const { data: projects } = await supabase
         .from('projects')
         .select('id')
@@ -104,11 +103,10 @@ export default function DashboardLayout({
           .select('*', { count: 'exact', head: true })
           .in('project_id', projectIds);
 
-        setDocumentCount(docCount || 12); // Default to demo count
+        setDocumentCount(docCount || 0);
       }
     } catch (error) {
       console.error('Error loading counts:', error);
-      // Keep demo counts on error
     }
   }
 
@@ -141,11 +139,12 @@ export default function DashboardLayout({
   };
 
   const getUserDisplayName = () => {
-    return 'Demo User';
+    return user?.user_metadata?.full_name || user?.email || 'User';
   };
 
   const getUserInitial = () => {
-    return 'D';
+    const name = getUserDisplayName();
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -182,7 +181,7 @@ export default function DashboardLayout({
               MyApulink
             </h1>
           </div>
-          <p className="text-sm text-gray-600">Demo Dashboard</p>
+          <p className="text-sm text-gray-600">Investment Command Center</p>
         </div>
         
         {/* Navigation */}
@@ -222,7 +221,7 @@ export default function DashboardLayout({
               </div>
               <div>
                 <p className="font-semibold text-gray-900">{getUserDisplayName()}</p>
-                <p className="text-xs text-gray-600">Demo Account</p>
+                <p className="text-xs text-gray-600">{user?.email}</p>
               </div>
             </div>
             <div className="flex justify-between text-xs text-gray-600">
@@ -248,7 +247,7 @@ export default function DashboardLayout({
               )}
             </button>
             <button 
-              onClick={() => alert('Settings not available in demo mode')}
+              onClick={() => onSectionChange('settings')}
               className="flex-1 p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
             >
               <Settings className="w-5 h-5 mx-auto" />
@@ -269,17 +268,18 @@ export default function DashboardLayout({
         <div className="bg-white/70 backdrop-blur-lg border-b border-blue-100 px-4 md:px-8 py-4">
           <div className="flex justify-between items-center">
             <h2 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent pl-12 lg:pl-0">
-              {activeSection === 'overview' && `Welcome to Demo Dashboard! You have ${projectCount} demo projects`}
-              {activeSection === 'properties' && 'Demo Property Projects'}
-              {activeSection === 'documents' && 'Demo Document Vault'}
-              {activeSection === 'timeline' && 'Demo Timeline & Milestones'}
-              {activeSection === 'budget' && 'Demo Financial Planning'}
-              {activeSection === 'team' && 'Demo Expert Team'}
-              {activeSection === 'grants' && 'Demo Grant Calculator'}
+              {activeSection === 'overview' && `Welcome back! You have ${projectCount} active projects`}
+              {activeSection === 'properties' && 'Your Property Projects'}
+              {activeSection === 'documents' && 'Document Vault'}
+              {activeSection === 'timeline' && 'Timeline & Milestones'}
+              {activeSection === 'budget' && 'Financial Planning'}
+              {activeSection === 'team' && 'Your Expert Team'}
+              {activeSection === 'grants' && 'Grant Calculator'}
+              {activeSection === 'settings' && 'Account Settings'}
             </h2>
             <div className="flex items-center gap-3">
               <span className="hidden md:block text-sm text-gray-600">
-                Demo Mode - {new Date().toLocaleDateString('en-US', { 
+                {new Date().toLocaleDateString('en-US', { 
                   weekday: 'long', 
                   year: 'numeric', 
                   month: 'long', 
