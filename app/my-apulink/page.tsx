@@ -1,160 +1,133 @@
-// Path: app/my-apulink/page.tsx
-// Fixed modular dashboard - Real Authentication Enabled
+// PATH: app/my-apulink/page.tsx
+
 'use client';
 
-// CRITICAL: Force dynamic rendering to prevent build errors
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-
-// Import icons for quick actions
+import { useAuth } from '@/contexts/AuthContext';
+import firebase from '@/lib/firebase/firebase-service';
 import { Calculator, Upload, MessageSquare, ArrowUpRight, Loader2, X } from 'lucide-react';
 
-// Define types for better TypeScript support
 interface Activity {
   type: string;
   title: string;
   description: string;
-  time: string;
+  time: any;
   icon: string;
 }
 
-// Define types for components (since we don't have access to the actual component types)
 interface GrantCalculation {
   totalCost?: number;
   grantAmount?: number;
   grantPercentage?: number;
   eligibleCosts?: number;
-  [key: string]: any; // Allow for additional properties
+  [key: string]: any;
 }
 
 export default function MyApulinkDashboard() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [activeSection, setActiveSection] = useState('overview');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showGrantCalculator, setShowGrantCalculator] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
   const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const [projects, setProjects] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
-  // Check if we're on the client
+  // Redirect if not authenticated
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
-  // Handle REAL authentication
+  // Load user data
   useEffect(() => {
-    if (isClient) {
-      // Check for real authentication
-      async function checkAuth() {
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) {
-            router.push('/login');
-            return;
-          }
-          setUser(user);
-        } catch (error) {
-          console.error('Auth error:', error);
-          router.push('/login');
-        } finally {
-          setAuthLoading(false);
-        }
+    if (user) {
+      loadUserData();
+    }
+  }, [user]);
+
+  // Subscribe to real-time notifications
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = firebase.notifications.subscribeToNotifications(
+      user.uid,
+      (newNotifications) => {
+        setNotifications(newNotifications);
       }
-      checkAuth();
-    }
-  }, [isClient, router, supabase]);
+    );
 
-  // Load recent activity for overview
-  useEffect(() => {
-    if (user && activeSection === 'overview') {
-      loadRecentActivity();
-    }
-  }, [user, activeSection]);
+    return () => unsubscribe();
+  }, [user]);
 
-  async function loadRecentActivity() {
+  async function loadUserData() {
     if (!user) return;
     
     try {
       setLoadingActivity(true);
       
-      // Get recent notifications
-      const { data: notifications, error: notifError } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (notifError) {
-        console.error('Error loading notifications:', notifError);
+      // Load projects
+      const projectsResult = await firebase.projects.getProjectsByUser(user.uid);
+      if (projectsResult.success) {
+        setProjects(projectsResult.data || []);
       }
-
-      // Get recent project updates
-      const { data: projects, error: projError } = await supabase
-        .from('projects')
-        .select(`
-          *,
-          project_milestones (*)
-        `)
-        .eq('buyer_id', user.id)
-        .order('updated_at', { ascending: false })
-        .limit(3);
-
-      if (projError) {
-        console.error('Error loading projects:', projError);
+      
+      // Load notifications
+      const notificationsResult = await firebase.notifications.getUserNotifications(user.uid);
+      if (notificationsResult.success) {
+        setNotifications(notificationsResult.data || []);
       }
-
-      // Combine and format activity
+      
+      // Combine into recent activity
       const activity: Activity[] = [];
       
-      if (notifications) {
-        notifications.forEach((n: any) => {
+      // Add recent notifications to activity
+      if (notificationsResult.success && notificationsResult.data) {
+        notificationsResult.data.slice(0, 3).forEach((n: any) => {
           activity.push({
             type: 'notification',
             title: n.title || 'New notification',
             description: n.message || '',
-            time: n.created_at,
+            time: n.createdAt,
             icon: n.type || 'bell'
           });
         });
       }
       
-      if (projects) {
-        projects.forEach((p: any) => {
+      // Add recent projects to activity
+      if (projectsResult.success && projectsResult.data) {
+        projectsResult.data.slice(0, 2).forEach((p: any) => {
           activity.push({
             type: 'project',
-            title: `Project update: ${p.name || 'Unnamed'}`,
+            title: `Project: ${p.name || 'Unnamed'}`,
             description: `Progress: ${p.progress || 0}%`,
-            time: p.updated_at,
+            time: p.createdAt,
             icon: 'project'
           });
         });
       }
       
-      // Sort by time and limit to 5
-      const sortedActivity = activity
-        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-        .slice(0, 5);
-
-      setRecentActivity(sortedActivity);
+      setRecentActivity(activity);
     } catch (error) {
-      console.error('Error loading activity:', error);
+      console.error('Error loading user data:', error);
     } finally {
       setLoadingActivity(false);
     }
   }
 
   // Helper function for relative time
-  function getRelativeTime(dateString: string): string {
-    const date = new Date(dateString);
+  function getRelativeTime(timestamp: any): string {
+    if (!timestamp) return 'recently';
+    
+    // Handle Firestore Timestamp
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
     
     const intervals = [
@@ -176,7 +149,7 @@ export default function MyApulinkDashboard() {
   }
 
   // Show loading state
-  if (!isClient || authLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <div className="text-center">
@@ -187,12 +160,12 @@ export default function MyApulinkDashboard() {
     );
   }
 
-  // If we reach here and no user, auth check failed - will redirect
+  // If we reach here and no user, will redirect
   if (!user) {
     return null;
   }
 
-  // Dynamically import components to avoid build issues
+  // Dynamically import components
   const DashboardLayout = require('./components/DashboardLayout').default;
   const DashboardMetrics = require('./components/DashboardMetrics').default;
   const ProjectList = require('./components/ProjectList').default;
@@ -202,7 +175,6 @@ export default function MyApulinkDashboard() {
   const GrantCalculator = require('./components/GrantCalculator').default;
   const NotificationCenter = require('./components/NotificationCenter').default;
 
-  // Render dashboard
   return (
     <DashboardLayout
       activeSection={activeSection}
@@ -212,8 +184,18 @@ export default function MyApulinkDashboard() {
       {/* Overview Section */}
       {activeSection === 'overview' && (
         <div className="max-w-7xl mx-auto space-y-6">
+          {/* Welcome Message */}
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 text-white">
+            <h2 className="text-2xl font-bold mb-2">
+              Welcome back, {user.email}!
+            </h2>
+            <p className="opacity-90">
+              You have {projects.length} active projects and {notifications.length} new notifications
+            </p>
+          </div>
+
           {/* Key Metrics */}
-          <DashboardMetrics userId={user.id} />
+          <DashboardMetrics userId={user.uid} />
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -283,7 +265,7 @@ export default function MyApulinkDashboard() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Your Projects</h3>
             <ProjectList 
-              userId={user.id} 
+              userId={user.uid} 
               onProjectClick={(projectId: string) => {
                 setSelectedProjectId(projectId);
                 setActiveSection('properties');
@@ -297,7 +279,7 @@ export default function MyApulinkDashboard() {
       {activeSection === 'properties' && (
         <div className="max-w-7xl mx-auto">
           <ProjectList 
-            userId={user.id}
+            userId={user.uid}
             onProjectClick={(projectId: string) => {
               setSelectedProjectId(projectId);
             }}
@@ -310,7 +292,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <DocumentVault 
             projectId={selectedProjectId}
-            userId={user.id}
+            userId={user.uid}
           />
         </div>
       )}
@@ -320,7 +302,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <Timeline 
             projectId={selectedProjectId}
-            userId={user.id}
+            userId={user.uid}
           />
         </div>
       )}
@@ -330,7 +312,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <BudgetPlanner 
             projectId={selectedProjectId}
-            userId={user.id}
+            userId={user.uid}
           />
         </div>
       )}
@@ -342,7 +324,7 @@ export default function MyApulinkDashboard() {
             <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
               Team Collaboration
             </h3>
-            <p className="text-gray-600">Team collaboration features coming soon. Connect with your architects, surveyors, and other professionals here.</p>
+            <p className="text-gray-600">Connect with your architects, surveyors, and other professionals here.</p>
           </div>
         </div>
       )}
@@ -363,7 +345,7 @@ export default function MyApulinkDashboard() {
       <NotificationCenter 
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
-        userId={user.id}
+        userId={user.uid}
       />
 
       {/* Grant Calculator Modal */}
