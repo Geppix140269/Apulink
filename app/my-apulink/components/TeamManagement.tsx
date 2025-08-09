@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, query, where, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db } from '../../lib/firebase/config';
 import { Users, UserPlus, Mail, Phone, Shield, Trash2, Edit, X, Loader2, Check, Clock } from 'lucide-react';
 
 interface TeamMember {

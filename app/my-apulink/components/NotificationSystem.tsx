@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, orderBy, onSnapshot, updateDoc, doc, addDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db } from '../../lib/firebase/config';
 import { Bell, Calendar, AlertCircle, CheckCircle, Clock, Users, FileText, Euro, X } from 'lucide-react';
 
 interface Notification {

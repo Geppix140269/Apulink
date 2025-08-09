@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Download, Link, Loader2, Check, AlertCircle } from 'lucide-react';
-import { milestoneService } from '@/lib/firebase/firestore-service';
-import type { Milestone } from '@/lib/firebase/firestore-service';
+import { milestoneService } from '../../lib/firebase/firestore-service';
+import type { Milestone } from '../../lib/firebase/firestore-service';
 
 interface CalendarSyncProps {
   projectId: string;

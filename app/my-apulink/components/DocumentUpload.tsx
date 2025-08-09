@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { storage } from '@/lib/firebase/config';
+import { storage } from '../../lib/firebase/config';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { documentService } from '@/lib/firebase/firestore-service';
+import { documentService } from '../../lib/firebase/firestore-service';
 import { Upload, File, X, Loader2, FolderPlus, FileText, Image, FileSpreadsheet } from 'lucide-react';
 
 interface DocumentUploadProps {
