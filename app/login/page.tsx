@@ -2,7 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '../contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react'
@@ -120,3 +120,4 @@ export default function LoginPage() {
     </div>
   )
 }
+
