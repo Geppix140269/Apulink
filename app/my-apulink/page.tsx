@@ -3,14 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { projectService, budgetService, milestoneService, documentService } from '../../lib/firebase/firestore-service';
-import type { Project, Milestone, BudgetItem, Document } from '../../lib/firebase/firestore-service';
+import { projectService, budgetService, milestoneService, documentService } from '@/lib/firebase/firestore-service';
+import type { Project, Milestone, BudgetItem, Document } from '@/lib/firebase/firestore-service';
 import DashboardLayout from './components-new/DashboardLayout';
 import DashboardMetrics from './components-new/DashboardMetrics';
 import ProjectList from './components-new/ProjectList';
 import AddBudgetItem from './components/AddBudgetItem';
 import AddMilestone from './components/AddMilestone';
-import { Plus, Loader2, Edit, Trash2, Download, Upload } from 'lucide-react';
+import DocumentUpload from './components/DocumentUpload';
+import EditProject from './components/EditProject';
+import TeamManagement from './components/TeamManagement';
+import ProjectMessages from './components/ProjectMessages';
+import NotificationSystem from './components/NotificationSystem';
+import CalendarSync from './components/CalendarSync';
+import { createNotification } from './components/NotificationSystem';
+import { Plus, Loader2, Edit, Trash2, Download, Upload, FileText, Image, File, Folder, Search, Filter, Grid, List, Eye, Share2, Lock, Unlock, Calendar, Bell } from 'lucide-react';
 
 export default function MyApulinkDashboard() {
   const router = useRouter();
@@ -34,6 +41,14 @@ export default function MyApulinkDashboard() {
   // Modal states
   const [showAddBudget, setShowAddBudget] = useState(false);
   const [showAddMilestone, setShowAddMilestone] = useState(false);
+  const [showDocumentUpload, setShowDocumentUpload] = useState(false);
+  const [showEditProject, setShowEditProject] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  
+  // Document filters
+  const [documentSearch, setDocumentSearch] = useState('');
+  const [documentCategory, setDocumentCategory] = useState('all');
+  const [documentView, setDocumentView] = useState<'grid' | 'list'>('grid');
 
   // Load REAL projects when user logs in
   useEffect(() => {
@@ -87,7 +102,11 @@ export default function MyApulinkDashboard() {
     // Subscribe to milestones
     const unsubMilestones = milestoneService.subscribeToProjectMilestones(
       selectedProject.id,
-      (projectMilestones) => setMilestones(projectMilestones)
+      (projectMilestones) => {
+        setMilestones(projectMilestones);
+        // Check for upcoming deadlines
+        checkUpcomingDeadlines(projectMilestones);
+      }
     );
 
     // Subscribe to budget
@@ -108,6 +127,26 @@ export default function MyApulinkDashboard() {
       unsubDocs();
     };
   }, [selectedProject]);
+
+  // Check for upcoming deadlines and create notifications
+  const checkUpcomingDeadlines = async (milestones: Milestone[]) => {
+    const today = new Date();
+    const threeDaysFromNow = new Date(today.getTime() + (3 * 24 * 60 * 60 * 1000));
+    
+    for (const milestone of milestones) {
+      const endDate = new Date(milestone.endDate);
+      if (endDate <= threeDaysFromNow && endDate >= today && milestone.status !== 'completed') {
+        await createNotification({
+          userId: user!.uid,
+          projectId: selectedProject?.id,
+          type: 'deadline',
+          title: 'Milestone Deadline Approaching',
+          message: `"${milestone.title}" is due on ${endDate.toLocaleDateString()}`,
+          priority: endDate <= today ? 'urgent' : 'high'
+        });
+      }
+    }
+  };
 
   const handleCreateProject = () => {
     router.push('/my-apulink/create-project');
@@ -140,6 +179,32 @@ export default function MyApulinkDashboard() {
   const handleUpdateBudgetStatus = async (itemId: string, status: BudgetItem['status']) => {
     await budgetService.updateBudgetItem(itemId, { status });
   };
+
+  const handleDeleteDocument = async (documentId: string) => {
+    if (confirm('Are you sure you want to delete this document?')) {
+      await documentService.deleteDocument(documentId);
+    }
+  };
+
+  const handleDownloadDocument = (document: Document) => {
+    window.open(document.fileUrl, '_blank');
+  };
+
+  const getFileIcon = (fileType: string) => {
+    if (fileType.includes('image')) return <Image className="w-12 h-12 text-blue-500" />;
+    if (fileType.includes('pdf')) return <FileText className="w-12 h-12 text-red-500" />;
+    return <File className="w-12 h-12 text-gray-500" />;
+  };
+
+  // Filter documents
+  const filteredDocuments = documents.filter(doc => {
+    const matchesSearch = doc.name.toLowerCase().includes(documentSearch.toLowerCase()) ||
+                          doc.tags.some(tag => tag.toLowerCase().includes(documentSearch.toLowerCase()));
+    const matchesCategory = documentCategory === 'all' || doc.folder === documentCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const documentCategories = ['all', ...new Set(documents.map(doc => doc.folder))];
 
   const renderContent = () => {
     switch (activeSection) {
@@ -185,6 +250,21 @@ export default function MyApulinkDashboard() {
                 onRefresh={() => {}}
               />
             </div>
+
+            {/* Messages Section for Selected Project */}
+            {selectedProject && user && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ProjectMessages 
+                  projectId={selectedProject.id!}
+                  userId={user.uid}
+                  userName={user.displayName || user.email || 'User'}
+                />
+                <CalendarSync
+                  projectId={selectedProject.id!}
+                  projectName={selectedProject.name}
+                />
+              </div>
+            )}
           </div>
         );
         
@@ -218,10 +298,25 @@ export default function MyApulinkDashboard() {
                   {projects.map((project) => (
                     <div
                       key={project.id}
-                      onClick={() => handleProjectClick(project)}
-                      className="bg-white/70 backdrop-blur-sm rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all border border-white/50"
+                      className="bg-white/70 backdrop-blur-sm rounded-xl p-6 hover:shadow-xl transition-all border border-white/50"
                     >
-                      <h4 className="font-semibold text-lg mb-2">{project.name}</h4>
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 
+                          className="font-semibold text-lg cursor-pointer hover:text-purple-600"
+                          onClick={() => handleProjectClick(project)}
+                        >
+                          {project.name}
+                        </h4>
+                        <button
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setShowEditProject(true);
+                          }}
+                          className="p-2 hover:bg-gray-100 rounded-lg"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
                       <p className="text-sm text-gray-600 mb-4">{project.comune}, {project.region}</p>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
@@ -254,6 +349,186 @@ export default function MyApulinkDashboard() {
                   ))}
                 </div>
               </>
+            )}
+          </div>
+        );
+
+      case 'documents':
+        if (!selectedProject) {
+          return (
+            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-12 text-center">
+              <p className="text-gray-600">Please select a project first</p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-6">
+            {/* Header with Actions */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h3 className="text-xl font-bold">Documents for {selectedProject.name}</h3>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setShowDocumentUpload(true)}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-xl transition-all flex items-center gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload Document
+                </button>
+                <div className="flex gap-1 bg-white/70 rounded-lg p-1">
+                  <button
+                    onClick={() => setDocumentView('grid')}
+                    className={`p-2 rounded ${documentView === 'grid' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
+                  >
+                    <Grid className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setDocumentView('list')}
+                    className={`p-2 rounded ${documentView === 'list' ? 'bg-purple-100 text-purple-600' : 'text-gray-500'}`}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search documents..."
+                  value={documentSearch}
+                  onChange={(e) => setDocumentSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg"
+                />
+              </div>
+              <select
+                value={documentCategory}
+                onChange={(e) => setDocumentCategory(e.target.value)}
+                className="px-4 py-2 border rounded-lg"
+              >
+                {documentCategories.map(cat => (
+                  <option key={cat} value={cat}>
+                    {cat === 'all' ? 'All Categories' : cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Documents Display */}
+            {filteredDocuments.length === 0 ? (
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-12 text-center">
+                <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Documents Found</h3>
+                <p className="text-gray-600 mb-6">
+                  {documentSearch ? 'Try adjusting your search' : 'Upload your first document'}
+                </p>
+                {!documentSearch && (
+                  <button
+                    onClick={() => setShowDocumentUpload(true)}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:shadow-xl transition-all"
+                  >
+                    Upload Document
+                  </button>
+                )}
+              </div>
+            ) : documentView === 'grid' ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {filteredDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="bg-white/70 backdrop-blur-sm rounded-xl p-4 hover:shadow-xl transition-all border border-white/50 group"
+                  >
+                    <div className="flex justify-center mb-3">
+                      {getFileIcon(doc.fileType)}
+                    </div>
+                    <h4 className="font-medium text-sm truncate mb-1">{doc.name}</h4>
+                    <p className="text-xs text-gray-500 mb-2">{doc.folder}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">
+                        v{doc.version}
+                      </span>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleDownloadDocument(doc)}
+                          className="p-1 hover:bg-gray-100 rounded"
+                        >
+                          <Download className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDocument(doc.id!)}
+                          className="p-1 hover:bg-red-100 rounded text-red-500"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b">
+                    <tr>
+                      <th className="text-left px-4 py-3 text-sm font-medium">Name</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium">Category</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium">Size</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium">Uploaded</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDocuments.map((doc) => (
+                      <tr key={doc.id} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            {doc.fileType.includes('image') ? <Image className="w-4 h-4" /> :
+                             doc.fileType.includes('pdf') ? <FileText className="w-4 h-4 text-red-500" /> :
+                             <File className="w-4 h-4" />}
+                            <span className="font-medium text-sm">{doc.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm">{doc.folder}</td>
+                        <td className="px-4 py-3 text-sm">
+                          {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          {new Date(doc.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleDownloadDocument(doc)}
+                              className="p-1 hover:bg-gray-100 rounded"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteDocument(doc.id!)}
+                              className="p-1 hover:bg-red-100 rounded text-red-500"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Document Upload Modal */}
+            {showDocumentUpload && selectedProject?.id && user && (
+              <DocumentUpload
+                projectId={selectedProject.id}
+                userId={user.uid}
+                onUploadComplete={() => {}}
+                onClose={() => setShowDocumentUpload(false)}
+              />
             )}
           </div>
         );
@@ -456,6 +731,42 @@ export default function MyApulinkDashboard() {
             )}
           </div>
         );
+
+      case 'team':
+        if (!selectedProject) {
+          return (
+            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-12 text-center">
+              <p className="text-gray-600">Please select a project first</p>
+            </div>
+          );
+        }
+        
+        return (
+          <TeamManagement 
+            projectId={selectedProject.id!}
+            userId={user!.uid}
+          />
+        );
+
+      case 'calendar':
+        if (!selectedProject) {
+          return (
+            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-12 text-center">
+              <p className="text-gray-600">Please select a project first</p>
+            </div>
+          );
+        }
+        
+        return (
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold">Calendar Integration</h3>
+            <CalendarSync
+              projectId={selectedProject.id!}
+              projectName={selectedProject.name}
+            />
+            {/* Add a visual calendar component here if needed */}
+          </div>
+        );
         
       default:
         return (
@@ -479,14 +790,33 @@ export default function MyApulinkDashboard() {
   }
 
   return (
-    <DashboardLayout
-      activeSection={activeSection}
-      onSectionChange={setActiveSection}
-      onNotificationClick={() => {}}
-      notificationCount={0}
-      projectCount={projects.length}
-    >
-      {renderContent()}
-    </DashboardLayout>
+    <>
+      <DashboardLayout
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onNotificationClick={() => setShowNotifications(!showNotifications)}
+        notificationCount={3} // You can make this dynamic
+        projectCount={projects.length}
+      >
+        {renderContent()}
+      </DashboardLayout>
+
+      {/* Edit Project Modal */}
+      {showEditProject && selectedProject && (
+        <EditProject
+          project={selectedProject}
+          onClose={() => setShowEditProject(false)}
+          onSaved={() => setShowEditProject(false)}
+        />
+      )}
+
+      {/* Notifications Panel */}
+      {showNotifications && user && (
+        <NotificationSystem
+          userId={user.uid}
+          onClose={() => setShowNotifications(false)}
+        />
+      )}
+    </>
   );
 }
