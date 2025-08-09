@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, addDoc, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
-import { db } from '../../lib/firebase/config';
+import { db } from '../../../lib/firebase/config';
 import { Send, Paperclip, MessageSquare, User, Calendar } from 'lucide-react';
 
 interface Message {

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { projectService } from '../../lib/firebase/firestore-service';
-import type { Project } from '../../lib/firebase/firestore-service';
+import { projectService } from '../../../lib/firebase/firestore-service';
+import type { Project } from '../../../lib/firebase/firestore-service';
 import { Save, X, Loader2 } from 'lucide-react';
 
 interface EditProjectProps {
