@@ -10,7 +10,8 @@ import {
   where, 
   orderBy,
   Timestamp,
-  addDoc
+  addDoc,
+  onSnapshot
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -139,12 +140,41 @@ export class ProjectService {
     });
   }
 
+  subscribeToUserProjects(userId: string, callback: (projects: Project[]) => void) {
+    const q = query(
+      collection(db, this.collection),
+      where('ownerId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const projects = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          startDate: data.startDate.toDate(),
+          endDate: data.endDate.toDate(),
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        } as Project;
+      });
+      callback(projects);
+    });
+  }
+
   async updateProject(projectId: string, updates: Partial<Project>): Promise<void> {
     const docRef = doc(db, this.collection, projectId);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: Timestamp.now()
-    });
+    const updateData: any = { ...updates, updatedAt: Timestamp.now() };
+    
+    if (updates.startDate) {
+      updateData.startDate = Timestamp.fromDate(new Date(updates.startDate));
+    }
+    if (updates.endDate) {
+      updateData.endDate = Timestamp.fromDate(new Date(updates.endDate));
+    }
+    
+    await updateDoc(docRef, updateData);
   }
 
   async deleteProject(projectId: string): Promise<void> {
@@ -189,12 +219,46 @@ export class MilestoneService {
     });
   }
 
+  subscribeToProjectMilestones(projectId: string, callback: (milestones: Milestone[]) => void) {
+    const q = query(
+      collection(db, this.collection),
+      where('projectId', '==', projectId),
+      orderBy('startDate', 'asc')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const milestones = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          startDate: data.startDate.toDate(),
+          endDate: data.endDate.toDate(),
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        } as Milestone;
+      });
+      callback(milestones);
+    });
+  }
+
   async updateMilestone(milestoneId: string, updates: Partial<Milestone>): Promise<void> {
     const docRef = doc(db, this.collection, milestoneId);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: Timestamp.now()
-    });
+    const updateData: any = { ...updates, updatedAt: Timestamp.now() };
+    
+    if (updates.startDate) {
+      updateData.startDate = Timestamp.fromDate(new Date(updates.startDate));
+    }
+    if (updates.endDate) {
+      updateData.endDate = Timestamp.fromDate(new Date(updates.endDate));
+    }
+    
+    await updateDoc(docRef, updateData);
+  }
+
+  async deleteMilestone(milestoneId: string): Promise<void> {
+    const docRef = doc(db, this.collection, milestoneId);
+    await deleteDoc(docRef);
   }
 }
 
@@ -227,6 +291,27 @@ export class BudgetService {
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       } as BudgetItem;
+    });
+  }
+
+  subscribeToProjectBudget(projectId: string, callback: (items: BudgetItem[]) => void) {
+    const q = query(
+      collection(db, this.collection),
+      where('projectId', '==', projectId),
+      orderBy('category', 'asc')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const items = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        } as BudgetItem;
+      });
+      callback(items);
     });
   }
 
@@ -300,6 +385,27 @@ export class DocumentService {
         createdAt: data.createdAt.toDate(),
         updatedAt: data.updatedAt.toDate()
       } as Document;
+    });
+  }
+
+  subscribeToProjectDocuments(projectId: string, callback: (documents: Document[]) => void) {
+    const q = query(
+      collection(db, this.collection),
+      where('projectId', '==', projectId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const documents = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt.toDate(),
+          updatedAt: data.updatedAt.toDate()
+        } as Document;
+      });
+      callback(documents);
     });
   }
 
