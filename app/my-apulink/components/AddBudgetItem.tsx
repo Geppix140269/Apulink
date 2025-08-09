@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { budgetService } from '@/lib/firebase/firestore-service';
+import { budgetService } from '../../../lib/firebase/firestore-service';
 import { Plus, X, Loader2 } from 'lucide-react';
 
 interface AddBudgetItemProps {

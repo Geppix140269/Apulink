@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { projectService } from '@/lib/firebase/firestore-service';
+import { projectService } from '../../../lib/firebase/firestore-service';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 
 export default function CreateProjectPage() {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Building2, MapPin, Calendar, TrendingUp } from 'lucide-react';
-import type { Project } from '@/lib/firebase/firestore-service';
+import type { Project } from '../../../lib/firebase/firestore-service';
 
 interface ProjectListProps {
   userId?: string;

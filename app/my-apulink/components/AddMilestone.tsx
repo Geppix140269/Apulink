@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { milestoneService } from '@/lib/firebase/firestore-service';
+import { milestoneService } from '../../../lib/firebase/firestore-service';
 import { Calendar, X, Loader2 } from 'lucide-react';
 
 interface AddMilestoneProps {
