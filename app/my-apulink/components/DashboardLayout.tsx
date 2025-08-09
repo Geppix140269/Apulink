@@ -6,7 +6,7 @@ import {
   Calculator, Bell, Settings, LogOut, ChevronRight,
   Building2, Menu, X
 } from 'lucide-react';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface DashboardLayoutProps {
