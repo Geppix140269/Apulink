@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { projectService, budgetService, milestoneService, documentService } from '@/lib/firebase/firestore-service';
-import type { Project, Milestone, BudgetItem, Document } from '@/lib/firebase/firestore-service';
+import { projectService, budgetService, milestoneService, documentService } from '../../lib/firebase/firestore-service';
+import type { Project, Milestone, BudgetItem, Document } from '../../lib/firebase/firestore-service';
 import DashboardLayout from './components-new/DashboardLayout';
 import DashboardMetrics from './components-new/DashboardMetrics';
 import ProjectList from './components-new/ProjectList';

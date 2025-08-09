@@ -1,6 +1,6 @@
 // PATH: lib/sanity/queries.ts
 import { groq } from 'next-sanity'
-import type { Locale } from '@/lib/i18n/config'
+import type { Locale } from '../i18n/config'
 
 // Get all translations for a specific locale organized by namespace
 export const translationsQuery = groq`
