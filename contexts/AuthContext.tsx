@@ -5,7 +5,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
-import { auth } from '../lib/firebase/config';  // FIXED: Using relative path
+import { auth } from '../../lib/firebase/config';  // Go up TWO levels, not one
 import firebase from '../lib/firebase/firebase-service';  // FIXED: Using relative path
 
 interface AuthContextType {
