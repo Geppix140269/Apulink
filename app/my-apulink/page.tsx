@@ -8,7 +8,9 @@ import type { Project, Milestone, BudgetItem, Document } from '@/lib/firebase/fi
 import DashboardLayout from './components-new/DashboardLayout';
 import DashboardMetrics from './components-new/DashboardMetrics';
 import ProjectList from './components-new/ProjectList';
-import { Plus, Loader2 } from 'lucide-react';
+import AddBudgetItem from './components/AddBudgetItem';
+import AddMilestone from './components/AddMilestone';
+import { Plus, Loader2, Edit, Trash2, Download, Upload } from 'lucide-react';
 
 export default function MyApulinkDashboard() {
   const router = useRouter();
@@ -28,6 +30,10 @@ export default function MyApulinkDashboard() {
     teamExperts: 0,
     avgProgress: 0
   });
+
+  // Modal states
+  const [showAddBudget, setShowAddBudget] = useState(false);
+  const [showAddMilestone, setShowAddMilestone] = useState(false);
 
   // Load REAL projects when user logs in
   useEffect(() => {
@@ -58,8 +64,8 @@ export default function MyApulinkDashboard() {
       
       setMetrics({
         totalPortfolio: totalBudget,
-        totalGrants: totalBudget * 0.4, // Example: 40% grant coverage
-        teamExperts: 12, // You can fetch this from a professionals collection
+        totalGrants: totalBudget * 0.4,
+        teamExperts: 12,
         avgProgress: userProjects.length > 0 ? Math.round(totalProgress / userProjects.length) : 0
       });
       
@@ -110,6 +116,29 @@ export default function MyApulinkDashboard() {
   const handleProjectClick = (project: Project) => {
     setSelectedProject(project);
     setActiveSection('properties');
+  };
+
+  const handleDeleteBudgetItem = async (itemId: string) => {
+    if (confirm('Are you sure you want to delete this budget item?')) {
+      await budgetService.deleteBudgetItem(itemId);
+    }
+  };
+
+  const handleDeleteMilestone = async (milestoneId: string) => {
+    if (confirm('Are you sure you want to delete this milestone?')) {
+      await milestoneService.deleteMilestone(milestoneId);
+    }
+  };
+
+  const handleUpdateMilestoneProgress = async (milestoneId: string, progress: number) => {
+    await milestoneService.updateMilestone(milestoneId, { 
+      progress,
+      status: progress === 100 ? 'completed' : progress > 0 ? 'in_progress' : 'pending'
+    });
+  };
+
+  const handleUpdateBudgetStatus = async (itemId: string, status: BudgetItem['status']) => {
+    await budgetService.updateBudgetItem(itemId, { status });
   };
 
   const renderContent = () => {
@@ -174,45 +203,57 @@ export default function MyApulinkDashboard() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project) => (
-                  <div
-                    key={project.id}
-                    onClick={() => handleProjectClick(project)}
-                    className="bg-white/70 backdrop-blur-sm rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all border border-white/50"
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold">All Projects</h3>
+                  <button
+                    onClick={handleCreateProject}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-xl transition-all flex items-center gap-2"
                   >
-                    <h4 className="font-semibold text-lg mb-2">{project.name}</h4>
-                    <p className="text-sm text-gray-600 mb-4">{project.comune}, {project.region}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Status</span>
-                        <span className={`font-medium ${
-                          project.status === 'completed' ? 'text-green-600' :
-                          project.status === 'in_progress' ? 'text-blue-600' :
-                          project.status === 'on_hold' ? 'text-yellow-600' :
-                          'text-gray-600'
-                        }`}>
-                          {project.status.replace('_', ' ').charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
-                        </span>
+                    <Plus className="w-4 h-4" />
+                    New Project
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {projects.map((project) => (
+                    <div
+                      key={project.id}
+                      onClick={() => handleProjectClick(project)}
+                      className="bg-white/70 backdrop-blur-sm rounded-xl p-6 cursor-pointer hover:shadow-xl transition-all border border-white/50"
+                    >
+                      <h4 className="font-semibold text-lg mb-2">{project.name}</h4>
+                      <p className="text-sm text-gray-600 mb-4">{project.comune}, {project.region}</p>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Status</span>
+                          <span className={`font-medium ${
+                            project.status === 'completed' ? 'text-green-600' :
+                            project.status === 'in_progress' ? 'text-blue-600' :
+                            project.status === 'on_hold' ? 'text-yellow-600' :
+                            'text-gray-600'
+                          }`}>
+                            {project.status.replace('_', ' ').charAt(0).toUpperCase() + project.status.slice(1).replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Budget</span>
+                          <span className="font-medium">€{project.totalBudget.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Progress</span>
+                          <span className="font-medium">{project.progress}%</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Budget</span>
-                        <span className="font-medium">€{project.totalBudget.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Progress</span>
-                        <span className="font-medium">{project.progress}%</span>
+                      <div className="mt-4 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full"
+                          style={{ width: `${project.progress}%` }}
+                        />
                       </div>
                     </div>
-                    <div className="mt-4 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full"
-                        style={{ width: `${project.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         );
@@ -227,10 +268,42 @@ export default function MyApulinkDashboard() {
         }
         
         const categories = [...new Set(budgetItems.map(item => item.category))];
+        const totals = budgetItems.reduce((acc, item) => {
+          acc.total += item.totalCost + item.vatAmount;
+          if (item.status === 'paid') {
+            acc.paid += item.totalCost + item.vatAmount;
+          }
+          return acc;
+        }, { total: 0, paid: 0 });
         
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-bold">Budget for {selectedProject.name}</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold">Budget for {selectedProject.name}</h3>
+              <button
+                onClick={() => setShowAddBudget(true)}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-xl transition-all flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Item
+              </button>
+            </div>
+
+            {/* Budget Summary */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600">Total Budget</p>
+                <p className="text-2xl font-bold">€{totals.total.toLocaleString()}</p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600">Paid</p>
+                <p className="text-2xl font-bold text-green-600">€{totals.paid.toLocaleString()}</p>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600">Remaining</p>
+                <p className="text-2xl font-bold text-orange-600">€{(totals.total - totals.paid).toLocaleString()}</p>
+              </div>
+            </div>
             
             {categories.map(category => {
               const categoryItems = budgetItems.filter(item => item.category === category);
@@ -242,15 +315,32 @@ export default function MyApulinkDashboard() {
                   <div className="space-y-3">
                     {categoryItems.map(item => (
                       <div key={item.id} className="flex justify-between items-center border-b pb-2">
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">{item.item}</p>
                           <p className="text-sm text-gray-600">
                             {item.quantity} {item.unit} × €{item.unitCost}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold">€{(item.totalCost + item.vatAmount).toLocaleString()}</p>
-                          <p className="text-xs text-gray-500">{item.status}</p>
+                        <div className="flex items-center gap-4">
+                          <select
+                            value={item.status}
+                            onChange={(e) => handleUpdateBudgetStatus(item.id!, e.target.value as any)}
+                            className="text-xs px-2 py-1 border rounded"
+                          >
+                            <option value="planned">Planned</option>
+                            <option value="committed">Committed</option>
+                            <option value="invoiced">Invoiced</option>
+                            <option value="paid">Paid</option>
+                          </select>
+                          <div className="text-right">
+                            <p className="font-semibold">€{(item.totalCost + item.vatAmount).toLocaleString()}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteBudgetItem(item.id!)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -262,6 +352,14 @@ export default function MyApulinkDashboard() {
                 </div>
               );
             })}
+
+            {showAddBudget && selectedProject?.id && (
+              <AddBudgetItem
+                projectId={selectedProject.id}
+                onClose={() => setShowAddBudget(false)}
+                onAdded={() => setShowAddBudget(false)}
+              />
+            )}
           </div>
         );
         
@@ -276,7 +374,16 @@ export default function MyApulinkDashboard() {
         
         return (
           <div className="space-y-6">
-            <h3 className="text-xl font-bold">Timeline for {selectedProject.name}</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold">Timeline for {selectedProject.name}</h3>
+              <button
+                onClick={() => setShowAddMilestone(true)}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:shadow-xl transition-all flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Milestone
+              </button>
+            </div>
             
             <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6">
               {milestones.map((milestone, index) => (
@@ -294,13 +401,33 @@ export default function MyApulinkDashboard() {
                       )}
                     </div>
                     <div className="flex-1 pb-8">
-                      <h4 className="font-semibold">{milestone.title}</h4>
-                      <p className="text-sm text-gray-600 mb-2">{milestone.description}</p>
-                      <div className="flex gap-4 text-sm text-gray-500">
-                        <span>{new Date(milestone.startDate).toLocaleDateString()}</span>
-                        <span>→</span>
-                        <span>{new Date(milestone.endDate).toLocaleDateString()}</span>
-                        <span className="ml-auto font-medium">{milestone.progress}%</span>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{milestone.title}</h4>
+                          <p className="text-sm text-gray-600 mb-2">{milestone.description}</p>
+                          <div className="flex gap-4 text-sm text-gray-500">
+                            <span>{new Date(milestone.startDate).toLocaleDateString()}</span>
+                            <span>→</span>
+                            <span>{new Date(milestone.endDate).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={milestone.progress}
+                            onChange={(e) => handleUpdateMilestoneProgress(milestone.id!, Number(e.target.value))}
+                            className="w-16 px-2 py-1 text-sm border rounded"
+                          />
+                          <span className="text-sm">%</span>
+                          <button
+                            onClick={() => handleDeleteMilestone(milestone.id!)}
+                            className="text-red-500 hover:text-red-700 ml-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                       <div className="mt-2 bg-gray-200 rounded-full h-2">
                         <div
@@ -318,6 +445,15 @@ export default function MyApulinkDashboard() {
                 </div>
               ))}
             </div>
+
+            {showAddMilestone && selectedProject?.id && user && (
+              <AddMilestone
+                projectId={selectedProject.id}
+                ownerId={user.uid}
+                onClose={() => setShowAddMilestone(false)}
+                onAdded={() => setShowAddMilestone(false)}
+              />
+            )}
           </div>
         );
         
