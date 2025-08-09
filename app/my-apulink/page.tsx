@@ -3,7 +3,7 @@
 'use client';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+// export const runtime = 'nodejs'; // REMOVED - causing client/server mismatch
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
