@@ -1,106 +1,171 @@
-// app/my-apulink/page.tsx
+// PATH: app/my-apulink/page.tsx
+
 'use client';
+
+export const dynamic = 'force-dynamic';
+// export const runtime = 'nodejs'; // REMOVED - causing client/server mismatch
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Calculator, Upload, MessageSquare, ArrowUpRight, 
-  Loader2, X, Building2, FileText, Users, Calendar,
-  Euro, Bell, TrendingUp, Clock
-} from 'lucide-react';
-import * as firebaseDb from './services/firebase-db';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../../lib/firebase/config';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Calculator, Upload, MessageSquare, ArrowUpRight, Loader2, X } from 'lucide-react';
 
-// Import components (we'll create new Firebase versions)
-import DashboardLayout from './components-new/DashboardLayout';
-import DashboardMetrics from './components-new/DashboardMetrics';
-import ProjectList from './components-new/ProjectList';
-import DocumentVault from './components-new/DocumentVault';
-import Timeline from './components-new/Timeline';
-import BudgetPlanner from './components-new/BudgetPlanner';
-import TeamManager from './components-new/TeamManager';
-import GrantCalculator from './components-new/GrantCalculator';
-import NotificationCenter from './components-new/NotificationCenter';
+interface Activity {
+  type: string;
+  title: string;
+  description: string;
+  time: any;
+  icon: string;
+}
 
 export default function MyApulinkDashboard() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const [user, setUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('overview');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showGrantCalculator, setShowGrantCalculator] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
-  const [dashboardData, setDashboardData] = useState<any>({
-    projects: [],
-    notifications: [],
-    metrics: null,
-    recentActivity: []
-  });
-  const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  
+  const supabase = createClientComponentClient();
 
+  // Firebase Authentication
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, authLoading, router]);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // Convert Firebase user to format components expect
+        setUser({
+          id: firebaseUser.uid,
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          user_metadata: {
+            full_name: firebaseUser.displayName || firebaseUser.email
+          }
+        });
+        setAuthLoading(false);
+      } else {
+        router.push('/login');
+      }
+    });
 
+    return () => unsubscribe();
+  }, [router]);
+
+  // Load user data from Supabase
   useEffect(() => {
     if (user) {
-      loadDashboardData();
+      loadUserData();
+    }
+  }, [user]);
+
+  // Load recent activity
+  useEffect(() => {
+    if (user && activeSection === 'overview') {
+      loadRecentActivity();
     }
   }, [user, activeSection]);
 
-  async function loadDashboardData() {
+  async function loadUserData() {
     if (!user) return;
-    
+
     try {
-      setLoading(true);
-      
-      // Load all dashboard data in parallel
-      const [projects, notifications, metrics] = await Promise.all([
-        firebaseDb.getUserProjects(user.uid),
-        firebaseDb.getUserNotifications(user.uid),
-        firebaseDb.calculateDashboardMetrics(user.uid)
-      ]);
+      // Load projects from Supabase
+      const { data: projectData, error: projError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('buyer_id', user.id)
+        .order('created_at', { ascending: false });
 
-      // Create recent activity from notifications and projects
-      const recentActivity = [
-        ...notifications.slice(0, 3).map((n: any) => ({
-          type: 'notification',
-          title: n.title,
-          description: n.message,
-          time: n.created_at,
-          icon: 'bell'
-        })),
-        ...projects.slice(0, 2).map((p: any) => ({
-          type: 'project',
-          title: `Project: ${p.name}`,
-          description: `Progress: ${p.progress}%`,
-          time: p.updated_at || p.created_at,
-          icon: 'project'
-        }))
-      ].sort((a, b) => {
-        const timeA = a.time?.toDate?.() || new Date(a.time) || new Date();
-        const timeB = b.time?.toDate?.() || new Date(b.time) || new Date();
-        return timeB.getTime() - timeA.getTime();
-      }).slice(0, 5);
+      if (!projError && projectData) {
+        setProjects(projectData);
+      }
 
-      setDashboardData({
-        projects,
-        notifications,
-        metrics,
-        recentActivity
-      });
+      // Load notifications from Supabase
+      const { data: notifData, error: notifError } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+        .order('created_at', { ascending: false });
+
+      if (!notifError && notifData) {
+        setNotifications(notifData);
+      }
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error loading user data:', error);
+    }
+  }
+
+  async function loadRecentActivity() {
+    try {
+      setLoadingActivity(true);
+
+      // Get recent notifications
+      const { data: notifications } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Get recent project updates
+      const { data: projects } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('buyer_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(3);
+
+      // Combine into activity
+      const activity: Activity[] = [];
+
+      if (notifications) {
+        notifications.forEach((n: any) => {
+          activity.push({
+            type: 'notification',
+            title: n.title || 'New notification',
+            description: n.message || '',
+            time: n.created_at,
+            icon: n.type || 'bell'
+          });
+        });
+      }
+
+      if (projects) {
+        projects.forEach((p: any) => {
+          activity.push({
+            type: 'project',
+            title: `Project: ${p.name || 'Unnamed'}`,
+            description: `Progress: ${p.progress || 0}%`,
+            time: p.updated_at,
+            icon: 'project'
+          });
+        });
+      }
+
+      // Sort by time
+      const sortedActivity = activity
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .slice(0, 5);
+
+      setRecentActivity(sortedActivity);
+    } catch (error) {
+      console.error('Error loading activity:', error);
     } finally {
-      setLoading(false);
+      setLoadingActivity(false);
     }
   }
 
   function getRelativeTime(timestamp: any): string {
     if (!timestamp) return 'recently';
     
-    const date = timestamp?.toDate?.() || new Date(timestamp);
+    const date = new Date(timestamp);
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
 
     const intervals = [
@@ -120,6 +185,11 @@ export default function MyApulinkDashboard() {
     return 'just now';
   }
 
+  // Handle grant calculation
+  const handleGrantCalculation = (calculation: any) => {
+    console.log('Grant calculation:', calculation);
+  };
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -135,13 +205,21 @@ export default function MyApulinkDashboard() {
     return null;
   }
 
+  // Import components
+  const DashboardLayout = require('./components/DashboardLayout').default;
+  const DashboardMetrics = require('./components/DashboardMetrics').default;
+  const ProjectList = require('./components/ProjectList').default;
+  const DocumentVault = require('./components/DocumentVault').default;
+  const Timeline = require('./components/Timeline').default;
+  const BudgetPlanner = require('./components/BudgetPlanner').default;
+  const GrantCalculator = require('./components/GrantCalculator').default;
+  const NotificationCenter = require('./components/NotificationCenter').default;
+
   return (
     <DashboardLayout
       activeSection={activeSection}
       onSectionChange={setActiveSection}
       onNotificationClick={() => setShowNotifications(true)}
-      notificationCount={dashboardData.metrics?.unreadNotifications || 0}
-      projectCount={dashboardData.metrics?.projectCount || 0}
     >
       {/* Overview Section */}
       {activeSection === 'overview' && (
@@ -149,15 +227,15 @@ export default function MyApulinkDashboard() {
           {/* Welcome Message */}
           <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 text-white">
             <h2 className="text-2xl font-bold mb-2">
-              Welcome back, {user.displayName || user.email}!
+              Welcome back, {user.email}!
             </h2>
             <p className="opacity-90">
-              You have {dashboardData.metrics?.projectCount || 0} active projects and {dashboardData.metrics?.unreadNotifications || 0} new notifications
+              You have {projects.length} active projects and {notifications.length} new notifications
             </p>
           </div>
 
           {/* Key Metrics */}
-          <DashboardMetrics metrics={dashboardData.metrics} loading={loading} />
+          <DashboardMetrics userId={user.id} />
 
           {/* Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -198,18 +276,17 @@ export default function MyApulinkDashboard() {
             </button>
           </div>
 
-          {/* Recent Activity & Projects */}
+          {/* Recent Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recent Activity */}
             <div className="lg:col-span-2 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6">
               <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-              {loading ? (
+              {loadingActivity ? (
                 <div className="text-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
                 </div>
-              ) : dashboardData.recentActivity.length > 0 ? (
+              ) : recentActivity.length > 0 ? (
                 <div className="space-y-3">
-                  {dashboardData.recentActivity.map((activity: any, index: number) => (
+                  {recentActivity.map((activity, index) => (
                     <div key={index} className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
                       <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
                       <div className="flex-1">
@@ -225,58 +302,15 @@ export default function MyApulinkDashboard() {
               )}
             </div>
 
-            {/* Quick Projects View */}
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Your Projects</h3>
-                <button 
-                  onClick={() => setActiveSection('properties')}
-                  className="text-sm text-blue-600 hover:text-blue-700"
-                >
-                  View all
-                </button>
-              </div>
-              {loading ? (
-                <div className="text-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-blue-600 mx-auto" />
-                </div>
-              ) : dashboardData.projects.length > 0 ? (
-                <div className="space-y-3">
-                  {dashboardData.projects.slice(0, 3).map((project: any) => (
-                    <div 
-                      key={project.id}
-                      onClick={() => {
-                        setSelectedProjectId(project.id);
-                        setActiveSection('properties');
-                      }}
-                      className="p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                    >
-                      <p className="font-medium text-gray-900">{project.name}</p>
-                      <p className="text-xs text-gray-600">{project.location}</p>
-                      <div className="mt-2">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-gray-500">Progress</span>
-                          <span className="font-medium">{project.progress || 0}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5">
-                          <div 
-                            className="bg-blue-600 h-1.5 rounded-full"
-                            style={{ width: `${project.progress || 0}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm">No projects yet</p>
-                  <button className="mt-2 text-blue-600 text-sm hover:text-blue-700">
-                    Create your first project
-                  </button>
-                </div>
-              )}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Your Projects</h3>
+              <ProjectList 
+                userId={user.id} 
+                onProjectClick={(projectId: string) => {
+                  setSelectedProjectId(projectId);
+                  setActiveSection('properties');
+                }}
+              />
             </div>
           </div>
         </div>
@@ -286,10 +320,10 @@ export default function MyApulinkDashboard() {
       {activeSection === 'properties' && (
         <div className="max-w-7xl mx-auto">
           <ProjectList 
-            userId={user.uid}
-            projects={dashboardData.projects}
-            onProjectClick={setSelectedProjectId}
-            onRefresh={loadDashboardData}
+            userId={user.id}
+            onProjectClick={(projectId: string) => {
+              setSelectedProjectId(projectId);
+            }}
           />
         </div>
       )}
@@ -299,7 +333,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <DocumentVault 
             projectId={selectedProjectId}
-            userId={user.uid}
+            userId={user.id}
           />
         </div>
       )}
@@ -309,7 +343,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <Timeline 
             projectId={selectedProjectId}
-            userId={user.uid}
+            userId={user.id}
           />
         </div>
       )}
@@ -319,7 +353,7 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <BudgetPlanner 
             projectId={selectedProjectId}
-            userId={user.uid}
+            userId={user.id}
           />
         </div>
       )}
@@ -327,10 +361,12 @@ export default function MyApulinkDashboard() {
       {/* Team Section */}
       {activeSection === 'team' && (
         <div className="max-w-7xl mx-auto">
-          <TeamManager 
-            projectId={selectedProjectId}
-            userId={user.uid}
-          />
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+              Team Collaboration
+            </h3>
+            <p className="text-gray-600">Connect with your architects, surveyors, and other professionals here.</p>
+          </div>
         </div>
       )}
 
@@ -339,31 +375,8 @@ export default function MyApulinkDashboard() {
         <div className="max-w-7xl mx-auto">
           <GrantCalculator 
             projectId={selectedProjectId}
-            userId={user.uid}
+            onCalculation={handleGrantCalculation}
           />
-        </div>
-      )}
-
-      {/* Settings Section */}
-      {activeSection === 'settings' && (
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6">
-            <h3 className="text-lg font-semibold mb-4">Account Settings</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p className="font-medium">{user.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Name</p>
-                <p className="font-medium">{user.displayName || 'Not set'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">User ID</p>
-                <p className="font-mono text-xs">{user.uid}</p>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -371,8 +384,7 @@ export default function MyApulinkDashboard() {
       <NotificationCenter 
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
-        notifications={dashboardData.notifications}
-        onRefresh={loadDashboardData}
+        userId={user.id}
       />
 
       {/* Grant Calculator Modal */}
@@ -381,14 +393,14 @@ export default function MyApulinkDashboard() {
           <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={() => setShowGrantCalculator(false)}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
             <div className="p-6">
               <GrantCalculator 
                 projectId={selectedProjectId}
-                userId={user.uid}
+                onCalculation={handleGrantCalculation}
               />
             </div>
           </div>

@@ -1,40 +1,45 @@
 ﻿// app/login/page.tsx
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { AlertCircle, ArrowLeft } from 'lucide-react'
+import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const { user, loading, signInWithGoogle, error } = useAuth()
   const router = useRouter()
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   useEffect(() => {
-    // If already logged in, redirect to intended destination or dashboard
-    if (user && !loading) {
+    if (user && !loading && !isRedirecting) {
+      setIsRedirecting(true)
       const redirectTo = sessionStorage.getItem('redirectAfterLogin') || '/my-apulink'
       sessionStorage.removeItem('redirectAfterLogin')
-      if (redirectTo.startsWith('http')) {
-          window.location.href = redirectTo;
-        } else {
-          router.push(redirectTo);
-        }
+      router.replace(redirectTo)
     }
-  }, [user, loading, router])
+  }, [user, loading, router, isRedirecting])
 
-  if (loading) {
+  if (loading || isRedirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-600">
+            {isRedirecting ? 'Redirecting to dashboard...' : 'Loading...'}
+          </p>
+        </div>
       </div>
     )
   }
 
+  if (user) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-amber-50 to-white flex flex-col">
-      {/* Header */}
       <header className="w-full p-4">
         <div className="max-w-7xl mx-auto">
           <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900">
@@ -44,11 +49,9 @@ export default function LoginPage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            {/* Logo/Brand */}
             <div className="text-center mb-8">
               <div className="mb-4">
                 <h1 className="text-3xl font-bold text-gray-900">Apulink</h1>
@@ -57,7 +60,6 @@ export default function LoginPage() {
               <p className="text-gray-600">Sign in to access your investment dashboard</p>
             </div>
 
-            {/* Error Message */}
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -65,7 +67,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Login Options */}
             <div className="space-y-4">
               <button
                 onClick={signInWithGoogle}
@@ -81,7 +82,6 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Benefits */}
             <div className="mt-8 pt-8 border-t border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 mb-4">Why create an account?</h3>
               <ul className="space-y-2 text-sm text-gray-600">
@@ -104,7 +104,6 @@ export default function LoginPage() {
               </ul>
             </div>
 
-            {/* Privacy Note */}
             <p className="mt-6 text-xs text-center text-gray-500">
               By signing in, you agree to our{' '}
               <Link href="/terms" className="text-blue-600 hover:underline">

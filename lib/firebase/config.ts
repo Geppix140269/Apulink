@@ -1,34 +1,32 @@
-// lib/firebase/config.ts
+﻿// lib/firebase/config.ts
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDdm_uzw1MCrfgKBtY74gUxDS4thCpv-G4",
-  authDomain: "apulink-by-investinpuglia.firebaseapp.com",
-  projectId: "apulink-by-investinpuglia",
-  storageBucket: "apulink-by-investinpuglia.firebasestorage.app",
-  messagingSenderId: "622525573318",
-  appId: "1:622525573318:web:618bce514d9ec65c5d8fc7",
-  measurementId: "G-8JX22DF6NY"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Initialize Firestore
+export const db = getFirestore(app);
+
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
 
-// Initialize Analytics only on client side
-let analytics: any = null;
-if (typeof window !== 'undefined') {
-  isSupported().then(yes => {
-    if (yes) {
-      analytics = getAnalytics(app);
-    }
-  });
+// Initialize Analytics (only in browser)
+if (typeof window !== "undefined") {
+  isSupported().then(yes => yes && getAnalytics(app));
 }
 
-export { analytics };
-export default app;
+export { app };
