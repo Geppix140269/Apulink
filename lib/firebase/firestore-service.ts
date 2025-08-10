@@ -1,422 +1,608 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy,
-  Timestamp,
+// Path: lib/firebase/firestore-service.ts
+// Firebase Firestore service functions for all data operations
+
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
   addDoc,
-  onSnapshot
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  onSnapshot,
+  serverTimestamp,
+  Timestamp,
+  writeBatch,
+  setDoc
 } from 'firebase/firestore';
 import { db } from './config';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { storage } from './config';
 
-// Project Types
-export interface Project {
-  id?: string;
-  name: string;
-  status: 'planning' | 'in_progress' | 'completed' | 'on_hold';
-  region: string;
-  comune: string;
-  address: string;
-  description: string;
-  coverImage?: string;
-  miniPiaStage: string;
-  startDate: Date;
-  endDate: Date;
-  ownerId: string;
-  totalBudget: number;
-  spentBudget: number;
-  progress: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Budget Item validation guards
+function validateBudgetItem(data: any): void {
+  // Check quantity
+  if (typeof data.quantity !== 'number' || data.quantity < 0) {
+    throw new Error('Quantity must be a non-negative number');
+  }
+  if (data.quantity > 1e12) {
+    throw new Error('Quantity exceeds maximum allowed value');
+  }
 
-// Milestone Types
-export interface Milestone {
-  id?: string;
-  projectId: string;
-  title: string;
-  description: string;
-  startDate: Date;
-  endDate: Date;
-  progress: number;
-  status: 'pending' | 'in_progress' | 'completed' | 'delayed';
-  ownerId: string;
-  dependencies?: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+  // Check unit cost
+  if (typeof data.unitCost !== 'number' || data.unitCost < 0) {
+    throw new Error('Unit cost must be a non-negative number');
+  }
+  if (data.unitCost > 1e12) {
+    throw new Error('Unit cost exceeds maximum allowed value');
+  }
 
-// Budget Types
-export interface BudgetItem {
-  id?: string;
-  projectId: string;
-  category: 'Acquisition' | 'Design' | 'Permits' | 'Works' | 'FF&E' | 'Contingency' | 'Fees' | 'VAT';
-  item: string;
-  quantity: number;
-  unit: string;
-  unitCost: number;
-  totalCost: number;
-  vatRate: number;
-  vatAmount: number;
-  status: 'planned' | 'committed' | 'invoiced' | 'paid';
-  supplierId?: string;
-  notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+  // Check VAT rate (as decimal: 0 to 1)
+  if (typeof data.vatRate !== 'number' || data.vatRate < 0 || data.vatRate > 1) {
+    throw new Error('VAT rate must be between 0 and 1');
+  }
 
-// Document Types
-export interface Document {
-  id?: string;
-  projectId: string;
-  name: string;
-  folder: string;
-  fileUrl: string;
-  fileType: string;
-  fileSize: number;
-  tags: string[];
-  uploadedBy: string;
-  version: number;
-  createdAt: Date;
-  updatedAt: Date;
+  // Check item description
+  if (!data.item || typeof data.item !== 'string' || data.item.trim().length === 0) {
+    throw new Error('Item description is required');
+  }
 }
 
 // Project Service
-export class ProjectService {
-  private collection = 'projects';
+export const projectService = {
+  async createProject(projectData: any) {
+    try {
+      const docRef = await addDoc(collection(db, 'projects'), {
+        ...projectData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw error;
+    }
+  },
 
-  async createProject(project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    const docRef = await addDoc(collection(db, this.collection), {
-      ...project,
-      startDate: Timestamp.fromDate(new Date(project.startDate)),
-      endDate: Timestamp.fromDate(new Date(project.endDate)),
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    });
-    return docRef.id;
-  }
+  async getProject(projectId: string) {
+    try {
+      const docRef = doc(db, 'projects', projectId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting project:', error);
+      throw error;
+    }
+  },
 
-  async getProject(projectId: string): Promise<Project | null> {
-    const docRef = doc(db, this.collection, projectId);
-    const docSnap = await getDoc(docRef);
-    
-    if (!docSnap.exists()) return null;
-    
-    const data = docSnap.data();
-    return {
-      id: docSnap.id,
-      ...data,
-      startDate: data.startDate.toDate(),
-      endDate: data.endDate.toDate(),
-      createdAt: data.createdAt.toDate(),
-      updatedAt: data.updatedAt.toDate()
-    } as Project;
-  }
+  async updateProject(projectId: string, updates: any) {
+    try {
+      const docRef = doc(db, 'projects', projectId);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
+  },
 
-  async getUserProjects(userId: string): Promise<Project[]> {
-    const q = query(
-      collection(db, this.collection),
-      where('ownerId', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
+  async deleteProject(projectId: string) {
+    try {
+      await deleteDoc(doc(db, 'projects', projectId));
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      throw error;
+    }
+  },
+
+  async getUserProjects(userId: string) {
+    try {
+      const q = query(
+        collection(db, 'projects'),
+        where('ownerId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...data,
-        startDate: data.startDate.toDate(),
-        endDate: data.endDate.toDate(),
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate()
-      } as Project;
-    });
-  }
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting user projects:', error);
+      throw error;
+    }
+  },
 
-  subscribeToUserProjects(userId: string, callback: (projects: Project[]) => void) {
+  subscribeToProjects(userId: string, callback: (projects: any[]) => void) {
     const q = query(
-      collection(db, this.collection),
+      collection(db, 'projects'),
       where('ownerId', '==', userId),
       orderBy('createdAt', 'desc')
     );
     
     return onSnapshot(q, (snapshot) => {
-      const projects = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          startDate: data.startDate.toDate(),
-          endDate: data.endDate.toDate(),
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate()
-        } as Project;
-      });
+      const projects = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       callback(projects);
     });
   }
-
-  async updateProject(projectId: string, updates: Partial<Project>): Promise<void> {
-    const docRef = doc(db, this.collection, projectId);
-    const updateData: any = { ...updates, updatedAt: Timestamp.now() };
-    
-    if (updates.startDate) {
-      updateData.startDate = Timestamp.fromDate(new Date(updates.startDate));
-    }
-    if (updates.endDate) {
-      updateData.endDate = Timestamp.fromDate(new Date(updates.endDate));
-    }
-    
-    await updateDoc(docRef, updateData);
-  }
-
-  async deleteProject(projectId: string): Promise<void> {
-    const docRef = doc(db, this.collection, projectId);
-    await deleteDoc(docRef);
-  }
-}
-
-// Milestone Service
-export class MilestoneService {
-  private collection = 'milestones';
-
-  async createMilestone(milestone: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    const docRef = await addDoc(collection(db, this.collection), {
-      ...milestone,
-      startDate: Timestamp.fromDate(new Date(milestone.startDate)),
-      endDate: Timestamp.fromDate(new Date(milestone.endDate)),
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    });
-    return docRef.id;
-  }
-
-  async getProjectMilestones(projectId: string): Promise<Milestone[]> {
-    const q = query(
-      collection(db, this.collection),
-      where('projectId', '==', projectId),
-      orderBy('startDate', 'asc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        startDate: data.startDate.toDate(),
-        endDate: data.endDate.toDate(),
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate()
-      } as Milestone;
-    });
-  }
-
-  subscribeToProjectMilestones(projectId: string, callback: (milestones: Milestone[]) => void) {
-    const q = query(
-      collection(db, this.collection),
-      where('projectId', '==', projectId),
-      orderBy('startDate', 'asc')
-    );
-    
-    return onSnapshot(q, (snapshot) => {
-      const milestones = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          startDate: data.startDate.toDate(),
-          endDate: data.endDate.toDate(),
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate()
-        } as Milestone;
-      });
-      callback(milestones);
-    });
-  }
-
-  async updateMilestone(milestoneId: string, updates: Partial<Milestone>): Promise<void> {
-    const docRef = doc(db, this.collection, milestoneId);
-    const updateData: any = { ...updates, updatedAt: Timestamp.now() };
-    
-    if (updates.startDate) {
-      updateData.startDate = Timestamp.fromDate(new Date(updates.startDate));
-    }
-    if (updates.endDate) {
-      updateData.endDate = Timestamp.fromDate(new Date(updates.endDate));
-    }
-    
-    await updateDoc(docRef, updateData);
-  }
-
-  async deleteMilestone(milestoneId: string): Promise<void> {
-    const docRef = doc(db, this.collection, milestoneId);
-    await deleteDoc(docRef);
-  }
-}
+};
 
 // Budget Service
-export class BudgetService {
-  private collection = 'budgetItems';
-
-  async createBudgetItem(item: Omit<BudgetItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    const docRef = await addDoc(collection(db, this.collection), {
-      ...item,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    });
-    return docRef.id;
-  }
-
-  async getProjectBudget(projectId: string): Promise<BudgetItem[]> {
-    const q = query(
-      collection(db, this.collection),
-      where('projectId', '==', projectId),
-      orderBy('category', 'asc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
+export const budgetService = {
+  async createBudgetItem(data: any) {
+    try {
+      // Add validation before creating
+      validateBudgetItem(data);
+      
+      // Ensure calculated fields are correct
+      const totalCost = Math.round(data.quantity * data.unitCost * 100) / 100;
+      const vatAmount = Math.round(totalCost * data.vatRate * 100) / 100;
+      
+      const itemData = {
         ...data,
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate()
-      } as BudgetItem;
-    });
-  }
+        totalCost,
+        vatAmount,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
 
-  subscribeToProjectBudget(projectId: string, callback: (items: BudgetItem[]) => void) {
+      const docRef = await addDoc(collection(db, 'budgetItems'), itemData);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating budget item:', error);
+      throw error;
+    }
+  },
+
+  async updateBudgetItem(projectId: string, itemId: string, data: any) {
+    try {
+      // Add validation before updating
+      validateBudgetItem(data);
+      
+      // Ensure calculated fields are correct
+      const totalCost = Math.round(data.quantity * data.unitCost * 100) / 100;
+      const vatAmount = Math.round(totalCost * data.vatRate * 100) / 100;
+      
+      const itemData = {
+        ...data,
+        totalCost,
+        vatAmount,
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = doc(db, 'budgetItems', itemId);
+      await updateDoc(docRef, itemData);
+    } catch (error) {
+      console.error('Error updating budget item:', error);
+      throw error;
+    }
+  },
+
+  async getBudgetItem(projectId: string, itemId: string) {
+    try {
+      const docRef = doc(db, 'budgetItems', itemId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists() && docSnap.data().projectId === projectId) {
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting budget item:', error);
+      throw error;
+    }
+  },
+
+  async deleteBudgetItem(itemId: string) {
+    try {
+      await deleteDoc(doc(db, 'budgetItems', itemId));
+    } catch (error) {
+      console.error('Error deleting budget item:', error);
+      throw error;
+    }
+  },
+
+  async getProjectBudgetItems(projectId: string) {
+    try {
+      const q = query(
+        collection(db, 'budgetItems'),
+        where('projectId', '==', projectId),
+        orderBy('category', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting budget items:', error);
+      throw error;
+    }
+  },
+
+  subscribeToBudgetItems(projectId: string, callback: (items: any[]) => void) {
     const q = query(
-      collection(db, this.collection),
+      collection(db, 'budgetItems'),
       where('projectId', '==', projectId),
       orderBy('category', 'asc')
     );
     
     return onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate()
-        } as BudgetItem;
-      });
+      const items = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       callback(items);
     });
   }
+};
 
-  async updateBudgetItem(itemId: string, updates: Partial<BudgetItem>): Promise<void> {
-    const docRef = doc(db, this.collection, itemId);
-    await updateDoc(docRef, {
-      ...updates,
-      updatedAt: Timestamp.now()
-    });
-  }
+// Milestone Service
+export const milestoneService = {
+  async createMilestone(milestoneData: any) {
+    try {
+      const docRef = await addDoc(collection(db, 'milestones'), {
+        ...milestoneData,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating milestone:', error);
+      throw error;
+    }
+  },
 
-  async deleteBudgetItem(itemId: string): Promise<void> {
-    const docRef = doc(db, this.collection, itemId);
-    await deleteDoc(docRef);
-  }
+  async updateMilestone(milestoneId: string, updates: any) {
+    try {
+      const docRef = doc(db, 'milestones', milestoneId);
+      await updateDoc(docRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating milestone:', error);
+      throw error;
+    }
+  },
 
-  async calculateProjectTotals(projectId: string): Promise<{
-    totalBudget: number;
-    totalSpent: number;
-    byCategory: Record<string, number>;
-  }> {
-    const items = await this.getProjectBudget(projectId);
-    
-    let totalBudget = 0;
-    let totalSpent = 0;
-    const byCategory: Record<string, number> = {};
-    
-    items.forEach(item => {
-      totalBudget += item.totalCost + item.vatAmount;
-      
-      if (item.status === 'paid') {
-        totalSpent += item.totalCost + item.vatAmount;
-      }
-      
-      if (!byCategory[item.category]) {
-        byCategory[item.category] = 0;
-      }
-      byCategory[item.category] += item.totalCost + item.vatAmount;
-    });
-    
-    return { totalBudget, totalSpent, byCategory };
-  }
-}
+  async deleteMilestone(milestoneId: string) {
+    try {
+      await deleteDoc(doc(db, 'milestones', milestoneId));
+    } catch (error) {
+      console.error('Error deleting milestone:', error);
+      throw error;
+    }
+  },
 
-// Document Service
-export class DocumentService {
-  private collection = 'documents';
+  async getProjectMilestones(projectId: string) {
+    try {
+      const q = query(
+        collection(db, 'milestones'),
+        where('projectId', '==', projectId),
+        orderBy('startDate', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting milestones:', error);
+      throw error;
+    }
+  },
 
-  async uploadDocument(document: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    const docRef = await addDoc(collection(db, this.collection), {
-      ...document,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    });
-    return docRef.id;
-  }
-
-  async getProjectDocuments(projectId: string): Promise<Document[]> {
+  subscribeToMilestones(projectId: string, callback: (milestones: any[]) => void) {
     const q = query(
-      collection(db, this.collection),
+      collection(db, 'milestones'),
       where('projectId', '==', projectId),
-      orderBy('createdAt', 'desc')
+      orderBy('startDate', 'asc')
     );
     
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
+    return onSnapshot(q, (snapshot) => {
+      const milestones = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...data,
-        createdAt: data.createdAt.toDate(),
-        updatedAt: data.updatedAt.toDate()
-      } as Document;
+        ...doc.data()
+      }));
+      callback(milestones);
     });
   }
+};
 
-  subscribeToProjectDocuments(projectId: string, callback: (documents: Document[]) => void) {
+// Document Service
+export const documentService = {
+  async uploadDocument(file: File, projectId: string, folder: string, metadata: any) {
+    try {
+      // Create storage reference
+      const timestamp = Date.now();
+      const fileName = `${timestamp}_${file.name}`;
+      const storageRef = ref(storage, `projects/${projectId}/${folder}/${fileName}`);
+      
+      // Upload file
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
+      // Save metadata to Firestore
+      const docData = {
+        projectId,
+        name: file.name,
+        folder,
+        fileUrl: downloadURL,
+        fileType: file.type,
+        fileSize: file.size,
+        ...metadata,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      
+      const docRef = await addDoc(collection(db, 'documents'), docData);
+      return { id: docRef.id, ...docData };
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      throw error;
+    }
+  },
+
+  async deleteDocument(documentId: string, fileUrl: string) {
+    try {
+      // Delete from Storage
+      const storageRef = ref(storage, fileUrl);
+      await deleteObject(storageRef);
+      
+      // Delete from Firestore
+      await deleteDoc(doc(db, 'documents', documentId));
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw error;
+    }
+  },
+
+  async getProjectDocuments(projectId: string) {
+    try {
+      const q = query(
+        collection(db, 'documents'),
+        where('projectId', '==', projectId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting documents:', error);
+      throw error;
+    }
+  },
+
+  subscribeToDocuments(projectId: string, callback: (documents: any[]) => void) {
     const q = query(
-      collection(db, this.collection),
+      collection(db, 'documents'),
       where('projectId', '==', projectId),
       orderBy('createdAt', 'desc')
     );
     
     return onSnapshot(q, (snapshot) => {
-      const documents = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt.toDate(),
-          updatedAt: data.updatedAt.toDate()
-        } as Document;
-      });
+      const documents = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       callback(documents);
     });
   }
+};
 
-  async deleteDocument(documentId: string): Promise<void> {
-    const docRef = doc(db, this.collection, documentId);
-    await deleteDoc(docRef);
+// Team Service
+export const teamService = {
+  async addTeamMember(memberData: any) {
+    try {
+      const docRef = await addDoc(collection(db, 'teamMembers'), {
+        ...memberData,
+        invitedAt: serverTimestamp(),
+        status: 'pending'
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding team member:', error);
+      throw error;
+    }
+  },
+
+  async updateTeamMember(memberId: string, updates: any) {
+    try {
+      const docRef = doc(db, 'teamMembers', memberId);
+      await updateDoc(docRef, updates);
+    } catch (error) {
+      console.error('Error updating team member:', error);
+      throw error;
+    }
+  },
+
+  async removeTeamMember(memberId: string) {
+    try {
+      await deleteDoc(doc(db, 'teamMembers', memberId));
+    } catch (error) {
+      console.error('Error removing team member:', error);
+      throw error;
+    }
+  },
+
+  async getProjectTeam(projectId: string) {
+    try {
+      const q = query(
+        collection(db, 'teamMembers'),
+        where('projectId', '==', projectId)
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting team members:', error);
+      throw error;
+    }
+  },
+
+  subscribeToTeam(projectId: string, callback: (team: any[]) => void) {
+    const q = query(
+      collection(db, 'teamMembers'),
+      where('projectId', '==', projectId)
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const team = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      callback(team);
+    });
   }
-}
+};
 
-// Export service instances
-export const projectService = new ProjectService();
-export const milestoneService = new MilestoneService();
-export const budgetService = new BudgetService();
-export const documentService = new DocumentService();
+// Message Service
+export const messageService = {
+  async sendMessage(messageData: any) {
+    try {
+      const docRef = await addDoc(collection(db, 'projectMessages'), {
+        ...messageData,
+        createdAt: serverTimestamp(),
+        readBy: [messageData.userId]
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
+  },
+
+  async getProjectMessages(projectId: string) {
+    try {
+      const q = query(
+        collection(db, 'projectMessages'),
+        where('projectId', '==', projectId),
+        orderBy('createdAt', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting messages:', error);
+      throw error;
+    }
+  },
+
+  subscribeToMessages(projectId: string, callback: (messages: any[]) => void) {
+    const q = query(
+      collection(db, 'projectMessages'),
+      where('projectId', '==', projectId),
+      orderBy('createdAt', 'asc')
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const messages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      callback(messages);
+    });
+  }
+};
+
+// Notification Service
+export const notificationService = {
+  async createNotification(notificationData: any) {
+    try {
+      const docRef = await addDoc(collection(db, 'notifications'), {
+        ...notificationData,
+        read: false,
+        createdAt: serverTimestamp()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      throw error;
+    }
+  },
+
+  async markAsRead(notificationId: string) {
+    try {
+      const docRef = doc(db, 'notifications', notificationId);
+      await updateDoc(docRef, { read: true });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  },
+
+  async markAllAsRead(userId: string) {
+    try {
+      const q = query(
+        collection(db, 'notifications'),
+        where('userId', '==', userId),
+        where('read', '==', false)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      const batch = writeBatch(db);
+      querySnapshot.docs.forEach((doc) => {
+        batch.update(doc.ref, { read: true });
+      });
+      
+      await batch.commit();
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+      throw error;
+    }
+  },
+
+  async getUserNotifications(userId: string) {
+    try {
+      const q = query(
+        collection(db, 'notifications'),
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc'),
+        limit(50)
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting notifications:', error);
+      throw error;
+    }
+  },
+
+  subscribeToNotifications(userId: string, callback: (notifications: any[]) => void) {
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    
+    return onSnapshot(q, (snapshot) => {
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      callback(notifications);
+    });
+  }
+};
