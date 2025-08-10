@@ -1,689 +1,601 @@
-// PATH: lib/firebase/firebase-service.ts
-
-import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User
-} from 'firebase/auth';
-import { 
-  getFirestore, 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  getDocs, 
+import {
+  collection,
+  doc,
   addDoc,
   updateDoc,
   deleteDoc,
-  query, 
-  where, 
-  orderBy, 
-  limit,
+  query,
+  where,
+  orderBy,
   onSnapshot,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  getDoc,
+  setDoc,
+  limit,
+  getDocs,
 } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getAnalytics, isSupported } from 'firebase/analytics';
+import { db } from './config';
+import { z } from 'zod';
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDdm_uzw1MCrfgKBtY74gUxDS4thCpv-G4",
-  authDomain: "apulink-by-investinpuglia.firebaseapp.com",
-  projectId: "apulink-by-investinpuglia",
-  storageBucket: "apulink-by-investinpuglia.firebasestorage.app",
-  messagingSenderId: "622525573318",
-  appId: "1:622525573318:web:618bce514d9ec65c5d8fc7",
-  measurementId: "G-8JX22DF6NY"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-
-// Analytics (client-side only)
-let analytics: any = null;
-if (typeof window !== 'undefined') {
-  isSupported().then(yes => {
-    if (yes) {
-      analytics = getAnalytics(app);
-    }
-  });
+// Type definitions
+export interface Project {
+  id?: string;
+  name: string;
+  status: 'planning' | 'in-progress' | 'completed' | 'on-hold';
+  region: string;
+  comune: string;
+  address: string;
+  description: string;
+  miniPiaStage: string;
+  startDate: Date | Timestamp;
+  endDate: Date | Timestamp;
+  ownerId: string;
+  totalBudget: number;
+  spentBudget: number;
+  progress: number;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
 }
 
-// ============================================
-// AUTHENTICATION FUNCTIONS
-// ============================================
+export interface Milestone {
+  id?: string;
+  projectId: string;
+  title: string;
+  description: string;
+  startDate: Date | Timestamp;
+  endDate: Date | Timestamp;
+  progress: number;
+  status: 'not-started' | 'in-progress' | 'completed' | 'delayed';
+  ownerId: string;
+  dependencies?: string[];
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
 
-export const firebaseAuth = {
-  // Sign up new user
-  async signUp(email: string, password: string, userData: any) {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      // Create user profile in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        ...userData,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      
-      return { success: true, user };
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      return { success: false, error: error.message };
-    }
-  },
+export interface BudgetItem {
+  id?: string;
+  projectId: string;
+  category: string;
+  item: string;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  totalCost: number;
+  vatRate: number;
+  vatAmount: number;
+  status: 'pending' | 'approved' | 'paid';
+  supplierId?: string;
+  notes?: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
 
-  // Sign in existing user
-  async signIn(email: string, password: string) {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return { success: true, user: userCredential.user };
-    } catch (error: any) {
-      console.error('Signin error:', error);
-      return { success: false, error: error.message };
-    }
-  },
+export interface Document {
+  id?: string;
+  projectId: string;
+  name: string;
+  folder: string;
+  storagePath: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  tags: string[];
+  uploadedBy: string;
+  version: number;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
 
-  // Sign out
-  async signOut() {
-    try {
-      await signOut(auth);
-      return { success: true };
-    } catch (error: any) {
-      console.error('Signout error:', error);
-      return { success: false, error: error.message };
-    }
-  },
+export interface TeamMember {
+  id?: string;
+  projectId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  category: 'professional' | 'contractor' | 'supplier' | 'authority';
+  company?: string;
+  specialization?: string;
+  permissions: {
+    view: boolean;
+    edit: boolean;
+    delete: boolean;
+  };
+  status: 'pending' | 'active' | 'inactive';
+  invitedAt?: Timestamp;
+  acceptedAt?: Timestamp;
+}
 
-  // Get current user
-  getCurrentUser() {
-    return auth.currentUser;
-  },
+export interface ProjectMessage {
+  id?: string;
+  projectId: string;
+  userId: string;
+  userName: string;
+  message: string;
+  attachments?: string[];
+  createdAt?: Timestamp;
+  readBy?: string[];
+  replyTo?: string;
+}
 
-  // Listen to auth state changes
-  onAuthStateChange(callback: (user: User | null) => void) {
-    return onAuthStateChanged(auth, callback);
-  }
-};
+export interface Notification {
+  id?: string;
+  userId: string;
+  projectId?: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  title: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high';
+  read: boolean;
+  actionUrl?: string;
+  createdAt?: Timestamp;
+}
 
-// ============================================
-// USER PROFILE FUNCTIONS
-// ============================================
+// Validation schemas
+const budgetItemSchema = z.object({
+  category: z.string().min(1, "Category is required"),
+  item: z.string().min(1, "Item name is required"),
+  quantity: z.number().positive("Quantity must be positive"),
+  unit: z.string().min(1, "Unit is required"),
+  unitCost: z.number().nonnegative("Unit cost cannot be negative"),
+  vatRate: z.number().min(0).max(1, "VAT rate must be between 0 and 1"),
+  status: z.enum(['pending', 'approved', 'paid']),
+  notes: z.string().optional(),
+  supplierId: z.string().optional(),
+});
 
-export const userService = {
-  // Get user profile
-  async getUserProfile(userId: string) {
-    try {
-      const docRef = doc(db, 'users', userId);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        return { success: true, data: docSnap.data() };
-      } else {
-        return { success: false, error: 'User not found' };
-      }
-    } catch (error: any) {
-      console.error('Get profile error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Update user profile
-  async updateUserProfile(userId: string, updates: any) {
-    try {
-      const docRef = doc(db, 'users', userId);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: serverTimestamp()
-      });
-      return { success: true };
-    } catch (error: any) {
-      console.error('Update profile error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-};
-
-// ============================================
-// BUYER FUNCTIONS (Replaces Supabase buyers table)
-// ============================================
-
-export const buyerService = {
-  // Create buyer profile
-  async createBuyer(buyerData: any) {
-    try {
-      const docRef = await addDoc(collection(db, 'buyers'), {
-        ...buyerData,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      return { success: true, id: docRef.id };
-    } catch (error: any) {
-      console.error('Create buyer error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Get buyer by ID
-  async getBuyer(buyerId: string) {
-    try {
-      const docRef = doc(db, 'buyers', buyerId);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        return { success: true, data: { id: docSnap.id, ...docSnap.data() } };
-      } else {
-        return { success: false, error: 'Buyer not found' };
-      }
-    } catch (error: any) {
-      console.error('Get buyer error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Get all buyers for a user
-  async getBuyersByUser(userId: string) {
-    try {
-      const q = query(
-        collection(db, 'buyers'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const buyers = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      return { success: true, data: buyers };
-    } catch (error: any) {
-      console.error('Get buyers error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-};
-
-// ============================================
-// INQUIRY FUNCTIONS (Replaces Supabase inquiries table)
-// ============================================
-
-export const inquiryService = {
-  // Submit inquiry
-  async submitInquiry(inquiryData: any) {
-    try {
-      const docRef = await addDoc(collection(db, 'inquiries'), {
-        ...inquiryData,
-        status: 'new',
-        priority: 'normal',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      return { success: true, id: docRef.id };
-    } catch (error: any) {
-      console.error('Submit inquiry error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Get inquiries
-  async getInquiries(filters: any = {}) {
-    try {
-      let q = collection(db, 'inquiries');
-      
-      // Apply filters if provided
-      if (filters.userId) {
-        q = query(q, where('userId', '==', filters.userId));
-      }
-      if (filters.status) {
-        q = query(q, where('status', '==', filters.status));
-      }
-      if (filters.isSurveyRequest !== undefined) {
-        q = query(q, where('isSurveyRequest', '==', filters.isSurveyRequest));
-      }
-      
-      q = query(q, orderBy('createdAt', 'desc'));
-      
-      const querySnapshot = await getDocs(q);
-      const inquiries = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      return { success: true, data: inquiries };
-    } catch (error: any) {
-      console.error('Get inquiries error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Update inquiry status
-  async updateInquiryStatus(inquiryId: string, status: string) {
-    try {
-      const docRef = doc(db, 'inquiries', inquiryId);
-      await updateDoc(docRef, {
-        status,
-        updatedAt: serverTimestamp()
-      });
-      return { success: true };
-    } catch (error: any) {
-      console.error('Update inquiry error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-};
-
-// ============================================
-// PROFESSIONAL FUNCTIONS (Replaces Supabase professionals table)
-// ============================================
-
-export const professionalService = {
-  // Register professional
-  async registerProfessional(professionalData: any) {
-    try {
-      // Generate anonymous username if surveyor
-      if (professionalData.isSurveyor && professionalData.serviceAreas?.length > 0) {
-        const city = professionalData.serviceAreas[0];
-        const code = city.substring(0, 2).toUpperCase();
-        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        professionalData.anonymousUsername = `Surveyor_${code}_${random}`;
-      }
-
-      const docRef = await addDoc(collection(db, 'professionals'), {
-        ...professionalData,
-        isVerified: false,
-        isActive: true,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      
-      return { success: true, id: docRef.id };
-    } catch (error: any) {
-      console.error('Register professional error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Get professionals
-  async getProfessionals(filters: any = {}) {
-    try {
-      let q = collection(db, 'professionals');
-      
-      if (filters.isSurveyor !== undefined) {
-        q = query(q, where('isSurveyor', '==', filters.isSurveyor));
-      }
-      if (filters.profession) {
-        q = query(q, where('profession', '==', filters.profession));
-      }
-      if (filters.isVerified !== undefined) {
-        q = query(q, where('isVerified', '==', filters.isVerified));
-      }
-      
-      q = query(q, orderBy('createdAt', 'desc'));
-      
-      const querySnapshot = await getDocs(q);
-      const professionals = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      return { success: true, data: professionals };
-    } catch (error: any) {
-      console.error('Get professionals error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-};
-
-// ============================================
-// PROJECT FUNCTIONS (Replaces Supabase projects table)
-// ============================================
-
+// Project Service - USING SUBCOLLECTIONS
 export const projectService = {
-  // Create project
-  async createProject(projectData: any) {
+  async createProject(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
       const docRef = await addDoc(collection(db, 'projects'), {
-        ...projectData,
-        progress: 0,
-        isActive: true,
+        ...data,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
-      return { success: true, id: docRef.id };
-    } catch (error: any) {
-      console.error('Create project error:', error);
-      return { success: false, error: error.message };
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw error;
     }
   },
 
-  // Get projects for user
-  async getProjectsByUser(userId: string) {
+  async updateProject(projectId: string, data: Partial<Project>): Promise<void> {
     try {
-      const q = query(
-        collection(db, 'projects'),
-        where('buyerId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const projects = querySnapshot.docs.map(doc => ({
+      await updateDoc(doc(db, 'projects', projectId), {
+        ...data,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
+  },
+
+  async deleteProject(projectId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'projects', projectId));
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      throw error;
+    }
+  },
+
+  subscribeToProjects(
+    userId: string,
+    callback: (projects: Project[]) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'projects'),
+      where('ownerId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const projects = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
-      
-      return { success: true, data: projects };
-    } catch (error: any) {
-      console.error('Get projects error:', error);
-      return { success: false, error: error.message };
+      } as Project));
+      callback(projects);
+    });
+  },
+
+  async getProject(projectId: string): Promise<Project | null> {
+    try {
+      const docSnap = await getDoc(doc(db, 'projects', projectId));
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Project;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting project:', error);
+      throw error;
+    }
+  },
+};
+
+// Milestone Service - USING SUBCOLLECTIONS
+export const milestoneService = {
+  async createMilestone(projectId: string, data: Omit<Milestone, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      const docRef = await addDoc(
+        collection(db, 'projects', projectId, 'milestones'),
+        {
+          ...data,
+          projectId,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }
+      );
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating milestone:', error);
+      throw error;
     }
   },
 
-  // Update project progress
-  async updateProjectProgress(projectId: string, progress: number) {
+  async updateMilestone(projectId: string, milestoneId: string, data: Partial<Milestone>): Promise<void> {
     try {
-      const docRef = doc(db, 'projects', projectId);
-      await updateDoc(docRef, {
-        progress,
-        updatedAt: serverTimestamp()
+      await updateDoc(doc(db, 'projects', projectId, 'milestones', milestoneId), {
+        ...data,
+        updatedAt: serverTimestamp(),
       });
-      return { success: true };
-    } catch (error: any) {
-      console.error('Update project error:', error);
-      return { success: false, error: error.message };
+    } catch (error) {
+      console.error('Error updating milestone:', error);
+      throw error;
     }
-  }
+  },
+
+  async deleteMilestone(projectId: string, milestoneId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'projects', projectId, 'milestones', milestoneId));
+    } catch (error) {
+      console.error('Error deleting milestone:', error);
+      throw error;
+    }
+  },
+
+  subscribeToMilestones(
+    projectId: string,
+    callback: (milestones: Milestone[]) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'projects', projectId, 'milestones'),
+      orderBy('startDate', 'asc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const milestones = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Milestone));
+      callback(milestones);
+    });
+  },
 };
 
-// ============================================
-// DOCUMENT FUNCTIONS (Replaces Supabase documents table)
-// ============================================
+// Budget Service - USING SUBCOLLECTIONS
+export const budgetService = {
+  async createBudgetItem(projectId: string, data: Omit<BudgetItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      // Validate data
+      const validationResult = budgetItemSchema.safeParse(data);
+      if (!validationResult.success) {
+        throw new Error(`Validation error: ${validationResult.error.errors[0].message}`);
+      }
 
+      // Calculate total cost and VAT
+      const totalCost = data.quantity * data.unitCost;
+      const vatAmount = totalCost * data.vatRate;
+
+      const docRef = await addDoc(
+        collection(db, 'projects', projectId, 'budgetItems'),
+        {
+          ...data,
+          projectId,
+          totalCost,
+          vatAmount,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }
+      );
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating budget item:', error);
+      throw error;
+    }
+  },
+
+  async updateBudgetItem(projectId: string, itemId: string, data: Partial<BudgetItem>): Promise<void> {
+    try {
+      // If quantity or unitCost is being updated, recalculate totals
+      let updates = { ...data };
+      if (data.quantity !== undefined || data.unitCost !== undefined) {
+        const docSnap = await getDoc(doc(db, 'projects', projectId, 'budgetItems', itemId));
+        if (docSnap.exists()) {
+          const current = docSnap.data() as BudgetItem;
+          const quantity = data.quantity ?? current.quantity;
+          const unitCost = data.unitCost ?? current.unitCost;
+          const vatRate = data.vatRate ?? current.vatRate;
+          
+          const totalCost = quantity * unitCost;
+          const vatAmount = totalCost * vatRate;
+          
+          updates = {
+            ...updates,
+            totalCost,
+            vatAmount,
+          };
+        }
+      }
+
+      await updateDoc(doc(db, 'projects', projectId, 'budgetItems', itemId), {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Error updating budget item:', error);
+      throw error;
+    }
+  },
+
+  async deleteBudgetItem(projectId: string, itemId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'projects', projectId, 'budgetItems', itemId));
+    } catch (error) {
+      console.error('Error deleting budget item:', error);
+      throw error;
+    }
+  },
+
+  subscribeToBudgetItems(
+    projectId: string,
+    callback: (items: BudgetItem[]) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'projects', projectId, 'budgetItems'),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as BudgetItem));
+      callback(items);
+    });
+  },
+};
+
+// Document Service - USING SUBCOLLECTIONS
 export const documentService = {
-  // Upload document
-  async uploadDocument(file: File, projectId: string, metadata: any = {}) {
+  async createDocument(projectId: string, data: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
-      // Upload file to Firebase Storage
-      const storageRef = ref(storage, `projects/${projectId}/${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      
-      // Save document metadata to Firestore
-      const docRef = await addDoc(collection(db, 'documents'), {
-        projectId,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        downloadURL,
-        ...metadata,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      
-      return { success: true, id: docRef.id, downloadURL };
-    } catch (error: any) {
-      console.error('Upload document error:', error);
-      return { success: false, error: error.message };
+      const docRef = await addDoc(
+        collection(db, 'projects', projectId, 'documents'),
+        {
+          ...data,
+          projectId,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }
+      );
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating document:', error);
+      throw error;
     }
   },
 
-  // Get documents for project
-  async getProjectDocuments(projectId: string) {
+  async updateDocument(projectId: string, documentId: string, data: Partial<Document>): Promise<void> {
     try {
-      const q = query(
-        collection(db, 'documents'),
-        where('projectId', '==', projectId),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const documents = querySnapshot.docs.map(doc => ({
+      await updateDoc(doc(db, 'projects', projectId, 'documents', documentId), {
+        ...data,
+        updatedAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Error updating document:', error);
+      throw error;
+    }
+  },
+
+  async deleteDocument(projectId: string, documentId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'projects', projectId, 'documents', documentId));
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw error;
+    }
+  },
+
+  subscribeToDocuments(
+    projectId: string,
+    callback: (documents: Document[]) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'projects', projectId, 'documents'),
+      orderBy('createdAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const documents = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
-      
-      return { success: true, data: documents };
-    } catch (error: any) {
-      console.error('Get documents error:', error);
-      return { success: false, error: error.message };
-    }
-  }
+      } as Document));
+      callback(documents);
+    });
+  },
 };
 
-// ============================================
-// NOTIFICATION FUNCTIONS (Replaces Supabase notifications table)
-// ============================================
+// Team Member Service - USING SUBCOLLECTIONS
+export const teamMemberService = {
+  async addTeamMember(projectId: string, data: Omit<TeamMember, 'id' | 'invitedAt'>): Promise<string> {
+    try {
+      const docRef = await addDoc(
+        collection(db, 'projects', projectId, 'teamMembers'),
+        {
+          ...data,
+          projectId,
+          invitedAt: serverTimestamp(),
+        }
+      );
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding team member:', error);
+      throw error;
+    }
+  },
 
+  async updateTeamMember(projectId: string, memberId: string, data: Partial<TeamMember>): Promise<void> {
+    try {
+      await updateDoc(doc(db, 'projects', projectId, 'teamMembers', memberId), data);
+    } catch (error) {
+      console.error('Error updating team member:', error);
+      throw error;
+    }
+  },
+
+  async removeTeamMember(projectId: string, memberId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'projects', projectId, 'teamMembers', memberId));
+    } catch (error) {
+      console.error('Error removing team member:', error);
+      throw error;
+    }
+  },
+
+  subscribeToTeamMembers(
+    projectId: string,
+    callback: (members: TeamMember[]) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'projects', projectId, 'teamMembers'),
+      orderBy('invitedAt', 'desc')
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const members = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as TeamMember));
+      callback(members);
+    });
+  },
+};
+
+// Message Service - USING SUBCOLLECTIONS
+export const messageService = {
+  async sendMessage(projectId: string, data: Omit<ProjectMessage, 'id' | 'createdAt'>): Promise<string> {
+    try {
+      const docRef = await addDoc(
+        collection(db, 'projects', projectId, 'messages'),
+        {
+          ...data,
+          projectId,
+          createdAt: serverTimestamp(),
+          readBy: [data.userId],
+        }
+      );
+      return docRef.id;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      throw error;
+    }
+  },
+
+  async markMessageAsRead(projectId: string, messageId: string, userId: string): Promise<void> {
+    try {
+      const messageRef = doc(db, 'projects', projectId, 'messages', messageId);
+      const messageDoc = await getDoc(messageRef);
+      
+      if (messageDoc.exists()) {
+        const currentReadBy = messageDoc.data().readBy || [];
+        if (!currentReadBy.includes(userId)) {
+          await updateDoc(messageRef, {
+            readBy: [...currentReadBy, userId]
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+      throw error;
+    }
+  },
+
+  subscribeToMessages(
+    projectId: string,
+    callback: (messages: ProjectMessage[]) => void
+  ): () => void {
+    const q = query(
+      collection(db, 'projects', projectId, 'messages'),
+      orderBy('createdAt', 'asc'),
+      limit(100)
+    );
+
+    return onSnapshot(q, (snapshot) => {
+      const messages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as ProjectMessage));
+      callback(messages);
+    });
+  },
+};
+
+// Notification Service - ROOT LEVEL (user-scoped)
 export const notificationService = {
-  // Create notification
-  async createNotification(notificationData: any) {
+  async createNotification(data: Omit<Notification, 'id' | 'createdAt' | 'read'>): Promise<string> {
     try {
       const docRef = await addDoc(collection(db, 'notifications'), {
-        ...notificationData,
-        isRead: false,
-        isArchived: false,
-        createdAt: serverTimestamp()
+        ...data,
+        read: false,
+        createdAt: serverTimestamp(),
       });
-      return { success: true, id: docRef.id };
-    } catch (error: any) {
-      console.error('Create notification error:', error);
-      return { success: false, error: error.message };
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating notification:', error);
+      throw error;
     }
   },
 
-  // Get user notifications
-  async getUserNotifications(userId: string, unreadOnly: boolean = false) {
+  async markAsRead(notificationId: string): Promise<void> {
     try {
-      let q = query(
-        collection(db, 'notifications'),
-        where('userId', '==', userId)
-      );
-      
-      if (unreadOnly) {
-        q = query(q, where('isRead', '==', false));
-      }
-      
-      q = query(q, orderBy('createdAt', 'desc'));
-      
-      const querySnapshot = await getDocs(q);
-      const notifications = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      return { success: true, data: notifications };
-    } catch (error: any) {
-      console.error('Get notifications error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Mark notification as read
-  async markAsRead(notificationId: string) {
-    try {
-      const docRef = doc(db, 'notifications', notificationId);
-      await updateDoc(docRef, {
-        isRead: true,
-        readAt: serverTimestamp()
+      await updateDoc(doc(db, 'notifications', notificationId), {
+        read: true,
       });
-      return { success: true };
-    } catch (error: any) {
-      console.error('Mark as read error:', error);
-      return { success: false, error: error.message };
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
     }
   },
 
-  // Subscribe to real-time notifications
-  subscribeToNotifications(userId: string, callback: (notifications: any[]) => void) {
+  async deleteNotification(notificationId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'notifications', notificationId));
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      throw error;
+    }
+  },
+
+  subscribeToNotifications(
+    userId: string,
+    callback: (notifications: Notification[]) => void
+  ): () => void {
     const q = query(
       collection(db, 'notifications'),
       where('userId', '==', userId),
-      where('isRead', '==', false),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(50)
     );
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const notifications = querySnapshot.docs.map(doc => ({
+
+    return onSnapshot(q, (snapshot) => {
+      const notifications = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      } as Notification));
       callback(notifications);
     });
-  }
-};
-
-// ============================================
-// QUOTE FUNCTIONS (Replaces Supabase quotes table)
-// ============================================
-
-export const quoteService = {
-  // Submit quote
-  async submitQuote(quoteData: any) {
-    try {
-      const docRef = await addDoc(collection(db, 'quotes'), {
-        ...quoteData,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      return { success: true, id: docRef.id };
-    } catch (error: any) {
-      console.error('Submit quote error:', error);
-      return { success: false, error: error.message };
-    }
   },
-
-  // Get quotes for inquiry
-  async getInquiryQuotes(inquiryId: string) {
-    try {
-      const q = query(
-        collection(db, 'quotes'),
-        where('inquiryId', '==', inquiryId),
-        orderBy('price', 'asc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const quotes = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      return { success: true, data: quotes };
-    } catch (error: any) {
-      console.error('Get quotes error:', error);
-      return { success: false, error: error.message };
-    }
-  }
-};
-
-// ============================================
-// MESSAGE FUNCTIONS (Replaces Supabase messages table)
-// ============================================
-
-export const messageService = {
-  // Send message
-  async sendMessage(messageData: any) {
-    try {
-      // Check for contact info
-      if (checkForContactInfo(messageData.content)) {
-        messageData.flagged = true;
-        messageData.flagReason = 'Contains contact information';
-      }
-
-      const docRef = await addDoc(collection(db, 'messages'), {
-        ...messageData,
-        createdAt: serverTimestamp()
-      });
-      return { success: true, id: docRef.id };
-    } catch (error: any) {
-      console.error('Send message error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Get conversation messages
-  async getConversationMessages(conversationId: string) {
-    try {
-      const q = query(
-        collection(db, 'messages'),
-        where('conversationId', '==', conversationId),
-        orderBy('createdAt', 'asc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const messages = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      return { success: true, data: messages };
-    } catch (error: any) {
-      console.error('Get messages error:', error);
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Subscribe to real-time messages
-  subscribeToMessages(conversationId: string, callback: (messages: any[]) => void) {
-    const q = query(
-      collection(db, 'messages'),
-      where('conversationId', '==', conversationId),
-      orderBy('createdAt', 'asc')
-    );
-    
-    return onSnapshot(q, (querySnapshot) => {
-      const messages = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      callback(messages);
-    });
-  }
-};
-
-// Helper function to check for contact info
-function checkForContactInfo(message: string): boolean {
-  const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
-  const phonePatterns = [
-    /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/,
-    /\b\d{10}\b/,
-    /\b\+\d{1,3}\s?\d{3,14}\b/,
-    /\b\(\d{3}\)\s?\d{3}[-.]?\d{4}\b/
-  ];
-  const keywords = ['whatsapp', 'telegram', 'skype', 'email me', 'call me', 'contact me'];
-
-  const text = message.toLowerCase();
-
-  if (emailPattern.test(text)) return true;
-  if (phonePatterns.some(p => p.test(text))) return true;
-  if (keywords.some(k => text.includes(k))) return true;
-
-  return false;
-}
-
-// Export everything
-export default {
-  auth: firebaseAuth,
-  users: userService,
-  buyers: buyerService,
-  inquiries: inquiryService,
-  professionals: professionalService,
-  projects: projectService,
-  documents: documentService,
-  notifications: notificationService,
-  quotes: quoteService,
-  messages: messageService
 };
