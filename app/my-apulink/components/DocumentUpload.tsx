@@ -1,224 +1,334 @@
+// Path: app/my-apulink/components/DocumentUpload.tsx
+// Document upload component with multi-file support, progress, and cancel
+
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { ref, uploadBytesResumable, getDownloadURL, UploadTask } from 'firebase/storage';
 import { storage } from '../../../lib/firebase/config';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { documentService } from '../../../lib/firebase/firestore-service';
-import { Upload, File, X, Loader2, FolderPlus, FileText, Image, FileSpreadsheet } from 'lucide-react';
+import { Upload, X, FileText, Image, FileSpreadsheet, File, FolderOpen } from 'lucide-react';
+import UploadQueueItem from './UploadQueueItem';
+import { useAuth } from '../../../lib/firebase/auth-context';
 
 interface DocumentUploadProps {
   projectId: string;
-  userId: string;
-  onUploadComplete: () => void;
   onClose: () => void;
+  onUploaded: () => void;
 }
 
-const DOCUMENT_CATEGORIES = [
-  'Permits & Approvals',
-  'Contracts & Legal',
-  'Technical Drawings',
-  'Financial Documents',
-  'Photos & Progress',
-  'Reports & Studies',
-  'Correspondence',
-  'Invoices & Receipts'
-];
+interface UploadItem {
+  id: string;
+  file: File;
+  progress: number;
+  status: 'pending' | 'uploading' | 'success' | 'error' | 'cancelled';
+  error?: string;
+  uploadTask?: UploadTask;
+}
 
-export default function DocumentUpload({ projectId, userId, onUploadComplete, onClose }: DocumentUploadProps) {
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('Contracts & Legal');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [documentName, setDocumentName] = useState('');
-  const [tags, setTags] = useState('');
+export default function DocumentUpload({ projectId, onClose, onUploaded }: DocumentUploadProps) {
+  const { user } = useAuth();
+  const [uploadQueue, setUploadQueue] = useState<UploadItem[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState('General');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadTasksRef = useRef<Map<string, UploadTask>>(new Map());
 
-  const getFileIcon = (fileType: string) => {
-    if (fileType.includes('image')) return <Image className="w-5 h-5" />;
-    if (fileType.includes('pdf')) return <FileText className="w-5 h-5 text-red-500" />;
-    if (fileType.includes('sheet') || fileType.includes('excel')) return <FileSpreadsheet className="w-5 h-5 text-green-500" />;
-    return <File className="w-5 h-5" />;
+  const folders = [
+    'Permits & Approvals',
+    'Contracts & Legal',
+    'Technical Drawings',
+    'Financial Documents',
+    'Photos & Progress',
+    'Reports & Studies',
+    'Correspondence',
+    'Invoices & Receipts',
+    'General'
+  ];
+
+  const handleFileSelect = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const newItems: UploadItem[] = Array.from(files).map(file => ({
+      id: `${Date.now()}-${Math.random()}`,
+      file,
+      progress: 0,
+      status: 'pending' as const
+    }));
+
+    setUploadQueue(prev => [...prev, ...newItems]);
+    
+    // Start uploads
+    newItems.forEach(item => uploadFile(item));
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setDocumentName(file.name.split('.')[0]);
+  const uploadFile = async (item: UploadItem) => {
+    try {
+      // Update status to uploading
+      setUploadQueue(prev => prev.map(q => 
+        q.id === item.id ? { ...q, status: 'uploading' } : q
+      ));
+
+      // Create storage reference
+      const timestamp = Date.now();
+      const fileName = `${timestamp}_${item.file.name}`;
+      const storagePath = `projects/${projectId}/${selectedFolder}/${fileName}`;
+      const storageRef = ref(storage, storagePath);
+
+      // Create upload task
+      const uploadTask = uploadBytesResumable(storageRef, item.file);
+      uploadTasksRef.current.set(item.id, uploadTask);
+
+      // Update upload queue with task
+      setUploadQueue(prev => prev.map(q => 
+        q.id === item.id ? { ...q, uploadTask } : q
+      ));
+
+      // Monitor upload progress
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          setUploadQueue(prev => prev.map(q => 
+            q.id === item.id ? { ...q, progress } : q
+          ));
+        },
+        (error) => {
+          // Handle error
+          console.error('Upload error:', error);
+          let errorMessage = 'Upload failed';
+          
+          if (error.code === 'storage/canceled') {
+            setUploadQueue(prev => prev.map(q => 
+              q.id === item.id ? { ...q, status: 'cancelled', error: 'Upload cancelled' } : q
+            ));
+          } else {
+            setUploadQueue(prev => prev.map(q => 
+              q.id === item.id ? { ...q, status: 'error', error: errorMessage } : q
+            ));
+          }
+          uploadTasksRef.current.delete(item.id);
+        },
+        async () => {
+          // Upload completed successfully
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            
+            // Save document metadata to Firestore
+            await documentService.createDocument({
+              projectId,
+              name: item.file.name,
+              folder: selectedFolder,
+              storagePath,
+              fileUrl: downloadURL,
+              fileType: item.file.type || 'application/octet-stream',
+              fileSize: item.file.size,
+              tags: tags,
+              uploadedBy: user?.uid || 'unknown',
+              version: 1
+            });
+
+            setUploadQueue(prev => prev.map(q => 
+              q.id === item.id ? { ...q, status: 'success', progress: 100 } : q
+            ));
+            uploadTasksRef.current.delete(item.id);
+            
+            // Call onUploaded when at least one file succeeds
+            onUploaded();
+          } catch (error) {
+            console.error('Error saving document metadata:', error);
+            setUploadQueue(prev => prev.map(q => 
+              q.id === item.id ? { ...q, status: 'error', error: 'Failed to save document' } : q
+            ));
+            uploadTasksRef.current.delete(item.id);
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Error starting upload:', error);
+      setUploadQueue(prev => prev.map(q => 
+        q.id === item.id ? { ...q, status: 'error', error: 'Failed to start upload' } : q
+      ));
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile || !documentName) return;
-
-    setUploading(true);
-    const timestamp = Date.now();
-    const fileName = `${projectId}/${selectedCategory}/${timestamp}_${selectedFile.name}`;
-    const storageRef = ref(storage, fileName);
-
-    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      },
-      (error) => {
-        console.error('Upload error:', error);
-        alert('Upload failed. Please try again.');
-        setUploading(false);
-      },
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        
-        // Save document metadata to Firestore
-        await documentService.uploadDocument({
-          projectId,
-          name: documentName,
-          folder: selectedCategory,
-          fileUrl: downloadURL,
-          fileType: selectedFile.type,
-          fileSize: selectedFile.size,
-          tags: tags.split(',').map(t => t.trim()).filter(t => t),
-          uploadedBy: userId,
-          version: 1
-        });
-
-        setUploading(false);
-        setUploadProgress(0);
-        onUploadComplete();
-        onClose();
-      }
-    );
+  const handleCancelUpload = (itemId: string) => {
+    const task = uploadTasksRef.current.get(itemId);
+    if (task) {
+      task.cancel();
+      uploadTasksRef.current.delete(itemId);
+    }
+    setUploadQueue(prev => prev.filter(q => q.id !== itemId));
   };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFileSelect(e.dataTransfer.files);
+  };
+
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  };
+
+  const handleClose = () => {
+    // Cancel all active uploads
+    uploadTasksRef.current.forEach(task => task.cancel());
+    uploadTasksRef.current.clear();
+    onClose();
+  };
+
+  const activeUploads = uploadQueue.filter(q => q.status === 'uploading' || q.status === 'pending').length;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Upload Document</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+          <h2 className="text-2xl font-bold">Upload Documents</h2>
+          <button
+            onClick={handleClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="space-y-4">
-          {/* Category Selection */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Document Category *</label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg"
-            >
-              {DOCUMENT_CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
+        {/* Folder Selection */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Select Folder</label>
+          <select
+            value={selectedFolder}
+            onChange={(e) => setSelectedFolder(e.target.value)}
+            className="w-full px-3 py-2 border rounded-lg"
+          >
+            {folders.map(folder => (
+              <option key={folder} value={folder}>{folder}</option>
+            ))}
+          </select>
+        </div>
 
-          {/* File Selection */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Select File *</label>
-            <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 transition-colors"
+        {/* Tags */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Tags (Optional)</label>
+          <div className="flex gap-2 mb-2 flex-wrap">
+            {tags.map(tag => (
+              <span
+                key={tag}
+                className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-1"
+              >
+                {tag}
+                <button
+                  onClick={() => handleRemoveTag(tag)}
+                  className="hover:text-blue-900"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+              placeholder="Add a tag..."
+              className="flex-1 px-3 py-2 border rounded-lg"
+            />
+            <button
+              onClick={handleAddTag}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              {selectedFile ? (
-                <div className="flex items-center justify-center gap-3">
-                  {getFileIcon(selectedFile.type)}
-                  <div>
-                    <p className="font-medium">{selectedFile.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">Click to select file or drag and drop</p>
-                  <p className="text-sm text-gray-500 mt-1">PDF, Images, Excel, Word (Max 10MB)</p>
-                </>
+              Add Tag
+            </button>
+          </div>
+        </div>
+
+        {/* Upload Area */}
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`border-2 border-dashed rounded-lg p-8 text-center mb-4 transition-colors ${
+            isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+          }`}
+        >
+          <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-600 mb-2">Drag and drop files here, or</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={(e) => handleFileSelect(e.target.files)}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Browse Files
+          </button>
+          <p className="text-xs text-gray-500 mt-2">
+            Support for all file types. Multiple files allowed.
+          </p>
+        </div>
+
+        {/* Upload Queue */}
+        {uploadQueue.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-medium">
+                Upload Queue ({uploadQueue.length} {uploadQueue.length === 1 ? 'file' : 'files'})
+              </h3>
+              {activeUploads > 0 && (
+                <span className="text-sm text-blue-600">
+                  {activeUploads} active
+                </span>
               )}
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              onChange={handleFileSelect}
-              className="hidden"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
-            />
-          </div>
-
-          {/* Document Name */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Document Name *</label>
-            <input
-              type="text"
-              value={documentName}
-              onChange={(e) => setDocumentName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="e.g., Building Permit 2025"
-            />
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Tags (comma separated)</label>
-            <input
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg"
-              placeholder="e.g., permit, approved, municipality"
-            />
-          </div>
-
-          {/* Upload Progress */}
-          {uploading && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Uploading...</span>
-                <span>{Math.round(uploadProgress)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all"
-                  style={{ width: `${uploadProgress}%` }}
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {uploadQueue.map(item => (
+                <UploadQueueItem
+                  key={item.id}
+                  file={item.file}
+                  progress={item.progress}
+                  status={item.status}
+                  error={item.error}
+                  uploadTask={item.uploadTask}
+                  onCancel={() => handleCancelUpload(item.id)}
                 />
-              </div>
+              ))}
             </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <button
-              onClick={handleUpload}
-              disabled={!selectedFile || !documentName || uploading}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 rounded-lg hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {uploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                <>
-                  <Upload className="w-4 h-4" />
-                  Upload Document
-                </>
-              )}
-            </button>
-            <button
-              onClick={onClose}
-              disabled={uploading}
-              className="px-6 py-2 border rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
           </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={handleClose}
+            className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+          >
+            {activeUploads > 0 ? 'Cancel All & Close' : 'Close'}
+          </button>
         </div>
       </div>
     </div>
