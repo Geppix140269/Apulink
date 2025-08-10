@@ -1,8 +1,11 @@
-﻿// lib/firebase/config.ts
+// Path: lib/firebase/config.ts
+// Firebase configuration with Storage support
+
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // ADD THIS
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -23,6 +26,9 @@ export const db = getFirestore(app);
 
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
+
+// Initialize Firebase Storage - ADD THIS
+export const storage = getStorage(app);
 
 // Initialize Analytics (only in browser)
 if (typeof window !== "undefined") {
