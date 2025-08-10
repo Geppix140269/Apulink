@@ -1,5 +1,5 @@
 // Path: app/my-apulink/components/DocumentUpload.tsx
-// Document upload component with multi-file support, progress, and cancel 2
+// Document upload component with multi-file support, progress, and cancel - FIXED FOR SUBCOLLECTIONS
 
 'use client';
 
@@ -9,7 +9,7 @@ import { storage } from '../../../lib/firebase/config';
 import { documentService } from '../../../lib/firebase/firestore-service';
 import { Upload, X, FileText, Image, FileSpreadsheet, File, FolderOpen } from 'lucide-react';
 import UploadQueueItem from './UploadQueueItem';
-import { useAuth } from '../../contexts/AuthContext'; // FIXED PATH
+import { useAuth } from '../../contexts/AuthContext';
 
 interface DocumentUploadProps {
   projectId: string;
@@ -116,9 +116,8 @@ export default function DocumentUpload({ projectId, onClose, onUploaded }: Docum
           try {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             
-            // Save document metadata to Firestore
-            await documentService.createDocument({
-              projectId,
+            // Save document metadata to Firestore - FIXED FOR SUBCOLLECTIONS
+            await documentService.createDocument(projectId, {
               name: item.file.name,
               folder: selectedFolder,
               storagePath,
