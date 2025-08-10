@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../lib/firebase/auth-context';
+import { useAuth } from '../contexts/AuthContext'; // FIXED PATH
 import { projectService, budgetService, milestoneService, documentService } from '../../lib/firebase/firestore-service';
 import DashboardLayout from './components-new/DashboardLayout';
 import DashboardMetrics from './components-new/DashboardMetrics';
