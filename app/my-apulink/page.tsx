@@ -183,7 +183,6 @@ export default function MyApulinkDashboard() {
     );
 
     // Subscribe to documents - FIXED FUNCTION NAME
-    
     console.log('Subscribing to documents for project:', selectedProject?.id);
     const unsubDocs = documentService.subscribeToDocuments(
       selectedProject.id,
@@ -255,7 +254,7 @@ export default function MyApulinkDashboard() {
       const doc = documents.find(d => d.id === documentId);
       if (doc && doc.fileUrl) {
         // Extract storage path from URL or use storagePath if available
-        await documentService.deleteDocument(selectedProject.id, documentId);
+        await documentService.deleteDocument(documentId, '');
       }
     }
   };
@@ -893,6 +892,4 @@ export default function MyApulinkDashboard() {
     </>
   );
 }
-
-
 
