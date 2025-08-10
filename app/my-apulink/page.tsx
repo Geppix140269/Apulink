@@ -253,7 +253,7 @@ export default function MyApulinkDashboard() {
       const doc = documents.find(d => d.id === documentId);
       if (doc && doc.fileUrl) {
         // Extract storage path from URL or use storagePath if available
-        await documentService.deleteDocument(documentId, '');
+        await documentService.deleteDocument(selectedProject.id, documentId);
       }
     }
   };
@@ -891,3 +891,4 @@ export default function MyApulinkDashboard() {
     </>
   );
 }
+
