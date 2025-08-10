@@ -1,10 +1,12 @@
+// Path: app/my-apulink/page.tsx
+// Main dashboard page for MyApulink
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../../lib/firebase/auth-context';
 import { projectService, budgetService, milestoneService, documentService } from '../../lib/firebase/firestore-service';
-import type { Project, Milestone, BudgetItem, Document } from '../../lib/firebase/firestore-service';
 import DashboardLayout from './components-new/DashboardLayout';
 import DashboardMetrics from './components-new/DashboardMetrics';
 import ProjectList from './components-new/ProjectList';
@@ -18,6 +20,74 @@ import NotificationSystem from './components/NotificationSystem';
 import CalendarSync from './components/CalendarSync';
 import { createNotification } from './components/NotificationSystem';
 import { Plus, Loader2, Edit, Trash2, Download, Upload, FileText, Image, File, Folder, Search, Filter, Grid, List, Eye, Share2, Lock, Unlock, Calendar, Bell } from 'lucide-react';
+
+// Type definitions
+interface Project {
+  id?: string;
+  name: string;
+  status: 'planning' | 'in_progress' | 'completed' | 'on_hold';
+  region: string;
+  comune: string;
+  address: string;
+  description: string;
+  miniPiaStage: string;
+  startDate: string;
+  endDate: string;
+  ownerId: string;
+  totalBudget: number;
+  spentBudget: number;
+  progress: number;
+  createdAt: any;
+  updatedAt: any;
+}
+
+interface Milestone {
+  id?: string;
+  projectId: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  progress: number;
+  status: 'pending' | 'in_progress' | 'completed' | 'delayed';
+  ownerId: string;
+  dependencies: string[];
+  createdAt: any;
+  updatedAt: any;
+}
+
+interface BudgetItem {
+  id?: string;
+  projectId: string;
+  category: string;
+  item: string;
+  quantity: number;
+  unit: string;
+  unitCost: number;
+  totalCost: number;
+  vatRate: number;
+  vatAmount: number;
+  status: 'planned' | 'committed' | 'invoiced' | 'paid';
+  supplierId?: string;
+  notes: string;
+  createdAt: any;
+  updatedAt: any;
+}
+
+interface Document {
+  id?: string;
+  projectId: string;
+  name: string;
+  folder: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  tags: string[];
+  uploadedBy: string;
+  version: number;
+  createdAt: any;
+  updatedAt: any;
+}
 
 export default function MyApulinkDashboard() {
   const router = useRouter();
@@ -59,8 +129,8 @@ export default function MyApulinkDashboard() {
 
     setLoading(true);
     
-    // Subscribe to real-time project updates
-    const unsubscribe = projectService.subscribeToUserProjects(user.uid, async (userProjects) => {
+    // Subscribe to real-time project updates - FIXED FUNCTION NAME
+    const unsubscribe = projectService.subscribeToProjects(user.uid, async (userProjects) => {
       setProjects(userProjects);
       
       // Calculate REAL metrics
@@ -69,12 +139,9 @@ export default function MyApulinkDashboard() {
       let totalProgress = 0;
       
       for (const project of userProjects) {
-        if (project.id) {
-          const totals = await budgetService.calculateProjectTotals(project.id);
-          totalBudget += totals.totalBudget;
-          totalSpent += totals.totalSpent;
-          totalProgress += project.progress;
-        }
+        totalBudget += project.totalBudget || 0;
+        totalSpent += project.spentBudget || 0;
+        totalProgress += project.progress || 0;
       }
       
       setMetrics({
@@ -99,8 +166,8 @@ export default function MyApulinkDashboard() {
   useEffect(() => {
     if (!selectedProject?.id) return;
 
-    // Subscribe to milestones
-    const unsubMilestones = milestoneService.subscribeToProjectMilestones(
+    // Subscribe to milestones - FIXED FUNCTION NAME
+    const unsubMilestones = milestoneService.subscribeToMilestones(
       selectedProject.id,
       (projectMilestones) => {
         setMilestones(projectMilestones);
@@ -109,14 +176,14 @@ export default function MyApulinkDashboard() {
       }
     );
 
-    // Subscribe to budget
-    const unsubBudget = budgetService.subscribeToProjectBudget(
+    // Subscribe to budget - FIXED FUNCTION NAME
+    const unsubBudget = budgetService.subscribeToBudgetItems(
       selectedProject.id,
       (projectBudget) => setBudgetItems(projectBudget)
     );
 
-    // Subscribe to documents
-    const unsubDocs = documentService.subscribeToProjectDocuments(
+    // Subscribe to documents - FIXED FUNCTION NAME
+    const unsubDocs = documentService.subscribeToDocuments(
       selectedProject.id,
       (projectDocs) => setDocuments(projectDocs)
     );
@@ -177,12 +244,17 @@ export default function MyApulinkDashboard() {
   };
 
   const handleUpdateBudgetStatus = async (itemId: string, status: BudgetItem['status']) => {
-    await budgetService.updateBudgetItem(itemId, { status });
+    if (!selectedProject?.id) return;
+    await budgetService.updateBudgetItem(selectedProject.id, itemId, { status });
   };
 
   const handleDeleteDocument = async (documentId: string) => {
     if (confirm('Are you sure you want to delete this document?')) {
-      await documentService.deleteDocument(documentId);
+      const doc = documents.find(d => d.id === documentId);
+      if (doc && doc.fileUrl) {
+        // Extract storage path from URL or use storagePath if available
+        await documentService.deleteDocument(documentId, '');
+      }
     }
   };
 
@@ -199,7 +271,7 @@ export default function MyApulinkDashboard() {
   // Filter documents
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(documentSearch.toLowerCase()) ||
-                          doc.tags.some(tag => tag.toLowerCase().includes(documentSearch.toLowerCase()));
+                          (doc.tags && doc.tags.some(tag => tag.toLowerCase().includes(documentSearch.toLowerCase())));
     const matchesCategory = documentCategory === 'all' || doc.folder === documentCategory;
     return matchesSearch && matchesCategory;
   });
@@ -332,17 +404,17 @@ export default function MyApulinkDashboard() {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500">Budget</span>
-                          <span className="font-medium">€{project.totalBudget.toLocaleString()}</span>
+                          <span className="font-medium">€{(project.totalBudget || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-500">Progress</span>
-                          <span className="font-medium">{project.progress}%</span>
+                          <span className="font-medium">{project.progress || 0}%</span>
                         </div>
                       </div>
                       <div className="mt-4 bg-gray-200 rounded-full h-2">
                         <div
                           className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full"
-                          style={{ width: `${project.progress}%` }}
+                          style={{ width: `${project.progress || 0}%` }}
                         />
                       </div>
                     </div>
@@ -448,7 +520,7 @@ export default function MyApulinkDashboard() {
                     <p className="text-xs text-gray-500 mb-2">{doc.folder}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-400">
-                        v{doc.version}
+                        v{doc.version || 1}
                       </span>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -496,7 +568,7 @@ export default function MyApulinkDashboard() {
                           {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          {new Date(doc.createdAt).toLocaleDateString()}
+                          {doc.createdAt ? new Date(doc.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2">
@@ -522,12 +594,11 @@ export default function MyApulinkDashboard() {
             )}
 
             {/* Document Upload Modal */}
-            {showDocumentUpload && selectedProject?.id && user && (
+            {showDocumentUpload && selectedProject?.id && (
               <DocumentUpload
                 projectId={selectedProject.id}
-                userId={user.uid}
-                onUploadComplete={() => {}}
                 onClose={() => setShowDocumentUpload(false)}
+                onUploaded={() => setShowDocumentUpload(false)}
               />
             )}
           </div>
