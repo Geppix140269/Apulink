@@ -116,7 +116,8 @@ export default function DocumentUpload({ projectId, onClose, onUploaded }: Docum
           try {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             
-            // Save document metadata to Firestore - FIXED FOR SUBCOLLECTIONS
+            // Save document metadata to Firestore
+            console.log('Uploading document to project:', projectId); - FIXED FOR SUBCOLLECTIONS
             await documentService.createDocument(projectId, {
               name: item.file.name,
               folder: selectedFolder,
@@ -333,3 +334,4 @@ export default function DocumentUpload({ projectId, onClose, onUploaded }: Docum
     </div>
   );
 }
+
