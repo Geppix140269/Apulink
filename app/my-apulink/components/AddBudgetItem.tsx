@@ -1,8 +1,22 @@
+// Path: app/my-apulink/components/AddBudgetItem.tsx
+// Component for adding new budget items to a project
+
 'use client';
 
 import React, { useState } from 'react';
 import { budgetService } from '../../../lib/firebase/firestore-service';
 import { Plus, X, Loader2 } from 'lucide-react';
+import { CurrencyInput } from './ui/CurrencyInput';
+import { NumberInput } from './ui/NumberInput';
+import { z } from 'zod';
+
+// Zod schema for validation
+const budgetItemSchema = z.object({
+  item: z.string().min(1, 'Item description is required'),
+  quantity: z.number().nonnegative('Quantity must be non-negative').max(1e12),
+  unitCost: z.number().nonnegative('Unit cost must be non-negative').max(1e12),
+  vatRate: z.number().min(0).max(1) // As decimal: 0 to 1 (0% to 100%)
+});
 
 interface AddBudgetItemProps {
   projectId: string;
@@ -12,6 +26,7 @@ interface AddBudgetItemProps {
 
 export default function AddBudgetItem({ projectId, onClose, onAdded }: AddBudgetItemProps) {
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     category: 'Works' as const,
     item: '',
@@ -29,21 +44,41 @@ export default function AddBudgetItem({ projectId, onClose, onAdded }: AddBudget
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setErrors({});
 
     try {
+      // Validate critical fields
+      const validation = budgetItemSchema.parse({
+        item: formData.item,
+        quantity: formData.quantity,
+        unitCost: formData.unitCost,
+        vatRate: formData.vatRate
+      });
+
+      setLoading(true);
+
       await budgetService.createBudgetItem({
         projectId,
         ...formData,
-        totalCost,
-        vatAmount
+        totalCost: Math.round(totalCost * 100) / 100,
+        vatAmount: Math.round(vatAmount * 100) / 100
       });
+      
       onAdded();
       onClose();
     } catch (error) {
-      console.error('Error adding budget item:', error);
-      alert('Error adding budget item');
-    } finally {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            fieldErrors[err.path[0].toString()] = err.message;
+          }
+        });
+        setErrors(fieldErrors);
+      } else {
+        console.error('Error adding budget item:', error);
+        setErrors({ general: 'Error adding budget item. Please try again.' });
+      }
       setLoading(false);
     }
   };
@@ -62,6 +97,12 @@ export default function AddBudgetItem({ projectId, onClose, onAdded }: AddBudget
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errors.general && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+              {errors.general}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Category</label>
@@ -106,19 +147,25 @@ export default function AddBudgetItem({ projectId, onClose, onAdded }: AddBudget
               className="w-full px-3 py-2 border rounded-lg"
               placeholder="e.g., Structural Reinforcement"
             />
+            {errors.item && (
+              <p className="text-red-500 text-sm mt-1">{errors.item}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2">Quantity</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
+              <NumberInput
                 value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
+                onValue={(value) => setFormData({ ...formData, quantity: value })}
+                decimals={3}
+                min={0}
+                placeholder="1"
                 className="w-full px-3 py-2 border rounded-lg"
               />
+              {errors.quantity && (
+                <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>
+              )}
             </div>
 
             <div>
@@ -134,14 +181,18 @@ export default function AddBudgetItem({ projectId, onClose, onAdded }: AddBudget
 
             <div>
               <label className="block text-sm font-medium mb-2">Unit Cost (€)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
+              <CurrencyInput
                 value={formData.unitCost}
-                onChange={(e) => setFormData({ ...formData, unitCost: Number(e.target.value) })}
+                onValue={(value) => setFormData({ ...formData, unitCost: value })}
+                decimals={2}
+                currency="EUR"
+                locale="en-GB"
+                placeholder="0.00"
                 className="w-full px-3 py-2 border rounded-lg"
               />
+              {errors.unitCost && (
+                <p className="text-red-500 text-sm mt-1">{errors.unitCost}</p>
+              )}
             </div>
           </div>
 
@@ -157,6 +208,9 @@ export default function AddBudgetItem({ projectId, onClose, onAdded }: AddBudget
               <option value="0.10">10% - Reduced</option>
               <option value="0.22">22% - Standard</option>
             </select>
+            {errors.vatRate && (
+              <p className="text-red-500 text-sm mt-1">{errors.vatRate}</p>
+            )}
           </div>
 
           <div>
