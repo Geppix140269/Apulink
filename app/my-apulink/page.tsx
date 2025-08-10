@@ -183,8 +183,9 @@ export default function MyApulinkDashboard() {
     );
 
     // Subscribe to documents - FIXED FUNCTION NAME
+    
+    console.log('Subscribing to documents for project:', selectedProject?.id);
     const unsubDocs = documentService.subscribeToDocuments(
-    console.log('Subscribing to documents for project:', selectedProject.id);
       selectedProject.id,
       (projectDocs) => { console.log('Documents received:', projectDocs); setDocuments(projectDocs); }
     );
@@ -892,5 +893,6 @@ export default function MyApulinkDashboard() {
     </>
   );
 }
+
 
 
