@@ -9,7 +9,7 @@ import { storage } from '../../../lib/firebase/config';
 import { documentService } from '../../../lib/firebase/firestore-service';
 import { Upload, X, FileText, Image, FileSpreadsheet, File, FolderOpen } from 'lucide-react';
 import UploadQueueItem from './UploadQueueItem';
-import { useAuth } from '../../../lib/firebase/auth-context';
+import { useAuth } from '../../contexts/AuthContext'; // FIXED PATH
 
 interface DocumentUploadProps {
   projectId: string;
